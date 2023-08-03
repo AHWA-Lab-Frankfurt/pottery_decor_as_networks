@@ -49,6 +49,8 @@ The **analysis** directory contains:
     supplementary-materials](/analysis/supplementary-materials):
     Supplementary materials including notes and other documents
     prepared and collected during the analysis.
+  - [:file\_folder: R](/analysis/R): functions for the analysis
+  - [:file\_folder: templates](/analysis/templates): visualisation code
 
 ## How to run in your browser or download and run locally
 
