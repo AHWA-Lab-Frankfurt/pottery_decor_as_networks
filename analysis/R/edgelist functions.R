@@ -64,8 +64,9 @@ make_edgelist <- function(data){
   merge(sites, Type) %>%
     left_join(data_long, by = c("x" = "Var1", "name" = "name"))%>%
     left_join(data_long, by = c("y" = "Var1", "name" = "name")) %>%    #merge the data
-    mutate(weight = value.x * value.y) %>%                            #multiply the pairs
-    dplyr::select(-c(value.x, value.y)) %>%
+    rowwise() %>%
+    mutate(weight = min(value.x, value.y)) %>%                            #because of rowwise we now get the minimum perc as weight
+    select(-c(value.x, value.y)) %>%
     tidyr::drop_na() %>%
     filter(weight > 0)
 }
