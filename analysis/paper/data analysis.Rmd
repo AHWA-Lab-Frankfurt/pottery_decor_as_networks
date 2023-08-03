@@ -33,7 +33,26 @@ Update: or maybe not, so that we can name the nodes the same
 ```{r}
 library(readr)
 # import decor data
-decors <- read_csv2(here::here("analysis/data/raw_data/decors_late.csv"))
+
+#decors late is the "cleaned" version without Oudalan and SAO. they are still present in the earlier version decors.csv
+decors <- read_csv(here::here("analysis/data/raw_data/decors.csv"))
+
+
+
+decors <- decors %>%
+  filter(site != "SAO 3" & site != "Oudalan fer recent")  %>%
+  mutate_at(vars(-site), as.numeric) %>% 
+  mutate(site = case_when(site == "HAMB 4" ~ "Hamb 4",
+         site == "KAN 4" ~ "Kaniana 4",
+         site == "Akumbu 1" ~ "Akumbu late",
+         site == "TMD" ~ "TMD 5",
+         TRUE ~ site)) %>% 
+  select(-slip)
+  
+ decors[is.na(decors)] <- 0
+
+ #write.csv2(decors,here::here("analysis/data/raw_data/decors_late.csv"))
+
 # import information on sites
 sites <- read_csv2(here::here("analysis/data/raw_data/sites_all.csv"))
 ```
@@ -83,6 +102,8 @@ decor_graph <- tbl_graph(sites, edgelist, directed = FALSE) %>%
   activate(nodes) %>%
   filter(!node_is_isolated())
 
+
+
 decor_graph
 ```
 
@@ -101,10 +122,41 @@ High number of connections due to the construction of the network. This network 
 ```{r total network sample, fig.cap="Partially overlapping networks of four decorative practices"}
 decor_graph %>%
   activate(edges) %>%
-  filter(name %in% c("braided_cord_roulette", "braided_strip_roulette", "paint", "straight_cord_mat")) %>%
+  filter(name %in% c("braided_cord_roulette", "braided_strip_roulette", "paint", "straight_cord_mat"))%>%
   ggraph() +
   coloured_edges +
   theme_graph()
+
+decor_graph %>%
+  activate(edges) %>%
+  filter(name %in% c("folded_strip_roulette", "braided_strip_roulette", "paint", "straight_cord_mat", "twisted_cord_roulette", "braided_cord_roulette"))%>%
+  filter(weight >= 3) |> 
+  activate(nodes) |> 
+  filter(!node_is_isolated()) |> 
+  ggraph() +
+  coloured_edges +
+  theme_graph()
+
+decor_graph %>%
+  activate(edges) %>%
+  filter(name %in% c("folded_strip_roulette","braided_strip_roulette", "paint", "straight_cord_mat", "braided_cord_roulette"))%>%
+  filter(weight >= 3) |> 
+  activate(nodes) |> 
+  filter(!node_is_isolated()) |> 
+  ggraph() +
+  coloured_edges +
+  theme_graph()
+
+
+decor_graph |> 
+    activate(edges) |> 
+  # Filters 'edges' based on 4 specific decorations
+  filter(name %in% c('folded_strip_roulette', 'braided_strip_roulette', 'paint', 'straight_cord_mat')) |> 
+#  filter(weight > 1) |> 
+  #plot the graph
+    ggraph(layout = 'stress') + 
+    coloured_edges + 
+    theme_graph() 
 ```
 
 ## Calculate difference between network layers
@@ -177,6 +229,15 @@ modularity <- decor_graph %>%
   mutate(modularity = graph_modularity(group = as.factor(louvain))) %>%
   pull(modularity) %>%
   head(1)
+
+decor_graph %>%  
+  get.data.frame(what = "vertices") %>% 
+  count(louvain)
+
+
+
+nodes <- decor_graph %>% 
+  get.data.frame("vertices")
 ```
 
 The louvain clustering has a modularity of `r modularity` .
@@ -289,7 +350,217 @@ ggraph(decor_graph, x = lon, y = lat) +
   theme_graph()
 ```
 
+The three communities can also be analysed as separate networks. The sites around the Niger Delta are mostly 
 
+```{r network 1 centrality in community vs in gen network}
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_degree(weights = weight)) %>%
+  filter(louvain == 1) %>%
+  mutate(deg_c = centrality_degree(weights = weight)) %>%
+ggraph(layout = "graphopt") + 
+  geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = deg, alpha = deg_c), col = "cornflowerblue", show.legend = FALSE) +
+  geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+      scale_color_manual(values = communitycolor)+
+  theme_graph()+
+  guides(color = guide_legend(override.aes = list(size = 0.5)), alpha = FALSE, edge_alpha = FALSE, edge_width = guide_legend(override.aes = list(size = 0.3)))+
+  ggtitle("network cluster 1 (red)")+
+  theme(legend.title = element_text(size = 8, face = "bold"),
+              legend.text = element_text(size = 7),
+              legend.key.size = unit(0.8, "lines"),
+        plot.title = element_text(size = 10, face= "bold"))
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain == 1) %>%
+  mutate(deg_c = centrality_eigen(weights = weight)) %>%
+flatten(weighted = TRUE) %>% 
+ggraph(layout = "graphopt") + 
+  geom_edge_fan(aes(edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = deg, alpha = deg_c), col = "cornflowerblue", show.legend = FALSE) +
+  geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+      scale_color_manual(values = communitycolor)+
+  theme_graph()+
+  guides(color = guide_legend(override.aes = list(size = 0.5)), alpha = FALSE, edge_alpha = FALSE, edge_width = guide_legend(override.aes = list(size = 0.3)))+
+  ggtitle("network cluster 1 (red)")+
+  theme(legend.title = element_text(size = 8, face = "bold"),
+              legend.text = element_text(size = 7),
+              legend.key.size = unit(0.8, "lines"),
+        plot.title = element_text(size = 10, face= "bold"))
+
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain == 1) %>%
+ggraph(layout = "graphopt") + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "cornflowerblue") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+
+
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain == 1) %>%
+ggraph(x = lon, y = lat) + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "cornflowerblue") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+```
+
+
+```{r network 2 centrality in community vs in gen network}
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_degree(weights = weight)) %>%
+  filter(louvain == 2) %>%
+  mutate(deg_c = centrality_degree(weights = weight)) %>%
+ activate(edges) %>%
+ggraph(layout = "graphopt") + 
+  geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = deg, alpha = deg_c), col = "tomato", show.legend = FALSE) +
+  geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+      scale_color_manual(values = communitycolor)+
+  theme_graph()+
+  guides(color = guide_legend(override.aes = list(size = 0.5)), alpha = FALSE, edge_alpha = FALSE, edge_width = guide_legend(override.aes = list(size = 0.3)))+
+  ggtitle("network cluster 1 (red)")+
+  theme(legend.title = element_text(size = 8, face = "bold"),
+              legend.text = element_text(size = 7),
+              legend.key.size = unit(0.8, "lines"),
+        plot.title = element_text(size = 10, face= "bold"))
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain == 2) %>%
+  mutate(deg_c = centrality_eigen(weights = weight)) %>%
+flatten(weighted = TRUE) %>% 
+ggraph(layout = "graphopt") + 
+  geom_edge_fan(aes(edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = deg, alpha = deg_c), col = "tomato", show.legend = FALSE) +
+  geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+      scale_color_manual(values = communitycolor)+
+  theme_graph()+
+  guides(color = guide_legend(override.aes = list(size = 0.5)), alpha = FALSE, edge_alpha = FALSE, edge_width = guide_legend(override.aes = list(size = 0.3)))+
+  ggtitle("network cluster 1 (red)")+
+  theme(legend.title = element_text(size = 8, face = "bold"),
+              legend.text = element_text(size = 7),
+              legend.key.size = unit(0.8, "lines"),
+        plot.title = element_text(size = 10, face= "bold"))
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain == 2) %>%
+ggraph(layout = "graphopt") + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "tomato") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain == 2) %>%
+ggraph(x = lon, y = lat) + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "tomato") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+```
+
+```{r network 3 centrality in community vs in gen network}
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_degree(weights = weight)) %>%
+  filter(louvain == 3) %>%
+  mutate(deg_c = centrality_degree(weights = weight)) %>%
+ activate(edges) %>%
+ggraph(layout = "graphopt") + 
+  geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = deg, alpha = deg_c), col = "darkgreen", show.legend = FALSE) +
+  geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+      scale_color_manual(values = communitycolor)+
+  theme_graph()+
+  guides(color = guide_legend(override.aes = list(size = 0.5)), alpha = FALSE, edge_alpha = FALSE, edge_width = guide_legend(override.aes = list(size = 0.3)))+
+  ggtitle("network cluster 1 (red)")+
+  theme(legend.title = element_text(size = 8, face = "bold"),
+              legend.text = element_text(size = 7),
+              legend.key.size = unit(0.8, "lines"),
+        plot.title = element_text(size = 10, face= "bold"))
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain == 3) %>%
+  mutate(deg_c = centrality_eigen(weights = weight)) %>%
+flatten(weighted = TRUE) %>% 
+ggraph(layout = "graphopt") + 
+  geom_edge_fan(aes(edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = deg, alpha = deg_c), col = "darkgreen", show.legend = FALSE) +
+  geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+      scale_color_manual(values = communitycolor)+
+  theme_graph()+
+  guides(color = guide_legend(override.aes = list(size = 0.5)), alpha = FALSE, edge_alpha = FALSE, edge_width = guide_legend(override.aes = list(size = 0.3)))+
+  ggtitle("network cluster 1 (red)")+
+  theme(legend.title = element_text(size = 8, face = "bold"),
+              legend.text = element_text(size = 7),
+              legend.key.size = unit(0.8, "lines"),
+        plot.title = element_text(size = 10, face= "bold"))
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain == 3) %>%
+ggraph(layout = "graphopt") + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "darkgreen") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain == 3) %>%
+ggraph(x = lon, y = lat) + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "darkgreen") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+```
+
+## dont use this
 ```{r relative edge weights and centralization by cluster}
 # Relative edge weights (how important are the connections within the cluster)
 rel_edge_weight <- vector("double", length(3))
@@ -320,10 +591,65 @@ for (i in 1:3) {
     head(1)
 }
 
+## checking the centrality of the nodes of a cluster
+
+centrality_deg.cluster <- decor_graph %>%
+    # filter community
+    activate(nodes) %>%
+    #filter(louvain == i) %>%
+    # degree centralization
+  #  mutate(cent = centrality_degree("all", normalized = TRUE)) %>%
+  mutate(centr = centrality_degree(weights = weight, mode = "all", normalized = TRUE)) %>% 
+#centr_degree(mode = "all", normalized = TRUE, weights = weight) %>%
+    as_tibble()
+
+centrality_eigen.cluster <- decor_graph %>%
+    # filter community
+    activate(nodes) %>%
+    #filter(louvain == i) %>%
+    # degree centralization
+  #  mutate(cent = centrality_degree("all", normalized = TRUE)) %>%
+  mutate(centr = centrality_eigen(weights = weight)) %>% 
+#centr_degree(mode = "all", normalized = TRUE, weights = weight) %>%
+    as_tibble()
+
+centr_deg.comb.cluster <- c()
+for (i in 1:3) {
+
+  centr_deg.comb.cluster[i] <- centrality_deg.cluster %>%
+    # filter community
+    filter(louvain == i) %>%
+    # degree centralization
+    summarise(centr_comb = mean(centr)) %>%
+    as_tibble() %>% 
+    pull(centr_comb)
+
+}
+
+centr_eig.comb.cluster <- c()
+for (i in 1:3) {
+  
+  centr_eig.comb.cluster[i] <- centrality_eigen.cluster %>%
+    # filter community
+    filter(louvain == i) %>%
+    # degree centralization
+    summarise(centr_comb = mean(centr)) %>%
+    as_tibble() %>% 
+    pull(centr_comb)
+  
+}
+
 # put together
-tibble(rel_edge_weight, centralization) %>%
+tibble(rel_edge_weight, 
+       centralization,
+    centr_deg.comb.cluster, 
+     centr_eig.comb.cluster
+     ) %>%
   mutate(cluster = 1:3) %>%
-  mutate(rel_edge_weight = rel_edge_weight / 100) %>%
+  mutate(rel_edge_weight = rel_edge_weight / 100,
+        centr_deg.comb.cluster = centr_deg.comb.cluster/1000,
+         centr_eig.comb.cluster = centr_eig.comb.cluster/0.1
+        ) %>%
   rename("relative edge weight" = rel_edge_weight) %>%
   pivot_longer(!cluster, names_to = "key", values_to = "value") %>%
   # plot
@@ -332,6 +658,294 @@ tibble(rel_edge_weight, centralization) %>%
   scale_fill_grey() +
   theme(axis.text.x = element_text(angle = 90)) +
   theme_publish()
+```
+
+## dont use this
+
+```{r relative edge weights, roles and centralization by cluster as boxplot}
+# Relative edge weights (how important are the connections within the cluster)
+rel_edge_weight <- data.frame()
+#for (i in 1:3) {
+  rel_edge_weight <- decor_graph %>%
+    # filter community
+    activate(nodes) %>%
+  #  filter(louvain == i) %>%
+    # relative edge weight (sum of weights / number of edges)
+    activate(edges) %>%
+    as.data.frame() %>%
+   mutate(louvain = i,
+          parameter = "edge_weight") %>% 
+    rename(value = weight) %>% 
+  select(value, louvain, parameter)
+#}
+
+# Centralization of the cluster
+centralization <- vector("double", length(3))
+for (i in 1:3) {
+  centralization[[i]] <- decor_graph %>%
+    # filter community
+    activate(nodes) %>%
+    filter(louvain == i) %>%
+    # degree centralization
+    centr_degree(mode = "all", normalized = TRUE) %>%
+    as_tibble() %>%
+    pull(centralization) %>%
+    head(1)
+}
+
+centralization <- data.frame(value = centralization, louvain = c(1:3), parameter = "centralization")
+## checking the centrality of the nodes of a cluster
+
+centrality_deg.cluster <- decor_graph %>%
+    # filter community
+    activate(nodes) %>%
+    #filter(louvain == i) %>%
+    # degree centralization
+  #  mutate(cent = centrality_degree("all", normalized = TRUE)) %>%
+  mutate(centr = centrality_degree(weights = weight, mode = "all", normalized = TRUE)) %>% 
+#centr_degree(mode = "all", normalized = TRUE, weights = weight) %>%
+    as_tibble()
+
+centrality_eigen.cluster <- decor_graph %>%
+    # filter community
+    activate(nodes) %>%
+    #filter(louvain == i) %>%
+    # degree centralization
+  #  mutate(cent = centrality_degree("all", normalized = TRUE)) %>%
+  mutate(centr = centrality_eigen(weights = weight)) %>% 
+#centr_degree(mode = "all", normalized = TRUE, weights = weight) %>%
+    as_tibble()
+
+centr_deg.comb.cluster <- c()
+for (i in 1:3) {
+
+  centr_deg.comb.cluster[i] <- centrality_deg.cluster %>%
+    # filter community
+    filter(louvain == i) %>%
+    # degree centralization
+    summarise(centr_comb = mean(centr)) %>%
+    as_tibble() %>% 
+    pull(centr_comb)
+
+}
+
+centr_eig.comb.cluster <- c()
+for (i in 1:3) {
+  
+  centr_eig.comb.cluster[i] <- centrality_eigen.cluster %>%
+    # filter community
+    filter(louvain == i) %>%
+    # degree centralization
+    summarise(centr_comb = mean(centr)) %>%
+    as_tibble() %>% 
+    pull(centr_comb)
+  
+}
+
+# put together
+tibble(rel_edge_weight, 
+     #  centralization,
+      #centr_deg.comb.cluster, 
+     #  centr_eig.comb.cluster
+     ) %>%
+  mutate(cluster = 1:3) %>%
+  mutate(rel_edge_weight = rel_edge_weight / 100,
+        centr_deg.comb.cluster = centr_deg.comb.cluster/1000#,
+        #  centr_eig.comb.cluster = centr_eig.comb.cluster/0.1
+        ) %>%
+  rename("relative edge weight" = rel_edge_weight) %>%
+  pivot_longer(!cluster, names_to = "key", values_to = "value") %>%
+  # plot
+  ggplot(aes(x = cluster, y = value, fill = key)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_grey() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  theme_publish()
+```
+
+```{r add community to edges}
+
+#mark which edges are in which community or without
+decor_graph <- decor_graph %>% 
+  activate(edges) %>% 
+  mutate(community = case_when(from %in% which(nodes$louvain == 1) & to %in% which(nodes$louvain == 1) ~ "1",
+                               from %in% which(nodes$louvain == 2) & to %in% which(nodes$louvain == 2) ~ "2",
+                               from %in% which(nodes$louvain == 3) & to %in% which(nodes$louvain == 3) ~ "3",
+         TRUE ~ "crossing"))
+
+
+
+```
+
+```{r}
+decor_graph %>% 
+  get.data.frame(what = "edges") %>% 
+  count(community)
+
+edge_inside <- decor_graph %>% 
+  activate(edges) %>% 
+  filter(community != "crossing") %>% 
+  activate(nodes) %>% 
+  mutate(centr_comm = centrality_degree(weights = weight, mode = "all")) %>% 
+  get.data.frame("vertices") %>% 
+  mutate(centr_comm_weigthed = case_when(louvain == 1 ~ centr_comm/8,
+                                         louvain == 2 ~ centr_comm/6,
+                                         TRUE ~ centr_comm/3))%>% 
+  mutate(type = "inside")
+
+
+
+edge_outside <- decor_graph %>% 
+  activate(edges) %>% 
+  filter(community == "crossing") %>% 
+  activate(nodes) %>% 
+  mutate(centr_comm = centrality_degree(weights = weight, mode = "all")) %>% 
+  get.data.frame("vertices") %>% 
+  mutate(centr_comm_weigthed = case_when(louvain == 1 ~ centr_comm/(19-9),
+                                         louvain == 2 ~ centr_comm/(19-7),
+                                         TRUE ~ centr_comm/(19-4))) %>% 
+  mutate(type = "outside")
+
+
+
+
+data <- rbind(edge_inside, edge_outside) %>% 
+  mutate(louvain = as.character(louvain))
+
+# plot as a boxplot
+ggplot(data, aes(x = louvain, y = centr_comm_weigthed, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("grey80", "black")) +
+  xlab("Community") +
+  ylab("Total Edge Weight") +
+  ggtitle("Weights of Edges Within and Between Communities")
+
+
+ggplot(data, aes(x = louvain, y = centr_comm, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("grey80", "black")) +
+  xlab("Community") +
+  ylab("Total Edge Weight") +
+  ggtitle("Weights of Edges Within and Between Communities")
+```
+
+
+
+```{r}
+data <- rbind(edge_inside, edge_outside) %>% 
+  mutate(louvain_bb = as.character(louvain))
+
+data %>% 
+  group_by(louvain, type) %>% 
+  summarise(centr_comm = mean(centr_comm),
+            centr_comm_weigthed = mean(centr_comm_weigthed)) %>%
+  ggplot(aes(x = louvain, y = centr_comm_weigthed, fill = type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Community", y = "Mean centrality") +
+  scale_fill_manual(values = c("red", "green", "blue")) +
+  theme_classic()
+
+data %>% 
+  group_by(louvain, type) %>% 
+  summarise(centr_comm_weigthed = mean(centr_comm_weigthed)) %>%
+  pivot_wider(names_from = type, values_from = centr_comm_weigthed) %>%
+  mutate(ratio_in_out = inside / outside)
+
+```
+
+
+```{r edge doenst work}
+library(dplyr)
+library(ggplot2)
+
+# group edges by community and whether they are within or outside the community
+edge_groups <- decor_graph %>% 
+  activate(edges) %>%
+  mutate(
+    community = ifelse(
+      from %in% nodes$louvain & to %in% nodes$louvain & nodes$louvain[from] == nodes$louvain[to],
+      as.character(nodes$louvain[from]),
+      "Crossing"
+    ),
+    is_within = ifelse(community == "Crossing", "Crossing", "Within")
+  ) %>%
+  group_by(community, is_within) %>%
+  summarize(weight = sum(weight))
+
+# create boxplot
+ggplot(edge_groups, aes(x = community, y = weight, fill = is_within)) +
+  geom_boxplot() +
+  labs(title = "Weight of Edges Within and Outside Communities",
+       x = "Community",
+       y = "Edge Weight")
+
+```
+
+```{r trash }
+# plot the weight of edges within the community
+ggplot(edges_within_community, aes(x = in_community, y = weight)) +
+  geom_boxplot() +
+  xlab("Community") +
+  ylab("Edge weight")
+
+
+# calculate edge weights
+g <- g %>% activate(edges) %>% mutate(weight = sample(1:10, n(), replace = TRUE))
+
+
+g <- decor_graph
+
+# calculate total weights within each community
+in_community <- g %>% 
+  activate(edges) %>%
+  group_by(from, to, louvain) %>%
+  summarise(total_weight = sum(weight)) %>%
+  ungroup()
+
+# calculate total weights between communities
+between_communities <- g %>% 
+  activate(edges) %>%
+  filter(!from %--% to) %>%
+  group_by(from, to) %>%
+  summarise(total_weight = sum(weight)) %>%
+  ungroup()
+
+# combine the data frames for plotting
+data <- rbind(in_community, between_communities)
+
+# plot as a boxplot
+ggplot(data, aes(x = community, y = total_weight, fill = from %--% to)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("grey80", "black")) +
+  xlab("Community") +
+  ylab("Total Edge Weight") +
+  ggtitle("Weights of Edges Within and Between Communities")
+
+
+library(tidygraph)
+library(igraph)
+
+# Create a tidygraph object from your data
+
+# Calculate the communities using the Louvain algorithm
+decor_graph <- decor_graph %>% activate(nodes) %>% mutate(louvain = group_louvain())
+
+# Mark edges that are within a community
+#decor_graph <- decor_graph %>% 
+#  activate(edges) %>% 
+  #mutate(in_community = group_edges(decor_graph, "louvain", .f = function(x) all(x == x[1])))
+
+# `in_community` column will be `TRUE` for edges within a community and `FALSE` for edges crossing communities
+decor_graph <- decor_graph %>%
+  activate(edges) %>%
+  mutate(
+    community = ifelse(
+      from %in% nodes$louvain & to %in% nodes$louvain & nodes$louvain[from] == nodes$louvain[to],
+      as.character(nodes$louvain[from]),
+      "crossing"
+    )
+  )
+
 ```
 
 
@@ -466,7 +1080,7 @@ decor_graph %>%
   mutate(crossing = community_crossing(weights = weight)) %>%
   filter(
     crossing == TRUE,
-    weight > 200
+    weight >= 10
   ) %>%
   activate(nodes) %>% 
   filter(!node_is_isolated()) %>%
@@ -576,9 +1190,113 @@ Outcomes: three communities of different scales are identified. Two of these app
 membership in these networks is not mutually exclusive, there are crossing points in all of them. As our initial look at the network structure shows, the networks of each individual decor overlap, and these groups should not be seen as bounded entities, but rather as nodes with a higher propensity for sharing information. 
 The next step then examines the pathways through which information is likely to have travelled.
 
+
+
+
+new cluster comparison by centralisation and centrality
+
+```{r cluster centralisation, fig.cap="Degree and eigen centralization by cluster"}
+### Centralization
+
+# Function to calculate centralization for each cluster
+calculate_centralization <- function(graph, louvain_column) {
+  # Create an empty tibble to store the centralization results
+  centralization <- tibble(cluster = character(), cent_deg = double(), cent_eigen = double())
+  
+  # Get the unique clusters from the specified louvain column
+  unique_clusters <- graph |>
+    pull({{louvain_column}}) |>
+    unique()
+  
+  # Loop through each cluster
+  for (cluster in unique_clusters) {
+    # Filter the graph based on the current cluster
+    subgraph <- graph |>
+      filter({{louvain_column}} == cluster)
+    
+    # Calculate the centralization measures for the subgraph
+    cent_deg <- centr_degree(subgraph, normalized = TRUE)$centralization
+    cent_eigen <- centr_eigen(subgraph, normalized = TRUE)$centralization
+    
+    # Add the results to the centralization tibble
+    centralization <- centralization |>
+      add_row(cluster = as.character(cluster), cent_deg = cent_deg, cent_eigen = cent_eigen)
+  }
+  
+  # Arrange the centralization results by cluster and return the tibble
+  centralization <- centralization |>
+    arrange(cluster)
+  return(centralization)
+}
+
+# Calculate centralization for the given graph and louvain column
+calculate_centralization(decor_graph, louvain)
+
+calculate_centralization(decor_graph, louvain) |> 
+  pivot_longer(-cluster, names_to = "cent_type") |> 
+  ggplot() +
+  geom_bar(aes(x = cent_type, y = value, fill = cluster), stat = "identity", position = "dodge") +
+  theme_minimal() +
+  labs(x = "Centrality Type", y = "Centrality Value", fill = "Cluster")
+```
+
+
+
+
+```{r cluster centralities, fig.cap="Mean centralities (Degree & Eigen) by cluster"}
+### Centralities
+
+# Function to calculate centralities for each cluster group
+pull_centralities_clust <- function(graph) {
+  # Activate the nodes in the graph
+  graph |>
+    activate(nodes) |>
+    # Calculate degree centrality and eigenvector centrality
+    mutate(deg = centrality_degree(weights = weight, normalized = TRUE), eig = centrality_eigen(weights = weight)) |>
+    # Select the louvain cluster, degree centrality, and eigenvector centrality columns
+    select(label,louvain, deg, eig) |>
+    # Convert the result to a tibble
+    as_tibble()
+}
+
+# Calculate centralities for each cluster
+centr <- pull_centralities_clust(decor_graph)
+
+# Display boxplots of centralities for degree centrality
+a <- ggplot(centr) +
+  geom_boxplot(aes(x = louvain, y = deg, fill = louvain)) +
+  scale_fill_grey(start = 0.5, end  = 1) +
+  theme_bw() +
+  theme(legend.position = "none")+
+  labs(y = "degree centrality",
+       x = "community")
+
+# Display boxplots of centralities for eigenvector centrality
+b <- ggplot(centr) +
+  geom_boxplot(aes(x = louvain, y = eig, fill = louvain)) +
+  scale_fill_grey(start = 0.5, end  = 1) +
+  theme_bw() +
+  theme(legend.position = "none")+
+  labs(y = "eigenvector centrality",
+       x = "community")
+
+# Combine the boxplots
+a + b
+
+# Summary of centralities per cluster
+centr |>
+  group_by(louvain) |>
+  summarise(meandeg = mean(deg), meaneig = mean(eig))
+```
+
+
+If we take a closer look at the "internal" connections of community 1, we see that "braided_strip_roulette" is present at all sites. The other main decor "straight_cord_mat" on the other hand is missing on 2 sites: Oudalan and Prom. The two decors are spread across the whole area of the community. The only other decor that is common in the community is the "twisted_cord_roulette" which is also abundant across the whole research area. It makes up a rather large part of the assemblage in Oudalan and Prom but was not found at the sites of Sadia and Ambere Dougon. The fact that SAO has a high degree of centrality shows that the location is not decisive for the connectedness within this community. This is underlined by the fact that the less central sites are distributed across the whole area. There is an ambivalence between a relative consistency across the whole area and the diversity between sites that are close to each other. One reason for this phenom can be the contact to other communities in the mountain area. Damassogou exemplifies this as the site contains the defining decors of community 1 and 2. But the difference between Oudalan and SAO that are geographically isolated suggest that there might be more reasons for this diversity. Community 2 is less diverse with "braided_cord_roulette" as the only outstanding decor type. The weaker connections of the sites Kokolo and Damassogou are based on data bias (the proportion is counted in regard to all sherds not only the decorated ones), the decor was probably equally abundant there. Other decors spread across the community are "folded_strip_roulette" and "dragged_comb". The first one is missing in KAN 4 and TOD H while the second one is missing at Kokolo and Damassogou. The other indicator for the homogeneous character of the community is the nearly equal degree of centrality of every site. As mentioned above community 3 is more diverse but also has weaker connections. Instead of one defining decor there are several ones but none is abundant across the whole community. The spatial distribution differs between the decors. While "paint" and "twisted_cord_roulette" appear from Gao to TOG 2, "folded_strip_roulette", "channel" and "incised" are located in the western part of the community's area. Essouk and TMD have the highest degree of centrality. Even though it is located at the margin of the research area, its character as a "market"-site explains the amount of links it has. The role of TMD for the network is elaborated elsewhere (!).
+
+
+
 # Sparsification
 
-# Simplified network backbone
+## Simplified network backbone
 
 we can now try to extract a backbone from the simplified network
 
@@ -592,7 +1310,7 @@ extract the binary backbone of the flattened graph and play around with the alph
 # extract binary backbones at decreasing levels of significance
 decor.05 <- extract_backbone(decor.flat, 0.05)
 decor.15 <- extract_backbone(decor.flat, 0.15)
-decor.20 <- extract_backbone(decor.flat, 0.20)
+decor.20 <- extract_backbone(decor.flat, 0.18)
 
 # plot
 p1 <- plot.bb(decor.05)
@@ -931,8 +1649,18 @@ rho %>%
 
 ```{r import early sites}
 library(readr)
-decorsearly <- read_csv2(here::here("analysis/data/raw_data/decors_early.csv"))
+decorsearly <- read_csv2(here::here("analysis/data/raw_data/decors_early.csv")) %>% 
+  select(-1) 
 
+#decorsearly <- decorsearly%>%
+#  filter(site != "SAO 3" & site != "Oudalan Fer moyen")  %>%
+ ## mutate_at(vars(-site), as.numeric) %>% 
+ # mutate(site = case_when(site == "Akumbu 1" ~ "Akumbu early",
+     #    site == "TMD" ~ "TMD 3",
+   #      TRUE ~ site))
+
+
+#write.csv2(decorsearly, here::here("analysis/data/raw_data/decors_early.csv"))
 # apply function to transform frequency table into edge list
 edgelist <- make_edgelist(decorsearly)
 
@@ -1301,3 +2029,850 @@ We could also see whether the clusters are still there and how the crossings cha
 
 Graph centralization:
 Wasserman & Faust p.180-183
+
+# Sparsified clustering
+
+## late cluster
+### calculating cluster with sparsification
+
+here we test clustering a sparsified network in contrast to the "normal" network. first we have to get the new clusters and then add them as louvain_bb to our decor_graph
+```{r}
+decor.20 <- decor.20 %>%
+  activate(nodes) %>%
+  mutate(louvain = as.character(group_louvain()))
+
+# calculate modularity of louvain clustering
+modularity.20 <- decor.20 %>%
+  activate(nodes) %>%
+  mutate(modularity = graph_modularity(group = as.factor(louvain))) %>%
+  pull(modularity) %>%
+  head(1)
+
+decor.20 %>%  
+  get.data.frame(what = "vertices") %>% 
+  count(louvain)
+
+decor_graph <- decor_graph %>% 
+    activate(nodes) %>%
+  mutate(louvain_bb = as.character(decor.20 %>% 
+  get.data.frame("vertices") %>% 
+  pull(louvain)))
+
+nodes <- decor_graph %>% 
+  get.data.frame("vertices")
+  
+
+
+```
+
+
+### mapping the new clusters
+
+```{r plot-clusters, fig.cap="Louvain communities within the decor network"}
+# set plot colours for communities
+communitycolor <-
+  setNames(
+    c("tomato", "cornflowerblue", "darkgreen"),
+    unique(V(decor_graph)$louvain)
+  )
+
+# disable s2 geometry to plot on map
+sf_use_s2(FALSE)
+
+ggraph(decor_graph, x = lon, y = lat) +
+  geom_sf(data = mali_adm0, fill = NA) +
+  geom_sf(data = rivers, colour = "black") +
+  edges_community +
+  ggforce::geom_mark_hull(aes(x = lon, y = lat, fill = louvain_bb, colour = louvain_bb),
+                          expand = unit(1.5, "mm"),
+                          radius = unit(1.5, "mm")) +
+  scale_fill_manual(values = communitycolor)+
+  scale_colour_manual(values = communitycolor)+
+  nodes_community +
+  theme_community +
+  coord_sf(xlim = c(-7, 2), ylim = c(13, 19), expand = FALSE) +
+  theme_graph()
+```
+
+### taking a look at all 3 clusters
+
+he three communities can also be analysed as separate networks. The sites around the Niger Delta are mostly 
+
+```{r network 1 centrality in community vs in gen network}
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 1) %>%
+ggraph(layout = "graphopt") + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "cornflowerblue") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+
+
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 1) %>%
+ggraph(x = lon, y = lat) + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "cornflowerblue") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+```
+
+
+```{r network 2 centrality in community vs in gen network}
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 2) %>%
+ggraph(layout = "graphopt") + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "tomato") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 2) %>%
+ggraph(x = lon, y = lat) + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "tomato") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+```
+
+```{r network 3 centrality in community vs in gen network}
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 3) %>%
+ggraph(layout = "graphopt") + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "darkgreen") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+
+decor_graph %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 3) %>%
+ggraph(x = lon, y = lat) + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "darkgreen") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+```
+
+
+### comparing connections within and without
+
+
+```{r add community to edges}
+
+#mark which edges are in which community or without
+decor_graph <- decor_graph %>% 
+  activate(edges) %>% 
+  mutate(community_bb = case_when(from %in% which(nodes$louvain_bb == 1) & to %in% which(nodes$louvain_bb == 1) ~ "1",
+                               from %in% which(nodes$louvain_bb == 2) & to %in% which(nodes$louvain_bb == 2) ~ "2",
+                               from %in% which(nodes$louvain_bb == 3) & to %in% which(nodes$louvain_bb == 3) ~ "3",
+                               from %in% which(nodes$louvain_bb == 4) & to %in% which(nodes$louvain_bb == 4) ~ "4",
+                               from %in% which(nodes$louvain_bb == 5) & to %in% which(nodes$louvain_bb == 5) ~ "5",
+         TRUE ~ "crossing"))
+
+
+decor_graph 
+```
+
+```{r crossings}
+decor_graph %>%
+  activate(edges) %>%
+  
+  # find the edges that cross between communities
+#  mutate(crossing = community_crossing(weights = weight)) %>%
+  filter(
+    community_bb == "crossing",
+    weight >= 3
+  ) %>%
+  activate(nodes) %>% 
+  filter(!node_is_isolated()) %>%
+  
+  #plot
+  ggraph(layout = "nicely") +
+  
+  geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
+  # scale_edge_color_manual(values = decorcolor) +
+  scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = centrality_degree(weights = weight), color = louvain_bb), show.legend = FALSE) +
+  geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  scale_color_manual(values = communitycolor)+
+  
+  theme_graph() +
+  theme_community
+
+```
+
+
+```{r}
+decor_graph %>% 
+  get.data.frame(what = "edges") %>% 
+  count(community_bb)
+
+edge_inside <- decor_graph %>% 
+  activate(edges) %>% 
+  filter(community_bb != "crossing") %>% 
+  activate(nodes) %>% 
+  mutate(centr_comm = centrality_degree(weights = weight, mode = "all")) %>% 
+  get.data.frame("vertices") %>% 
+  mutate(centr_comm_weigthed = case_when(louvain_bb == 1 ~ centr_comm/7,
+                                         louvain_bb == 2 ~ centr_comm/4,
+                                         TRUE ~ centr_comm/4))%>% 
+  mutate(type = "inside")
+
+
+
+edge_outside <- decor_graph %>% 
+  activate(edges) %>% 
+  filter(community_bb == "crossing") %>% 
+  activate(nodes) %>% 
+  mutate(centr_comm = centrality_degree(weights = weight, mode = "all")) %>% 
+  get.data.frame("vertices") %>% 
+  mutate(centr_comm_weigthed = case_when(louvain_bb == 1 ~ centr_comm/(19-8),
+                                         louvain_bb == 2 ~ centr_comm/(19-5),
+                                         louvain_bb == 3 ~ centr_comm/(19-5),
+                                         TRUE ~ centr_comm/(19-1))) %>% 
+  mutate(type = "outside")
+
+
+
+
+data <- rbind(edge_inside, edge_outside) %>% 
+  mutate(louvain_bb = as.character(louvain_bb))
+
+# plot as a boxplot
+ggplot(data, aes(x = louvain_bb, y = centr_comm_weigthed, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("grey80", "black")) +
+  xlab("Community") +
+  ylab("Total Edge Weight") +
+  ggtitle("Weights of Edges Within and Between Communities")
+
+
+ggplot(data, aes(x = louvain_bb, y = centr_comm, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("grey80", "black")) +
+  xlab("Community") +
+  ylab("Total Edge Weight") +
+  ggtitle("Weights of Edges Within and Between Communities")
+
+
+```
+the inside vs outside ratio  is 
+```{r}
+data %>% 
+  group_by(louvain_bb, type) %>% 
+  summarise(centr_comm = mean(centr_comm),
+            centr_comm_weigthed = mean(centr_comm_weigthed)) %>%
+  ggplot(aes(x = louvain_bb, y = centr_comm_weigthed, fill = type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Community", y = "Mean centrality") +
+  scale_fill_manual(values = c("red", "green", "blue")) +
+  theme_classic()
+
+data %>% 
+  group_by(louvain_bb, type) %>% 
+  summarise(centr_comm_weigthed = mean(centr_comm_weigthed)) %>%
+  pivot_wider(names_from = type, values_from = centr_comm_weigthed) %>%
+  mutate(ratio_in_out = inside / outside)
+```
+
+# sparsification cluster early
+
+# Sparsified clustering
+
+here we test clustering a sparsified network in contrast to the "normal" network. first we have to get the new clusters and then add them as louvain_bb to our decor_graph
+```{r}
+early.flat.bb <- early.flat.bb %>%
+  activate(nodes) %>%
+  mutate(louvain = as.character(group_louvain()))
+
+# calculate modularity of louvain clustering
+modularity.early.bb <- early.flat.bb %>%
+  activate(nodes) %>%
+  mutate(modularity = graph_modularity(group = as.factor(louvain))) %>%
+  pull(modularity) %>%
+  head(1)
+
+early.flat.bb %>%  
+  get.data.frame(what = "vertices") %>% 
+  count(louvain)
+
+decor_graph_early <- decor_graph_early %>% 
+  mutate(louvain_bb = as.character(early.flat.bb %>% 
+  get.data.frame("vertices") %>% 
+  pull(louvain)))
+
+nodes_early <- decor_graph_early %>% 
+  get.data.frame("vertices")
+  
+
+
+```
+
+the new clusters
+
+
+```{r plot-clusters, fig.cap="Louvain communities within the decor network"}
+# set plot colours for communities
+communitycolor <-
+  setNames(
+    c("tomato", "cornflowerblue", "darkgreen"),
+    unique(V(decor_graph)$louvain)
+  )
+
+# disable s2 geometry to plot on map
+sf_use_s2(FALSE)
+
+ggraph(decor_graph_early, x = lon, y = lat) +
+  geom_sf(data = mali_adm0, fill = NA) +
+  geom_sf(data = rivers, colour = "black") +
+  edges_community +
+  ggforce::geom_mark_hull(aes(x = lon, y = lat, fill = louvain_bb, colour = louvain_bb),
+                          expand = unit(1.5, "mm"),
+                          radius = unit(1.5, "mm")) +
+  scale_fill_manual(values = communitycolor)+
+  scale_colour_manual(values = communitycolor)+
+  nodes_community +
+  theme_community +
+  coord_sf(xlim = c(-7, 2), ylim = c(13, 19), expand = FALSE) +
+  theme_graph()
+```
+
+
+he three communities can also be analysed as separate networks. The sites around the Niger Delta are mostly 
+
+```{r network 1 centrality in community vs in gen network}
+
+decor_graph_early %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 1) %>%
+ggraph(layout = "graphopt") + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph_early)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "cornflowerblue") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+
+
+
+decor_graph_early %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 1) %>%
+ggraph(x = lon, y = lat) + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph_early)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "cornflowerblue") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+```
+
+
+```{r network 2 centrality in community vs in gen network}
+
+decor_graph_early %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 2) %>%
+ggraph(layout = "graphopt") + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph_early)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "tomato") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+
+
+decor_graph_early %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 2) %>%
+ggraph(x = lon, y = lat) + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph_early)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "tomato") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+```
+
+```{r network 3 centrality in community vs in gen network}
+
+decor_graph_early %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 3) %>%
+ggraph(layout = "graphopt") + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph_early)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "darkgreen") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+
+decor_graph_early %>%
+  activate(nodes) %>%
+    mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain_bb == 3) %>%
+ggraph(x = lon, y = lat) + 
+geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) + 
+     scale_edge_color_manual(values = decorcolor[E(decor_graph_early)$name]) +
+ scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(size = 3, colour = "darkgreen") +
+    geom_node_text(aes(label = label), col= "black", repel = TRUE) +
+  theme_graph()
+```
+
+
+
+```{r add community to edges}
+
+#mark which edges are in which community or without
+decor_graph_early <- decor_graph_early %>% 
+  activate(edges) %>% 
+  mutate(community_bb = case_when(from %in% which(nodes_early$louvain_bb == 1) & to %in% which(nodes_early$louvain_bb == 1) ~ "1",
+                               from %in% which(nodes_early$louvain_bb == 2) & to %in% which(nodes_early$louvain_bb == 2) ~ "2",
+                               from %in% which(nodes_early$louvain_bb == 3) & to %in% which(nodes_early$louvain_bb == 3) ~ "3",
+                               from %in% which(nodes_early$louvain_bb == 4) & to %in% which(nodes_early$louvain_bb == 4) ~ "4",
+                               from %in% which(nodes_early$louvain_bb == 5) & to %in% which(nodes_early$louvain_bb == 5) ~ "5",
+         TRUE ~ "crossing"))
+
+
+decor_graph_early 
+```
+
+```{r crossings}
+decor_graph_early %>%
+  activate(edges) %>%
+  
+  # find the edges that cross between communities
+#  mutate(crossing = community_crossing(weights = weight)) %>%
+  filter(
+    community_bb == "crossing",
+    weight >= 3
+  ) %>%
+  activate(nodes) %>% 
+  filter(!node_is_isolated()) %>%
+  
+  #plot
+  ggraph(layout = "nicely") +
+  
+  geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
+  # scale_edge_color_manual(values = decorcolor) +
+  scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = centrality_degree(weights = weight), color = louvain_bb), show.legend = FALSE) +
+  geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  scale_color_manual(values = communitycolor)+
+  
+  theme_graph() +
+  theme_community
+
+
+decor_graph_early %>%
+  activate(edges) %>%
+  
+  # find the edges that cross between communities
+#  mutate(crossing = community_crossing(weights = weight)) %>%
+  filter(
+   # community_bb == "crossing",
+    weight >= 3
+  ) %>%
+  activate(nodes) %>% 
+  filter(!node_is_isolated()) %>%
+  
+  #plot
+  ggraph(layout = "nicely") +
+  
+  geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
+  # scale_edge_color_manual(values = decorcolor) +
+  scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = centrality_degree(weights = weight), color = louvain_bb), show.legend = FALSE) +
+  geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  scale_color_manual(values = communitycolor)+
+  
+  theme_graph() +
+  theme_community
+
+```
+
+
+
+```{r}
+decor_graph_early %>% 
+  get.data.frame(what = "edges") %>% 
+  count(community_bb)
+
+edge_inside <- decor_graph_early %>% 
+  activate(edges) %>% 
+  filter(community_bb != "crossing") %>% 
+  activate(nodes) %>% 
+  mutate(centr_comm = centrality_degree(weights = weight, mode = "all")) %>% 
+  get.data.frame("vertices") %>% 
+  mutate(centr_comm_weigthed = case_when(louvain_bb == 1 ~ centr_comm/3,
+                                         louvain_bb == 2 ~ centr_comm/3,
+                                         louvain_bb == 3 ~ centr_comm/3,
+TRUE ~ centr_comm/1))%>% 
+  mutate(type = "inside")
+
+
+
+edge_outside <- decor_graph_early %>% 
+  activate(edges) %>% 
+  filter(community_bb == "crossing") %>% 
+  activate(nodes) %>% 
+  mutate(centr_comm = centrality_degree(weights = weight, mode = "all")) %>% 
+  get.data.frame("vertices") %>% 
+  mutate(centr_comm_weigthed = case_when(louvain_bb == 1 ~ centr_comm/(12-4),
+                                         louvain_bb == 2 ~ centr_comm/(12-4),
+                                        louvain_bb == 3 ~ centr_comm/(12-4),
+                                         TRUE ~ centr_comm/(12-1))) %>% 
+  mutate(type = "outside")
+
+
+
+
+data <- rbind(edge_inside, edge_outside) %>% 
+  mutate(louvain_bb = as.character(louvain_bb))
+
+# plot as a boxplot
+ggplot(data, aes(x = louvain_bb, y = centr_comm_weigthed, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("grey80", "black")) +
+  xlab("Community") +
+  ylab("Total Edge Weight") +
+  ggtitle("Weights of Edges Within and Between Communities")
+
+
+ggplot(data, aes(x = louvain_bb, y = centr_comm, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("grey80", "black")) +
+  xlab("Community") +
+  ylab("Total Edge Weight") +
+  ggtitle("Weights of Edges Within and Between Communities")
+
+
+```
+
+the inside vs outside ratio  is 
+```{r}
+data %>% 
+  group_by(louvain_bb, type) %>% 
+  summarise(centr_comm = mean(centr_comm),
+            centr_comm_weigthed = mean(centr_comm_weigthed)) %>%
+  ggplot(aes(x = louvain_bb, y = centr_comm_weigthed, fill = type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Community", y = "Mean centrality") +
+  scale_fill_manual(values = c("red", "green", "blue")) +
+  theme_classic()
+
+data %>% 
+  group_by(louvain_bb, type) %>% 
+  summarise(centr_comm_weigthed = mean(centr_comm_weigthed)) %>%
+  pivot_wider(names_from = type, values_from = centr_comm_weigthed) %>%
+  mutate(ratio_in_out = inside / outside)
+```
+
+# cluster measures
+## inside outside normal cluster
+### comparing connections within and without
+
+
+```{r add community to edges}
+
+#mark which edges are in which community or without
+decor_graph <- decor_graph %>% 
+  activate(edges) %>% 
+  mutate(community = case_when(from %in% which(nodes$louvain == 1) & to %in% which(nodes$louvain == 1) ~ "1",
+                               from %in% which(nodes$louvain == 2) & to %in% which(nodes$louvain == 2) ~ "2",
+                               from %in% which(nodes$louvain == 3) & to %in% which(nodes$louvain == 3) ~ "3",
+                               from %in% which(nodes$louvain == 4) & to %in% which(nodes$louvain == 4) ~ "4",
+                               from %in% which(nodes$louvain == 5) & to %in% which(nodes$louvain == 5) ~ "5",
+         TRUE ~ "crossing"))
+
+
+decor_graph 
+```
+
+```{r crossings}
+decor_graph %>%
+  activate(edges) %>%
+  
+  # find the edges that cross between communities
+#  mutate(crossing = community_crossing(weights = weight)) %>%
+  filter(
+    community == "crossing",
+    weight >= 3
+  ) %>%
+  activate(nodes) %>% 
+  filter(!node_is_isolated()) %>%
+  
+  #plot
+  ggraph(layout = "nicely") +
+  geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
+  # scale_edge_color_manual(values = decorcolor) +
+  scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = centrality_degree(weights = weight), color = louvain), show.legend = FALSE) +
+  geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  scale_color_manual(values = communitycolor)+
+  
+  theme_graph() +
+  theme_community
+
+```
+
+
+```{r}
+decor_graph %>% 
+  get.data.frame(what = "edges") %>% 
+  count(community)
+
+edge_inside <- decor_graph %>% 
+  activate(edges) %>% 
+  filter(community != "crossing") %>% 
+  activate(nodes) %>% 
+  mutate(centr_comm = centrality_degree(weights = weight, mode = "all")) %>% 
+  get.data.frame("vertices") %>% 
+  mutate(centr_comm_weigthed = case_when(louvain == 1 ~ centr_comm/8,
+                                         louvain == 2 ~ centr_comm/6,
+                                         TRUE ~ centr_comm/3))%>% 
+  mutate(type = "inside")
+
+
+
+edge_outside <- decor_graph %>% 
+  activate(edges) %>% 
+  filter(community == "crossing") %>% 
+  activate(nodes) %>% 
+  mutate(centr_comm = centrality_degree(weights = weight, mode = "all")) %>% 
+  get.data.frame("vertices") %>% 
+  mutate(centr_comm_weigthed = case_when(louvain == 1 ~ centr_comm/(19-9),
+                                         louvain == 2 ~ centr_comm/(19-7),
+                                         louvain == 3 ~ centr_comm/(19-4),
+                                         TRUE ~ centr_comm/(19-1))) %>% 
+  mutate(type = "outside")
+
+
+
+
+data <- rbind(edge_inside, edge_outside) %>% 
+  mutate(louvain = as.character(louvain))
+
+# plot as a boxplot
+ggplot(data, aes(x = louvain, y = centr_comm_weigthed, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("grey80", "black")) +
+  xlab("Community") +
+  ylab("Total Edge Weight") +
+  ggtitle("Weights of Edges Within and Between Communities")
+
+
+ggplot(data, aes(x = louvain, y = centr_comm, fill = type)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("grey80", "black")) +
+  xlab("Community") +
+  ylab("Total Edge Weight") +
+  ggtitle("Weights of Edges Within and Between Communities")
+
+
+```
+the inside vs outside ratio  is 
+```{r}
+data %>% 
+  group_by(louvain, type) %>% 
+  summarise(centr_comm = mean(centr_comm),
+            centr_comm_weigthed = mean(centr_comm_weigthed)) %>%
+  ggplot(aes(x = louvain, y = centr_comm_weigthed, fill = type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Community", y = "Mean centrality") +
+  scale_fill_manual(values = c("red", "green", "blue")) +
+  theme_classic()
+
+data %>% 
+  group_by(louvain, type) %>% 
+  summarise(centr_comm_weigthed = mean(centr_comm_weigthed)) %>%
+  pivot_wider(names_from = type, values_from = centr_comm_weigthed) %>%
+  mutate(ratio_in_out = inside / outside)
+```
+## centralities and centralisation
+
+### centralities by cluster
+
+```{r}
+pull_centralities_clust <- function(graph) {
+  graph %>%
+    activate(nodes) %>%
+    mutate(deg = centrality_degree(weights = weight, normalized = TRUE), eig = centrality_eigen(weights = weight)) %>%
+    select(louvain, deg, eig) %>%
+    as_tibble()
+}
+
+centr_late <- pull_centralities_clust(decor_graph) %>% 
+  mutate(period = "late")
+
+centr_early <- pull_centralities_clust(decor_graph_early) %>%
+  mutate(period = "early")
+
+
+centr <- bind_rows(centr_early, centr_late)
+
+a <- ggplot(centr) +
+  geom_boxplot(aes(x = period, y = deg, fill = louvain)) +
+  theme_minimal() +
+  ylab("degree centrality")
+
+b <- ggplot(centr) +
+  geom_boxplot(aes(x = period, y = eig, fill = louvain)) +
+  theme_minimal() +
+  ylab("eigenvector centrality")
+
+a + b
+
+centralities %>%
+  group_by(period) %>%
+  summarise(meandeg = mean(deg), meaneig = mean(eig))
+```
+### centralities
+
+```{r}
+pull_centralities_clust <- function(graph) {
+  graph %>%
+    activate(nodes) %>%
+    mutate(deg = centrality_degree(weights = weight, normalized = TRUE), eig = centrality_eigen(weights = weight)) %>%
+    select(louvain, deg, eig) %>%
+    as_tibble()
+}
+
+centr <- pull_centralities_clust(decor_graph)
+
+a <- ggplot(centr) +
+  geom_boxplot(aes(x = louvain, y = deg, fill = louvain)) +
+  theme_minimal() +
+  ylab("degree centrality")
+
+b <- ggplot(centr) +
+  geom_boxplot(aes(x = louvain, y = eig, fill = louvain)) +
+  theme_minimal() +
+  ylab("eigenvector centrality")
+
+a + b
+
+centralities %>%
+  group_by(louvain) %>%
+  summarise(meandeg = mean(deg), meaneig = mean(eig))
+```
+
+
+### centralisation
+
+```{r}
+library(tidyverse)
+library(igraph)
+
+calculate_centralization <- function(graph, louvain_column) {
+  centralization <- tibble(cluster = character(), cent_deg = double(), cent_eigen = double())
+  
+  unique_clusters <- graph %>%
+    pull({{louvain_column}}) %>%
+    unique()
+  
+  for (cluster in unique_clusters) {
+    subgraph <- graph %>%
+      filter({{louvain_column}} == cluster)
+    
+    cent_deg <- centr_degree(subgraph, normalized = TRUE)$centralization
+    cent_eigen <- centr_eigen(subgraph, normalized = TRUE)$centralization
+    
+ 
+
+    
+    centralization <- centralization %>%
+      add_row(cluster = as.character(cluster), cent_deg = cent_deg, cent_eigen = cent_eigen)
+  }
+  
+  centralization <- centralization |> 
+    arrange(cluster)
+  return(centralization)
+}
+
+
+calculate_centralization(decor_graph, louvain)
+```
+
+
+```{r}
+netmeasurements <- function(graph, type, dist){
+
+  trans <- graph %>%
+    igraph::transitivity()  # calculate transitivity
+
+  dens <- graph %>%
+    igraph::graph.density()  # calculate density
+
+  diam <- graph %>%
+    activate(edges) %>%
+    mutate(weight = (dist-weight)) %>%
+    diameter()
+
+  rad <- graph %>%
+    radius()
+
+
+
+  cent_deg <- centr_degree(graph, normalized = TRUE)$centralization
+  cent_eigen <- centr_eigen(graph, normalized = TRUE)$centralization
+
+  graph %>%
+    mutate(meandist = graph_mean_dist(),  # calculate mean distance
+           size = graph_size(),
+           order= graph_order()) %>%  # number of edges
+    select(meandist, size, order) %>%  # select measures
+    as_tibble() %>%  # turn into dataframe
+    head(1) %>%   # select only first row (as data is repetitive)
+    mutate(type = type,
+           transitivity = trans,
+           density = dens,
+           diameter = diam,
+           # radius = rad,
+           centralization.deg = cent_deg,
+           centralization.eigen = cent_eigen) %>%   # add all measures together
+    select(type, everything()) # order phase to the front
+}
+```
+
+### centralisation diachronic comparison
+```{r}
+
+```
+
