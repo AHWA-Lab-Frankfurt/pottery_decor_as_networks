@@ -23,7 +23,9 @@ This document is intended to make transparent the processes behind the creation 
 For the outline of Africa, we import a shapefile 
 
 ```{r}
-africa_outline <- sf::st_read(here::here("analysis", "data", "raw_data", "Africa_outline.shp")) %>% sf::st_crop(xmax = 54, xmin = -20, ymax = 40, ymin = -36)
+africa_outline <- sf::st_read(here::here("analysis", "data",
+                                         "raw_data", "Africa_outline.shp")) |>
+  sf::st_crop(xmax = 54, xmin = -20, ymax = 40, ymin = -36)
 ```
 
 ## country outline
@@ -31,18 +33,19 @@ africa_outline <- sf::st_read(here::here("analysis", "data", "raw_data", "Africa
 Here, we subset a free dataset of administrative boundaries downloaded from naturalearthdata.com. 
 
 ```{r subset adm0}
-mali_adm0 <- ne_countries(scale = "medium", returnclass = "sf") %>% filter(admin == "Mali")
+mali_adm0 <- ne_countries(scale = "medium", returnclass = "sf") |>
+  filter(admin == "Mali")
 ```
 
 
 These can be used for inset maps inset following manner
 
 ```{r plot adm0}
-ggplot()+
-  geom_sf(data = mali_adm0)+
+ggplot() +
+  geom_sf(data = mali_adm0) +
   geom_sf_text(data = mali_adm0, aes(label = admin))
 
-ggplot(africa_outline)+
+ggplot(africa_outline) +
   geom_sf()
 ```
 
@@ -50,17 +53,19 @@ ggplot(africa_outline)+
 
 
 ```{r}
-rivers <- ne_download(scale = 50, type = "rivers_lake_centerlines", category = "physical", returnclass = "sf") %>% sf::st_intersection(mali_adm0) %>% filter (name == "Niger")
+rivers <- ne_download(scale = 50, type = "rivers_lake_centerlines",
+                      category = "physical", returnclass = "sf") |>
+  sf::st_intersection(mali_adm0) |> filter(name == "Niger")
 
 
 ```
 
 
 ```{r plot hydro}
-ggplot()+
-  geom_sf(data = mali_adm0)+
-  geom_sf_text(data = mali_adm0, aes(label = admin))+
-  geom_sf(data = rivers, fill = '#9ecae1')+
+ggplot() +
+  geom_sf(data = mali_adm0) +
+  geom_sf_text(data = mali_adm0, aes(label = admin)) +
+  geom_sf(data = rivers, fill = '#9ecae1') +
   geom_sf(data = osm_lakes.sf)
 ```
 
@@ -85,7 +90,7 @@ srtm9 <- getData("SRTM", lat = 16, lon = -12, download = TRUE)
 srtm10 <- getData("SRTM", lat = 22, lon = 2, download = TRUE)
 
 #Mosaic/merge srtm tiles
-srtmmosaic <- mosaic(srtm1, srtm2, srtm3, srtm4, srtm5, srtm6, srtm7, srtm8, srtm9, srtm10, fun=mean)
+srtmmosaic <- mosaic(srtm1, srtm2, srtm3, srtm4, srtm5, srtm6, srtm7, srtm8, srtm9, srtm10, fun = mean)
 #crop to Mali
 dem1 <- crop(srtmmosaic, extent(mali_sp))
 mali_srtm <- mask(dem1, mali_sp)
@@ -94,15 +99,15 @@ mali_srtm_a <- terra::aggregate(mali_srtm, fact = 10)
 #convert to df
 dem.df <- rasterToPoints(mali_srtm_a)
 dem.df <- data.frame(dem.df)
-colnames(dem.df) = c("lon", "lat", "alt")
+colnames(dem.df) <- c("lon", "lat", "alt")
 ```
 
 ## Hillshade
 
 ```{r}
 # extract slope and aspect
-slope.raster <- terrain(mali_srtm_a, opt='slope')
-aspect.raster <- terrain(mali_srtm_a, opt='aspect')
+slope.raster <- terrain(mali_srtm_a, opt = 'slope')
+aspect.raster <- terrain(mali_srtm_a, opt = 'aspect')
 # calculate hill shade
 hill.raster <- hillShade(slope.raster, aspect.raster, 40, 270)
 # convert to df
@@ -113,14 +118,13 @@ colnames(hill.df) <- c("lon", "lat", "hill")
 
 
 ```{r}
-ggplot()+
-  #geom_sf(data = mali_adm0)+
+ggplot() +
   geom_raster(data = hill.df, aes(lon, lat, fill = hill)) +
   scale_fill_gradientn(colours = grey.colors(100)) +
-  geom_raster(data = dem.df, aes(lon, lat, fill = alt), alpha = 0.8)+
-  scale_fill_gradientn(colours = terrain.colors(100))+
-  geom_sf_text(data = mali_adm0, aes(label = admin))+
-  geom_sf(data = rivers, colour = "blue")+
+  geom_raster(data = dem.df, aes(lon, lat, fill = alt), alpha = 0.8) +
+  scale_fill_gradientn(colours = terrain.colors(100)) +
+  geom_sf_text(data = mali_adm0, aes(label = admin)) +
+  geom_sf(data = rivers, colour = "blue") +
   theme_minimal()
 
 ```

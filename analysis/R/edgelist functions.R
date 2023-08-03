@@ -64,10 +64,17 @@ make_edgelist <- function(data) {
   Type <- tibble::tibble(name = colnames(data[-1])) # get all edge types
 
   merge(sites, Type) %>%
+<<<<<<< HEAD
     left_join(data_long, by = c("x" = "Var1", "name" = "name")) %>%
     left_join(data_long, by = c("y" = "Var1", "name" = "name")) %>% # merge the data
     rowwise() %>%
     mutate(weight = min(value.x, value.y)) %>% # because of rowwise we now get the minimum perc as weight
+=======
+    left_join(data_long, by = c("x" = "Var1", "name" = "name"))%>%
+    left_join(data_long, by = c("y" = "Var1", "name" = "name")) %>%    #merge the data
+    rowwise() %>%
+    mutate(weight = min(value.x, value.y)) %>%                            #because of rowwise we now get the minimum perc as weight
+>>>>>>> d07b969c8b97784bee246785892543c639c2e6af
     select(-c(value.x, value.y)) %>%
     tidyr::drop_na() %>%
     filter(weight > 0)

@@ -418,7 +418,11 @@ g1 <- mean_edge_weight |>
   ggplot(aes(x = community, y = mean_edge_weight)) +
   geom_bar(stat = "identity", position = "dodge") +
   scale_fill_grey() +
+<<<<<<< HEAD
   theme_bw() +
+=======
+  theme_publish() +
+>>>>>>> d07b969c8b97784bee246785892543c639c2e6af
   ylab("mean edge weight")
 
 # Graph of centralization of the different communities
@@ -428,7 +432,11 @@ g2 <- tibble(centralization) |>
   ggplot(aes(x = community, y = centralisation)) +
   geom_bar(stat = "identity", position = "dodge") +
   scale_fill_grey() +
+<<<<<<< HEAD
   theme_bw()
+=======
+  theme_publish()
+>>>>>>> d07b969c8b97784bee246785892543c639c2e6af
 
 # plot:
 g1 + g2
