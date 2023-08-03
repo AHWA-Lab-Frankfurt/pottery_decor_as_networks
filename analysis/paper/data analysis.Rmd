@@ -1,0 +1,1303 @@
+---
+title: "analysis"
+author: "Nikolas Gestrich"
+date: '2022-05-02'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+options(knitr.kable.NA = "")
+
+# libraries
+library(dplyr)
+library(knitr)
+library(patchwork)
+library(ggplot2)
+library(tidygraph)
+library(ggraph)
+library(tibble)
+library(igraph)
+library(tidyr)
+library(sf)
+```
+
+## Data import
+We are importing data on pottery decors from a variety of sources. All of the data represents phases of sites that are dated to have been occupied at some point in the 11th century AD.
+
+
+XXX: put together the different periods. 
+Update: or maybe not, so that we can name the nodes the same
+
+```{r}
+library(readr)
+# import decor data
+decors <- read_csv2(here::here("analysis/data/raw_data/decors_late.csv"))
+# import information on sites
+sites <- read_csv2(here::here("analysis/data/raw_data/sites_all.csv"))
+```
+
+show the data:
+
+```{r fig.cap="decor data used for network construction"}
+library(kableExtra)
+kbl(decors) |> 
+  kable_styling(font_size = 7, html_font = "Cambria") 
+```
+
+show the map points:
+
+```{r fig.cap="location of sites in the analysis", warning=FALSE}
+source(here::here("analysis/R/map plots.R"))
+
+sitepoints <- st_as_sf(sites, coords = c("lon", "lat"), crs = 4326, agr = "constant")
+
+sitemap <- ggplot() +
+  map_bw_grid +
+  geom_sf(data = sitepoints)
+
+sitemap + inset_element(inset, 0.72, 0.72, 1, 1)
+```
+
+We can see here that sites are geographically unequally distributed. This is due to research history as well as past cultural dynamics. Certainly, the IND and the areas bordering it (notiably the Lakes region) were strongly populated at the time, maybe more so than other areas. The cluster of sites around the Bandiagara escarpment is due to the extraordinarily detailed and long-term research of the University of Geneva's research teams. Blank spaces do not imply a lack of people, in this case people making and using pottery. Global politics and research priorities over the last 50 years have meant that these are areas we do not currently have excavated and dated ceramics for, though we know that sites exist, often in abundance. This means that, when we construct networks, we do so with a geographically unrepresentative sample, which leads to incomplete networks. Sindbaek has pointed out the difficulty in this situation: the actual network is not known, only its effects, from which the network can be partially reconstructed. Accordingly, this study should be seen as an exercise first in the reconstruction of a possible network that led to the data preserved in the archaeological record: a tiny sample of a tiny sample, influenced by an unknown amount of mostly unknowable pre- and post-depositional biases. Nevertheless, we will attempt to analyse the reconstructed network in order to formulate some hypotheses about the nature of innovation and spread in ceramic decors. Future generations of researchers are encouraged to improve upon this initial attempt.
+
+
+# Construct network
+
+```{r}
+# import functions for network construction
+source(here::here("analysis/R/edgelist functions.R"))
+
+# import custom functions for network analysis
+source(here::here("analysis/R/network functions.R"))
+
+# import custom functions for data visualisation
+source(here::here("analysis/R/datavis themes.R"))
+
+# apply function to transform frequency table into edge list
+edgelist <- make_edgelist(decors)
+
+# construct network, remove extraneous sites
+decor_graph <- tbl_graph(sites, edgelist, directed = FALSE) %>%
+  activate(nodes) %>%
+  filter(!node_is_isolated())
+
+decor_graph
+```
+
+# Plot network
+
+```{r total network, fig.cap="Plot of 11th century AD network of decorative practices. The plot shows the very strongly connected structure of the network."}
+ggraph(decor_graph) +
+  coloured_edges +
+  theme_graph()
+```
+
+## Network structure
+
+High number of connections due to the construction of the network. This network is very much unsuitable for further network analysis, but it already allows us to see one major thing about pottery decor interactions: the networks in which individual decor types are propagated are overlapping. There are no two decor networks that cover one another entirely.
+
+```{r total network sample, fig.cap="Partially overlapping networks of four decorative practices"}
+decor_graph %>%
+  activate(edges) %>%
+  filter(name %in% c("braided_cord_roulette", "braided_strip_roulette", "paint", "straight_cord_mat")) %>%
+  ggraph() +
+  coloured_edges +
+  theme_graph()
+```
+
+## Calculate difference between network layers
+
+We do this using the `multinet` package.
+
+
+```{r import to multinet}
+library(multinet)
+# reduce graph to types with over 5 edges
+good_edges <- decor_graph %>%
+  activate(edges) %>%
+  as_tibble() %>%
+  count(name) %>%
+  filter(n > 5)
+
+reduced_graph <- decor_graph %>%
+  activate(edges) %>%
+  filter(name %in% good_edges$name)
+
+# prepare graph and make a vector of different layer names
+prep.graph <- reduced_graph %>%
+  activate(edges) %>%
+  rename(layer = name) %>%
+  activate(nodes) %>%
+  rename(name = label)
+
+layers <- prep.graph %>%
+  activate(edges) %>%
+  as_tibble() %>%
+  distinct(layer) %>%
+  pull(layer)
+
+# get a list of individual networks using the onelayer function (/R/network functions.R)
+graphlist <- purrr::map(layers, onelayer)
+names(graphlist) <- layers
+
+# add layers into a multinet object
+multi <- ml_empty()
+
+for (i in seq_along(layers)) {
+  add_igraph_layer_ml(multi, graphlist[[i]], paste(layers[[i]]))
+}
+```
+ 
+```{r layer comparison, fig.cap="Jaccard similarity of nodes present in the networks of individual decorative practices"}
+# perform layer compariosn using jaccard similarity between nodes
+lc <- layer_comparison_ml(multi, method = "jaccard.actors")
+
+# make heatmap
+heatmap_matrix(lc)
+```
+
+This shows us the jaccard similarity of the actors present on the different levels of the network. We can see that there are more similar and more dissimilar layers in the network.Very high are the similarities between folded strip roulette and braided cord roulette, two common decors. Also high is the similarity in common decorative techniques of channeling and applied decors. The fact that there are similar and dissimilar layers suggests that we might be able to identify groups in the network.
+
+## Clustering
+
+We use the Louvain clustering algorithm (Blondel et al 2008) to find communities in the network.
+
+
+```{r community detection, hide = 'results', echo=FALSE}
+# use louvain clustering method to assign clusters to nodes
+decor_graph <- decor_graph %>%
+  activate(nodes) %>%
+  mutate(louvain = as.character(group_louvain()))
+
+# calculate modularity of louvain clustering
+modularity <- decor_graph %>%
+  activate(nodes) %>%
+  mutate(modularity = graph_modularity(group = as.factor(louvain))) %>%
+  pull(modularity) %>%
+  head(1)
+```
+
+The louvain clustering has a modularity of `r modularity` .
+
+```{r plot-clusters, fig.cap="Louvain communities within the decor network"}
+# set plot colours for communities
+communitycolor <-
+  setNames(
+    c("tomato", "cornflowerblue", "darkgreen"),
+    unique(V(decor_graph)$louvain)
+  )
+
+# disable s2 geometry to plot on map
+sf_use_s2(FALSE)
+
+ggraph(decor_graph, x = lon, y = lat) +
+  geom_sf(data = mali_adm0, fill = NA) +
+  geom_sf(data = rivers, colour = "black") +
+  edges_community +
+  ggforce::geom_mark_hull(aes(x = lon, y = lat, fill = louvain, colour = louvain),
+                          expand = unit(1.5, "mm"),
+                          radius = unit(1.5, "mm")) +
+  scale_fill_manual(values = communitycolor)+
+  scale_colour_manual(values = communitycolor)+
+  nodes_community +
+  theme_community +
+  coord_sf(xlim = c(-7, 2), ylim = c(13, 19), expand = FALSE) +
+  theme_graph()
+```
+
+
+
+```{r setting up colors and multilevel community, hide = 'results', echo=FALSE}
+## in the final form this part will be much shorter because the colors are set elsewhere
+# we need a vector of colors that is named after the value we want to be plotted (community, name of the decor)
+communitycolor <-
+  setNames(
+    c("tomato", "cornflowerblue", "darkgreen"),
+    unique(V(decor_graph)$louvain)
+  )
+
+# because decor is longer we need to create a palette with the proper amount of colors (the whole code is still not perfect, but i think it is the proper way that can still be optimized)
+col_21 <- colorRampPalette(brewer.pal(8, "Set2"))(21)
+
+# then we create a vector containing all decortypes
+decortypes <- decor_graph %>%
+  activate(edges) %>%
+  as_data_frame(what = "edges") %>%
+  select(name) %>%
+  unique()
+
+decortypes <- as.vector(decortypes[, 1])
+
+# finally we make a named vector of the colors
+decorcolor <- setNames(col_21, decortypes)
+```
+
+There are some recent studies in archaeology that use community detection on archaeological networks. Radivojevic and Gruci (2018) have clustered sites on the Balkan based on the source of their copper, Mazucato (2019) has identified communities of building sites in Çatalhöyük to analyse the process of urbanisation, while Vargas and Lanata (2020) used community detection to find distinctive clusters of rock art sites in Patagonia. These studies differ significantly regarding the research object and question, but are similar in data structure and methodological approach. All three used the Louvain method to detect groups of sites that share a lot of edges with each other and have fewer edges with nodes outside of their community. The Louvain method is especially useful for archaeological datasets that typically contain few but heavily connected nodes (Blondel et al. 2008/ Yang et al. 2016).
+
+Here, we employ the same clustering algorithm, which results in three communities with a modularity of 0.3. Community 1 contains 7 Sites in the Dogon Area. Community 2 is in the Niger bend and the IND, it also contains 7 sites. Both only include sites south of the Niger. Community 3 is the biggest and most widely distributed community. Reaching from Gao to Togu Missiri in the Ségu area it seems to mostly contain sites around the Niger river. The nodes of community 3 often connect with sites of community 1 and 2, while those communities are not connected strongly.
+
+There are two major geographic features influencing the clusters. The first one is obviously the Niger river connecting the sites of community 3. The bend of the Niger river and the Inner Niger delta are the location of various sites of community 2 and probably a zone of contact between this community and community 3. The other geographic landmark that is strongly related to the communities is the Bandiagara Plateau. It is the border between community 1 and 2. Both communities overlap in this area. TMD, a site of community 3, lies in the north of the mountains making them the region where all 3 communities meet each other.
+
+
+```{r cluster multilevel, echo=FALSE}
+nodes <- decor_graph %>%
+  activate(nodes) %>%
+  as_tibble()
+hull1 <- nodes %>%
+  filter(louvain == 1) %>%
+  slice(chull(lon, lat)) %>%
+  rename(x = lon, y = lat)
+
+hull2 <- nodes %>%
+  filter(louvain == 2) %>%
+  slice(chull(lon, lat)) %>%
+  rename(x = lon, y = lat)
+
+hull3 <- nodes %>%
+  filter(louvain == 3) %>%
+  slice(chull(lon, lat)) %>%
+  rename(x = lon, y = lat)
+
+# override s2 use for geographic plotting
+sf_use_s2(FALSE)
+
+ggraph(decor_graph, x = lon, y = lat) +
+  # plot on map background
+  bw.dem.map +
+  # set edge parameters
+  geom_edge_fan(color = "gray", aes(edge_alpha = weight, edge_width = weight)) +
+  scale_edge_width(range = c(0.2, 2)) +
+  scale_edge_alpha(range = c(0.3, 0.6)) +
+  # colour nodes according to cluster and label
+  geom_node_point(aes(color = louvain)) +
+  scale_color_manual(values = communitycolor) +
+  geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  # draw cluster hulls
+  geom_polygon(data = hull1, aes(x = x, y = y), alpha = 0.5, fill = "cornflowerblue") +
+  geom_polygon(data = hull2, aes(x = x, y = y), alpha = 0.5, fill = "tomato") +
+  geom_polygon(data = hull3, aes(x = x, y = y), alpha = 0.5, fill = "darkgreen") +
+  # set colour scales
+  labs(color = "Community") +
+  guides(color = guide_legend(override.aes = list(size = 0.5)), 
+         alpha = "none", size = "none", edge_alpha = "none", 
+         edge_width = guide_legend(override.aes = list(size = 0.3))) +
+  ggtitle("Network with multilevel communities") +
+  # set map extent
+  coord_sf(xlim = c(-7, 2), ylim = c(13, 19), expand = FALSE) +
+  theme_graph()
+```
+
+
+```{r relative edge weights and centralization by cluster}
+# Relative edge weights (how important are the connections within the cluster)
+rel_edge_weight <- vector("double", length(3))
+for (i in 1:3) {
+  rel_edge_weight[[i]] <- decor_graph %>%
+    # filter community
+    activate(nodes) %>%
+    filter(louvain == i) %>%
+    # relative edge weight (sum of weights / number of edges)
+    activate(edges) %>%
+    as.data.frame() %>%
+    {
+      sum(.$weight) / nrow(.)
+    }
+}
+
+# Centralization of the cluster
+centralization <- vector("double", length(3))
+for (i in 1:3) {
+  centralization[[i]] <- decor_graph %>%
+    # filter community
+    activate(nodes) %>%
+    filter(louvain == i) %>%
+    # degree centralization
+    centr_degree(mode = "all", normalized = TRUE) %>%
+    as_tibble() %>%
+    pull(centralization) %>%
+    head(1)
+}
+
+# put together
+tibble(rel_edge_weight, centralization) %>%
+  mutate(cluster = 1:3) %>%
+  mutate(rel_edge_weight = rel_edge_weight / 100) %>%
+  rename("relative edge weight" = rel_edge_weight) %>%
+  pivot_longer(!cluster, names_to = "key", values_to = "value") %>%
+  # plot
+  ggplot(aes(x = cluster, y = value, fill = key)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_grey() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  theme_publish()
+```
+
+
+
+```{r edges by cluster, eval = FALSE}
+
+edges.com1 <- decor_graph %>%
+  activate(nodes) %>%
+  filter(louvain == 1) %>%
+  activate(edges) %>%
+  as_data_frame(what = "edges") %>%
+  group_by(name) %>%
+  summarise(n = sum(weight)) %>%
+  filter(n > 0) %>%
+  mutate(community = 1)
+
+edges.com2 <- decor_graph %>%
+  activate(nodes) %>%
+  filter(louvain == 2) %>%
+  activate(edges) %>%
+  as_data_frame(what = "edges") %>%
+  group_by(name) %>%
+  summarise(n = sum(weight)) %>%
+  filter(n > 0) %>%
+  mutate(community = 2)
+
+
+edges.com3 <- decor_graph %>%
+  activate(nodes) %>%
+  filter(louvain == 3) %>%
+  activate(edges) %>%
+  as_data_frame(what = "edges") %>%
+  group_by(name) %>%
+  summarise(n = sum(weight)) %>%
+  filter(n > 0) %>%
+  mutate(community = 3)
+
+
+# edges.comcrossing <- decor_graph %>%
+# activate(edges) %>%
+#  mutate(crossing = igraph::crossing(louvain,.)) %>%
+#  filter(crossing == TRUE) %>%
+#  as_data_frame(what = "edges") %>%
+# group_by(name) %>%
+#  summarise(n = sum(weight)) %>%
+#  filter(n > 0) %>%
+#    mutate(community = "crossing")
+
+plyr::rbind.fill(
+  edges.com1, edges.com2, edges.com3
+  # , edges.comcrossing
+) %>%
+  filter(n != 0) %>%
+  mutate(community = as.factor(community)) %>%
+  ggplot(aes(x = reorder(name, -n, sum), y = n, fill = community)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("tomato", "cornflowerblue", "darkgreen", "yellow")) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "decor type") +
+  scale_y_continuous(name = "sum of the weight") +
+  ggtitle("decors by clusters")
+
+
+
+
+str.1 <- edges.com1 %>%
+  select(n) %>%
+  sum()
+
+str.2 <- edges.com2 %>%
+  select(n) %>%
+  sum()
+
+str.3 <- edges.com3 %>%
+  select(n) %>%
+  sum()
+
+com.edges <- c(str.1 / nrow(edges.com1), str.2 / nrow(edges.com2), str.3 / nrow(edges.com3)) / 10000
+
+library(tibble)
+cent.1 <- decor_graph %>%
+  filter(louvain == 1) %>%
+  activate(nodes) %>%
+  centr_degree() %>%
+  as.tibble() %>%
+  select(centralization) %>%
+  transmute(centralization.weight = (centralization / nrow(.))) %>%
+  slice(1)
+
+cent.2 <- decor_graph %>%
+  activate(nodes) %>%
+  filter(louvain == 2) %>%
+  centr_degree() %>%
+  as.tibble() %>%
+  select(centralization) %>%
+  transmute(centralization.weight = (centralization / nrow(.))) %>%
+  slice(1)
+
+cent.3 <- decor_graph %>%
+  activate(nodes) %>%
+  filter(louvain == 3) %>%
+  centr_degree() %>%
+  as.tibble() %>%
+  select(centralization) %>%
+  transmute(centralization.weight = (centralization / nrow(.))) %>%
+  slice(1)
+
+library(tidyr)
+community.edges <- bind_rows(cent.1, cent.2, cent.3) %>%
+  add_column("sum of com.edges" = com.edges) %>%
+  gather(key) %>%
+  add_column(community = c(1:3, 1:3))
+
+ggplot(community.edges, aes(x = community, y = value, fill = key)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  # scale_fill_manual(values = c("tomato", "cornflowerblue", "darkgreen"))+
+  theme(axis.text.x = element_text(angle = 90))
+```
+If we look at the edges (divided by 10000 to make it comparable) and the centrality of sites in regard to the communities, we see that while the sites of community 3 are the most central ones in the network the weight of the edges within the community is relatively small. For community 1 and 2 it is vice versa even though community 2 has weaker edges within and is better connected to the whole network. The more isolated a community is from the network, the stronger is its connection within the community. 
+--maybe the bar_plots of the most common decors of all clusters is enough? maybe the first barplot is enough? – maybe the network of every cluster is too much
+If we take a closer look at the "internal" connections of community 1, we see that "braided_strip_roulette" is present at all sites. The other main decor "straight_cord_mat" on the other hand is missing on 2 sites: Oudalan and Prom. The two decors are spread across the whole area of the community. The only other decor that is common in the community is the "twisted_cord_roulette" which is also abundant across the whole research area. It makes up a rather large part of the assemblage in Oudalan and Prom but was not found at the sites of Sadia and Ambere Dougon.
+The fact that SAO has a high degree of centrality shows that the location is not decisive for the connectedness within this community. This is underlined by the fact that the less central sites are distributed across the whole area. There is an ambivalence between a relative consistency across the whole area and the diversity between sites that are close to each other. One reason for this phenom can be the contact to other communities in the mountain area. Damassogou exemplifies this as the site contains the defining decors of community 1 and 2. But the difference between Oudalan and SAO that are geographically isolated suggest that there might be more reasons for this diversity.
+Community 2 is less diverse with "braided_cord_roulette" as the only outstanding decor type. The weaker connections of the sites Kokolo and Damassogou are based on data bias (the proportion is counted in regard to all sherds not only the decorated ones), the decor was probably equally abundant there. Other decors spread across the community are "folded_strip_roulette" and "dragged_comb". The first one is missing in KAN 4 and TOD H while the second one is missing at Kokolo and Damassogou. The other indicator for the homogeneous character of the community is the nearly equal degree of centrality of every site.
+As mentioned above community 3 is more diverse but also has weaker connections. Instead of one defining decor there are several ones but none is abundant across the whole community. The spatial distribution differs between the decors. While "paint" and "twisted_cord_roulette" appear from Gao to TOG 2, "folded_strip_roulette", "channel" and "incised" are located in the western part of the community's area. Essouk and TMD have the highest degree of centrality. Even though it is located at the margin of the research area, its character as a "market"-site explains the amount of links it has. The role of TMD for the network is elaborated elsewhere (!). 
+
+
+```{r crossings}
+decor_graph %>%
+  activate(edges) %>%
+  
+  # find the edges that cross between communities
+  mutate(crossing = community_crossing(weights = weight)) %>%
+  filter(
+    crossing == TRUE,
+    weight > 200
+  ) %>%
+  activate(nodes) %>% 
+  filter(!node_is_isolated()) %>%
+  
+  #plot
+  ggraph(layout = "nicely") +
+  
+  geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
+  # scale_edge_color_manual(values = decorcolor) +
+  scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = centrality_eigen(weights = weight), color = louvain), show.legend = FALSE) +
+  geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  scale_color_manual(values = communitycolor)+
+  
+  theme_graph() +
+  theme_community
+
+```
+
+
+
+```{r crossings between communities, eval = FALSE}
+
+
+
+## this plot is hard to read but contains a lot of information, it shows only edges that connect the 2 communities. the color of the nodes shows their community while the size shows the betweenness centrality. This way we can show which sites are on the at the "frontier" of the communities that have strong connections to the other community. only edgest that are crossings between communities are shown, the widest ones are those that are those with an higher betweenness. in this way the graph shows the relation between the communities and which decor is shared/crossing community boundaries
+
+
+
+nodes.c1 <- decor.graph %>%
+  activate(nodes) %>%
+  filter(communityl == 1) %>%
+  as_data_frame(what = "vertices") %>%
+  pull(id)
+
+nodes.c2 <- decor.graph %>%
+  activate(nodes) %>%
+  filter(communityl == 2) %>%
+  as_data_frame(what = "vertices") %>%
+  pull(id)
+
+nodes.c3 <- decor.graph %>%
+  activate(nodes) %>%
+  filter(communityl == 3) %>%
+  as_data_frame(what = "vertices") %>%
+  pull(id)
+
+c1_3 <- decor.graph %>%
+  activate(edges) %>%
+  mutate(crossing = crossing(cl, .)) %>%
+  filter(crossing == TRUE) %>%
+  as_data_frame(what = "edges") %>%
+  filter(from %in% c(nodes.c3) | to %in% c(nodes.c3)) %>%
+  filter(from %in% c(nodes.c1) | to %in% c(nodes.c1)) %>%
+  group_by(name) %>%
+  summarise(n = sum(weight)) %>%
+  filter(n > 0) %>%
+  mutate(crossing = "c1_3")
+
+c2_3 <- decor.graph %>%
+  activate(edges) %>%
+  mutate(crossing = crossing(cl, .)) %>%
+  filter(crossing == TRUE) %>%
+  as_data_frame(what = "edges") %>%
+  filter(from %in% c(nodes.c3) | to %in% c(nodes.c3)) %>%
+  filter(from %in% c(nodes.c2) | to %in% c(nodes.c2)) %>%
+  group_by(name) %>%
+  summarise(n = sum(weight)) %>%
+  filter(n > 0) %>%
+  mutate(crossing = "c2_3")
+
+c1_2 <- decor.graph %>%
+  activate(edges) %>%
+  mutate(crossing = crossing(cl, .)) %>%
+  filter(crossing == TRUE) %>%
+  as_data_frame(what = "edges") %>%
+  filter(from %in% c(nodes.c1) | to %in% c(nodes.c1)) %>%
+  filter(from %in% c(nodes.c2) | to %in% c(nodes.c2)) %>%
+  group_by(name) %>%
+  summarise(n = sum(weight)) %>%
+  filter(n > 0) %>%
+  mutate(crossing = "c1_2")
+
+plyr::rbind.fill(c1_2, c1_3, c2_3) %>%
+  filter(n != 0) %>%
+  mutate(crossing = as.factor(crossing)) %>%
+  ggplot(aes(x = reorder(name, -n, sum), y = n, fill = crossing)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("tomato", "cornflowerblue", "darkgreen", "yellow")) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "decor type") +
+  scale_y_continuous(name = "sum of the weight") +
+  ggtitle("decors by clusters")
+```
+
+Not only the connections within but also those between the communities should be examined. Therefore, only the edges that "cross" the two communities will be considered. While there is no obvious "broker"-site, community 3 could be described as a "broker"-community. There are few strong crossings between community 1 and 2. Even though most decors that cross communities connect all three, those are mostly decors that are most abundant at the sites of community 3. 
+
+The crossings also show the limits of the community detection at the research area. The clusters that were found are congruent with the results of earlier works and help to understand the network, but they do not capture all the networks and connections of the region. To grasp the dynamics of pottery production we must go beyond those boundaries.
+
+For an archaeological interpretation of the results, we need to take a step back and examine what our edges represent. If we take decoration techniques as the result of cultural practices, the communities we detect may be interpreted as communities of practice. Those are the result of the exchange of knowledge with various facets. Intergenerational teaching is one of them and might link our communities to ethnic groups (as Mayor did). But this is only one aspect and we should also consider communities as trading spheres where the demands influence the production. The exchange of goods is also fuelling the exchange of ideas that might cross ethnic boundaries. Hence our communities are foremost spheres of similar cultural knowledge that was intertemporally and -spatially exchanged.
+
+Community 1 and 2 are spheres were the two decors respectively one decor dominates. The cultural practice was revolving around them. Even though there were other decors present at the sites, they might have played a local role but were not cons. Behind this might be a teaching network and demand, that at least is similar at the sites if not crossing their boundaries. The relatively weak links towards the outside show that these groups of practice were somewhat resilient. The difference regarding the centrality of the sites within community 1 demonstrates that the grade of involvement in this group of practice alter in this sphere. 
+
+Community 3 is another type of sphere cultural knowledge. Instead of a distinct decoration technique the variety of those techniques was crucial. The exchange of knowledge on the production side but also the choices of consumers vary strongly. While there are some decors that belong only to this exchange network, especially the sites in the west are part of other spheres of cultural practice. 
+
+Outcomes: three communities of different scales are identified. Two of these appear to be geographically bounded, and are maybe representative of intensive information exchange on a regional level, if not even within cultural groups. This ethno-linguistic dimension remains to be discussed re: Swiss research. The last community is not locally bounded and instead represents the exchange of information on ceramic decors through long-distance contacts. We might want to find out how well connected this network is in comparison to the two others. A lower network density or weight of ties would suggest that contacts are not as intensive.
+membership in these networks is not mutually exclusive, there are crossing points in all of them. As our initial look at the network structure shows, the networks of each individual decor overlap, and these groups should not be seen as bounded entities, but rather as nodes with a higher propensity for sharing information. 
+The next step then examines the pathways through which information is likely to have travelled.
+
+# Sparsification
+
+# Simplified network backbone
+
+we can now try to extract a backbone from the simplified network
+
+```{r flatten}
+decor.flat <- flatten(decor_graph, weighted = TRUE)
+```
+
+extract the binary backbone of the flattened graph and play around with the alpha to get a good representation
+
+```{r backbone extraction}
+# extract binary backbones at decreasing levels of significance
+decor.05 <- extract_backbone(decor.flat, 0.05)
+decor.15 <- extract_backbone(decor.flat, 0.15)
+decor.20 <- extract_backbone(decor.flat, 0.20)
+
+# plot
+p1 <- plot.bb(decor.05)
+p2 <- plot.bb(decor.15)
+p3 <- plot.bb(decor.20) + geom_node_text(aes(label = label), repel = TRUE)
+
+(p1 | p2) / p3 + plot_annotation(tag_levels = "a")
+```
+
+The three communities from the previous section are also visible in the extracted backbone, albeit with some major differences in configuration. The site of Kokolo NE Phase 2 is placed in the closely connected cluster of sites in the IND and Lakes region, featuring the sites of the Jenné cluster and Toguére Galia, Toguére Doupwil, and Kawinza. The spread-out cluster of long-distance contact now also includes the sites at Dia, while the "Dogon" cluster remains largely intact. Akumbu is isolated from the network, and remains so until the significance is lowered to 0.2.
+
+On this backbone, whose ties are no longer weighted, we can perform a number of network calculations that were meaningless in the raw network due to its large number of connections. We will begin by asking which nodes are the most influential in the network, i.e. possess the highest potential for spreading information. This, calculated through eigenvalue centrality, gives us a first idea of how pottery decor knowledge might have spread.
+
+```{r backbone eigenvalue}
+decor.15 <- decor.15 %>% activate(nodes) %>% filter(!node_is_isolated())
+
+decor.15 %>%
+  activate(nodes) %>%
+  mutate(eigen = centrality_eigen()) %>%
+  select(label, eigen) %>%
+  arrange(desc(eigen)) %>%
+  kable()
+
+ggraph(decor.15, layout = "stress") +
+  geom_node_point(aes(size = centrality_eigen())) +
+  geom_edge_fan(color = "red", alpha = 0.8) +
+  scale_edge_width(range = c(0.2, 3)) +
+  geom_node_text(aes(label = label), repel = TRUE) +
+  theme_graph()
+```
+
+The result shows that the highest influence on the network is exerted by the sites in the Eastern IND and Lakes cluster. We should not forget that the network is partial, i.e. many connections to many sites are missing, and that the central position of the IND has to do with our sample selection and research history. Nevertheless, it suggests this region specifically as a centre through which information and thus also innovation in pottery decoration was disseminated in this period. The other network clusters are more homogenous, at this time probably less diverse and more stable in their decors.
+
+Betweenness centrality shows nodes in brokerage positions within the network. These are interesting to us in finding out where the different network cliques connect, and which sites are at crossroads positions in the pottery knowledge exchange. These are likely to be places with diverse markets, where producers belonging to different networks meet, and where information thus "jumps" between network cliques.
+
+```{r backbone betweenness}
+decor.15 %>%
+  activate(nodes) %>%
+  mutate(eigen = centrality_betweenness()) %>%
+  select(label, eigen) %>%
+  arrange(desc(eigen)) %>%
+  kable()
+
+ggraph(decor.15, layout = "stress") +
+  geom_node_point(aes(size = centrality_betweenness())) +
+  geom_edge_fan(color = "red", alpha = 0.8) +
+  scale_edge_width(range = c(0.2, 3)) +
+  geom_node_text(aes(label = label), repel = TRUE) +
+  theme_graph()
+```
+
+We can see that Hambarketolo appears as the main gatekeeper to the Jenné site cluster, and to the eastern IND network clique, while Tongo Maaré Diabal, and to a lesser extent also Gao-Saney and Togu Missiri, stand in a brokerage role between the IND and the greater Niger cluster. The Dogon cluster exists at two removes from the IND, passing through Dammassogou and Ambéré-Dougon.At alpha = 0.2, this cluster is also connected to the large niger cluster via the Sangha "tellem" cave sites.
+
+Also interesting is the edge betweenness value. This measures how important the edge between two nodes is for traversing the network. In our case it might indicate areas that were important axes of knowledge exchange.
+```{r backbone edge betweenness}
+ggraph(decor.15, layout = "stress") +
+  geom_node_point() +
+  geom_edge_fan(color = "red", alpha = 0.8, aes(width = centrality_edge_betweenness())) +
+  scale_edge_width(range = c(0.2, 3)) +
+  geom_node_text(aes(label = label), repel = TRUE) +
+  theme_graph()
+```
+
+The edge betweenness measure shows a central path through the network, connecting the sites of Togu Missiri, Tongo Maaré Diabal, Hambarketolo, Damassogou, Ambéré-Dougon, and Sadia, as well as a prominent side route connecting Gao and Kawinza.These might roughly represent two routes of knowledge exchange: one important one passing through the eastern side of the Inland Niger Delta and below the Niger Bend, in which the Jenné site cluster plays a pivotal role as the meeting place between the three networks of knowledge exchange, and another, though less important to the network we have sampled, along the western side of the IND and north of the Niger Bend to Gao. 
+
+## Check for robustness of centrality measures
+
+In order to know whether these centrality measures are valid, rather than random effects of the backbone sparsification, we implement a variation on Peeples' suggested method for estimating the robustness of centrality measures in archaeological networks. In order to do so, the edges of the original graph are sampled at 10 % intervals, from 10 to 90 %. The binary backbone of each of these samples is then extracted and the centrality measures calculated. A Spearman's rank correlation test is run between the samples to see how the deletion of edges influences the  centrality within the backbone. Figure \@ref(fig:MST-betweenness-validity) shows how there is a relatively significant correlation between the betweenness ranks of nodes in the original graph and the sampled graphs, all the way down to the 30% sample. Only on the 20% sample does the correlation statistic drop lower. We can take this to mean that, for our case, the betweenness centrality shown in the MST is dependable.
+
+```{r validity test, warning = FALSE}
+
+centrality.samples <- function(s, graph, centrality) {
+
+  # get size of fraction to sample
+  y <- (s / 100) * igraph::gsize(graph)
+
+  # sample graph
+  g <- graph %>%
+    activate(edges) %>%
+    tidygraph::sample_n(size = y) %>%
+    flatten(weighted = TRUE) %>%
+    as.igraph()
+
+  # extract backbone
+  bb <- backbone::disparity(g, alpha = 0.15, narrative = FALSE) %>%
+    tidygraph::as_tbl_graph()
+
+
+  # calculate and extract  centrality
+  if (centrality == "eigen") {
+    q <- bb %>%
+      as_tbl_graph() %>%
+      activate(nodes) %>%
+      mutate(centr = centrality_eigen(weights = weight)) %>%
+      as_tibble() %>%
+      dplyr::select(centr) %>%
+      dplyr::rename(!!paste0("s", s) := centr)
+  }
+
+  if (centrality == "betweenness") {
+    q <- bb %>%
+      as_tbl_graph() %>%
+      activate(nodes) %>%
+      mutate(centr = centrality_betweenness(weights = weight)) %>%
+      as_tibble() %>%
+      dplyr::select(centr) %>%
+      dplyr::rename(!!paste0("s", s) := centr)
+  }
+
+  return(q)
+}
+
+spearman_samples <- function(graph, centrality) {
+
+  # sample graph at 10 percent intervals
+  samples <- seq(10, 100, 10)
+
+
+  # iterate function over intervals
+  centralities <-
+    samples %>%
+    purrr::map(centrality.samples, graph = graph, centrality = centrality) %>%
+    dplyr::bind_cols()
+
+  # 2. Spearman's rank correlation
+
+  # get sample names
+  cols <- centralities %>%
+    select(-s100) %>%
+    names()
+
+  # rank correlation function
+  rank.correlation <- function(x) {
+    cor.test(centralities$s100, centralities[[x]], method = "spearman")
+  }
+
+  # iterate for samples
+  purrr::map(cols, rank.correlation) %>%
+    purrr::map_df(`[`, c("estimate")) %>%
+    pull(estimate)
+}
+
+
+test_centralities <- function(graph, centrality, reps) {
+
+  # check for correct arguments
+  if (centrality %in% c("eigen", "betweenness") == F) {
+    stop("centrality must be 'eigen' or 'betweenness'")
+  }
+
+  # get sample names
+  s <- seq(10, 90, 10)
+  samples <- paste("s", s, sep = "")
+
+  # replicate the test
+  replicate(reps, spearman_samples(graph, centrality)) %>%
+    as_tibble() %>%
+    mutate(sample = samples) %>%
+    pivot_longer(!sample, names_to = "iteration", values_to = "value") %>%
+    select(-iteration) %>%
+    group_by(sample) %>%
+    summarise(mean_rho = mean(value)) %>%
+    # plot
+    ggplot() +
+    geom_histogram(aes(x = sample, y = mean_rho), stat = "identity") +
+    labs(y = expression(paste("mean Spearman's ", rho))) +
+    ylim(0, 1) +
+    theme_publish()
+}
+```
+
+
+
+
+
+```{r apply validity test, warning = FALSE, message = FALSE}
+p1 <- test_centralities(decor_graph, "eigen", 100)
+p2 <- test_centralities(decor_graph, "betweenness", 100)
+
+(p1 | p2) + plot_annotation(tag_levels = "a")
+```
+
+eigenvector centrality is fine, betweenness less impressive. 
+For edge betweenness, the validation is much harder, as the flattening procedure means that edges cannot reliably be numbered, and thus correlation is hard to achieve. We can, however, manually inspect the result.
+
+```{r warning = FALSE, message=FALSE}
+bb.edge.betw <- function(x) {
+
+  # sample graph
+  g <- decor_graph %>%
+    activate(edges) %>%
+    tidygraph::sample_n(size = x) %>%
+    flatten(weighted = TRUE) %>%
+    as.igraph()
+
+  # extract backbone
+  bb <- backbone::disparity(g, alpha = 0.15, narrative = FALSE) %>%
+    tidygraph::as_tbl_graph()
+
+  # put node attributes back
+  decor.nodes <- decor_graph %>%
+    activate(nodes) %>%
+    as_tibble()
+  bb <- bb %>%
+    activate(nodes) %>%
+    mutate(label = decor.nodes$label, lat = decor.nodes$lat, lon = decor.nodes$lon)
+
+  # plot
+  ggraph(bb, layout = "stress") +
+    geom_node_point() +
+    geom_edge_fan(color = "red", alpha = 0.8, aes(width = centrality_edge_betweenness())) +
+    scale_edge_width(range = c(0.2, 3)) +
+    geom_node_text(data = . %>% filter(centrality_betweenness(weights = weight) > mean(centrality_betweenness(weights = weight))), aes(label = label), repel = TRUE) +
+    theme_graph() +
+    theme(legend.position = "none")
+}
+
+p1 <- bb.edge.betw(90) + ggtitle("90%")
+p2 <- bb.edge.betw(80) + ggtitle("80%")
+p3 <- bb.edge.betw(70) + ggtitle("70%")
+p4 <- bb.edge.betw(60) + ggtitle("60%")
+
+p1 + p2 + p3 + p4
+```
+What is clear is that the backbone is, predictably, quite sensitive to random edge deletion, and therefore edge_betweenness is very much dependent on whether an edge exists or not. For the purposes of generating hypotheses for archaeological testing, we have still found this method superior to other methods of finding paths through networks, such as an inverted version of Kruskal's minimum spanning tree (for details and code, see Annex) 
+
+
+
+
+## Spanning tree
+
+We can use Kruskal's concept of the minimum spanning tree, simply transformed to a maximum spanning tree (MST) here. This method has its drawbacks, as described by [@Serranoetal]: 
+
+>*"One of the big limitations of this method is that spanning trees are by construction acyclic. This means that reduced networks obtained by this algorithm are overly structural simplifications that destroy local cycles, clustering coefficient, and the clustering hierarchies often present in real world networks." *
+
+In our case, however, we can use the maximum spanning tree especially to gain access to a measure that is not accessible or meaningful in hairball networks: betweenness centrality. This is particularly interesting in this case, as high betweenness centrality in a network indicates a brokerage position. If we would like to know which places within the network are particularly well placed to pass on information, we can find out using the MST.
+
+```{r MST, fig.cap="The maximum spanning tree of the Niger pottery decor network, showing edge weights and betweenness centrality"}
+# invert edge weights
+g <- decor_graph %>%
+  activate(edges) %>%
+  mutate(weight = 0 - weight) %>%
+  as.igraph()
+
+# create MST and reconvert edge weights
+mst <- mst(g, weights = E(g)$weight) %>%
+  as_tbl_graph() %>%
+  activate(edges) %>%
+  mutate(weight = 0 - weight)
+
+# plot
+mst %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(alpha = weight), colour = "blue") +
+  geom_node_point(aes(size = centrality_betweenness(weights = weight))) +
+  # geom_node_text(data = . %>% filter(centrality_betweenness(weights = weight) > mean(centrality_betweenness(weights = weight))), aes(label = label), repel = TRUE)+
+  geom_node_text(aes(label = label), repel = TRUE) +
+  theme_graph()
+```
+
+
+## Check for robustness of betweenness measures
+
+XXX: This needs to be done for the backbone now, instead of the spanning tree.
+
+In order to know whether these centrality measures are valid, rather than random effects of the MST transformation, we implement a variation on Peeples' suggested method for estimating the robustness of centrality measures in archaeological networks. In order to do so, the edges of the original graph are sampled at 10 % intervals, from 10 to 90 %. Each of these samples is then converted to a maximum spanning tree and the betweenness measures are extracted. A Spearman's rank correlation test is run between the samples to see how the deletion of edges influences the betweenness centrality within the MST. Figure \@ref(fig:MST-betweenness-validity) shows how there is a relatively significant correlation between the betweenness ranks of nodes in the original graph and the sampled graphs, all the way down to the 30% sample. Only on the 20% sample does the correlation statistic drop lower. We can take this to mean that, for our case, the betweenness centrality shown in the MST is dependable.
+
+```{r MST-betweenness-validity,fig.cap="Spearman's rank-correlation coefficient between the MST of the original graph and those sampled at 10 to 90 percent."}
+# 1. calculate betweenness centrality of sampled graphs
+set.seed(6789)
+# sample graph at 10 percent intervals
+samples <- seq(10, 100, 10)
+
+centrality.samples <- function(s) {
+
+  # get size of fraction to sample
+  y <- (s / 100) * igraph::gsize(decor_graph)
+
+  # sample graph and invert weights
+  g <- decor_graph %>%
+    activate(edges) %>%
+    tidygraph::sample_n(size = y) %>%
+    mutate(weight = 0 - weight) %>%
+    as.igraph()
+
+  # create weighted MST
+  mst <- mst(g, weights = E(g)$weight)
+
+  # reconvert weights, calculate and extract betweenness centrality
+  q <- mst %>%
+    as_tbl_graph() %>%
+    activate(edges) %>%
+    mutate(weight = 0 - weight) %>%
+    activate(nodes) %>%
+    mutate(betw = centrality_betweenness(weights = weight)) %>%
+    as_tibble() %>%
+    dplyr::select(betw) %>%
+    dplyr::rename(!!paste0("s", s) := betw)
+}
+
+# iterate function over intervals
+centralities <- samples %>%
+  purrr::map(centrality.samples) %>%
+  dplyr::bind_cols()
+
+# 2. Spearman's rank correlation
+
+# get sample names
+cols <- centralities %>%
+  select(-s100) %>%
+  names()
+
+# rank correlation function
+rank.correlation <- function(x) {
+  cor.test(centralities$s100, centralities[[x]], method = "spearman")
+}
+
+# iterate for samples
+rho <- purrr::map(cols, rank.correlation)
+
+# 3. plot
+rho %>%
+  purrr::map_df(`[`, c("estimate", "p.value")) %>%
+  mutate(sample = cols) %>%
+  ggplot() +
+  geom_histogram(aes(x = sample, y = estimate), stat = "identity") +
+  labs(y = expression(paste("Spearman's ", rho))) +
+  ylim(0, 1) +
+  theme_minimal()
+```
+
+
+# Diachronic analysis
+
+## NB clean this part and update the site list.
+
+```{r import early sites}
+library(readr)
+decorsearly <- read_csv2(here::here("analysis/data/raw_data/decors_early.csv"))
+
+# apply function to transform frequency table into edge list
+edgelist <- make_edgelist(decorsearly)
+
+# construct network, remove extraneous sites
+decor_graph_early <- tbl_graph(sites, edgelist, directed = FALSE) %>%
+  activate(nodes) %>%
+  filter(!node_is_isolated())
+
+decor_graph_early
+```
+
+## Backbone extraction
+
+```{r extract early backbone}
+# flatten with weights
+early_flat <- flatten(decor_graph_early, weighted = TRUE)
+
+library(backbone)
+# extract backbone
+early.flat.bb <- backbone::disparity(as.igraph(early_flat), alpha = 0.31, narrative = TRUE) %>%
+  tidygraph::as_tbl_graph()
+
+# igraph transformation loses the node attributes, so we put them back
+early.flat.nodes <- early_flat %>%
+  activate(nodes) %>%
+  as_tibble()
+early.flat.bb <- early.flat.bb %>%
+  activate(nodes) %>%
+  mutate(label = early.flat.nodes$label, lat = early.flat.nodes$lat, lon = early.flat.nodes$lon)
+
+ggraph(early.flat.bb, layout = "stress") +
+  geom_node_point() +
+  geom_edge_fan(color = "red", alpha = 0.8) +
+  scale_edge_width(range = c(0.2, 3)) +
+  geom_node_text(aes(label = label), repel = TRUE) +
+  theme_graph()
+```
+
+This backbone looks significantly different from the later one, though we still distinguish an IND group, a very clear Dogon group, and one that includes "others": Kawinza, TMD, Tiebala, Akumbu. Essouk is isolated. Let's try this with louvain communities.
+
+```{r cluster early}
+decor_graph_early <- decor_graph_early %>%
+  activate(nodes) %>%
+  mutate(louvain = as.character(group_louvain()))
+
+# calculate modularity of louvain clustering
+modularity <- decor_graph_early %>%
+  activate(nodes) %>%
+  mutate(modularity = graph_modularity(group = as.factor(louvain))) %>%
+  pull(modularity) %>%
+  head(1)
+
+ggraph(decor_graph_early, x = lon, y = lat) +
+  geom_sf(data = mali_adm0, fill = NA) +
+  geom_sf(data = rivers, colour = "black") +
+  edges_community +
+  ggforce::geom_mark_hull(aes(x = lon, y = lat, fill = louvain, colour = louvain),
+                          expand = unit(1.5, "mm"),
+                          radius = unit(1.5, "mm")) +
+  scale_fill_manual(values = communitycolor)+
+  scale_colour_manual(values = communitycolor)+
+  nodes_community +
+  theme_community +
+  coord_sf(xlim = c(-7, 2), ylim = c(13, 19), expand = FALSE) +
+  theme_graph()
+```
+
+From these, the hypothesis: The Dogon network in the early period is very densely connected and more isolated from the Niger network. The Niger network on the other hand, is more diffuse, harder to cluster, maybe more generalised.
+How to calculate this?
+
+```{r}
+# Relative edge weights (how important are the connections within the cluster)
+rel_edge_weight_early <- vector("double", length(3))
+for (i in 1:2) {
+  rel_edge_weight_early[[i]] <- decor_graph_early %>%
+    # filter community
+    activate(nodes) %>%
+    filter(louvain == i) %>%
+    # relative edge weight (sum of weights / number of edges)
+    activate(edges) %>%
+    as.data.frame() %>%
+    {
+      sum(.$weight) / nrow(.)
+    }
+}
+
+# Centralization of the cluster
+centralization_early <- vector("double", length(3))
+for (i in 1:2) {
+  centralization_early[[i]] <- decor_graph_early %>%
+    # filter community
+    activate(nodes) %>%
+    filter(louvain == i) %>%
+    # degree centralization
+    centr_degree(mode = "all", normalized = TRUE) %>%
+    as_tibble() %>%
+    pull(centralization) %>%
+    head(1)
+}
+
+# put together
+early <- tibble(rel_edge_weight, centralization) %>%
+  mutate(cluster = 1:3) %>%
+  mutate(rel_edge_weight = rel_edge_weight / 100) %>%
+  rename("relative edge weight" = rel_edge_weight) %>%
+  pivot_longer(!cluster, names_to = "key", values_to = "value") |> 
+  ggplot(aes(x = cluster, y = value, fill = key)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_grey() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  theme_publish()
+
+late <- tibble(rel_edge_weight_early, centralization_early) %>%
+  mutate(cluster = 1:2) %>%
+  mutate(rel_edge_weight_early = rel_edge_weight_early / 100) %>%
+  rename("relative edge weight early" = rel_edge_weight_early) %>%
+  pivot_longer(!cluster, names_to = "key", values_to = "value") |> 
+
+  # plot
+  ggplot(aes(x = cluster, y = value, fill = key)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_grey() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  theme_publish()
+
+early + late
+```
+
+
+
+Clustering Coefficient: "Transitivity measures the probability that the adjacent vertices of a vertex are connected. This is sometimes also called the clustering coefficient."
+Diameter
+Average Distance
+
+```{r}
+# Transitivity(clustering coefficient)
+
+igraph::transitivity(decor_graph_early)
+igraph::transitivity(decor_graph)
+
+# density - doesn't work for multiple graphs
+igraph::edge_density(decor_graph)
+igraph::edge_density(decor_graph_early)
+
+# Diameter
+igraph::diameter(decor_graph,
+  directed = FALSE,
+  # weights = E(decor_graph)$weight
+  weights = NA
+)
+igraph::diameter(early_flat,
+  directed = FALSE,
+  # weights = E(decor_graph_early)$weight
+  weights = NA
+)
+```
+Transitivity and density: The earlier network has a higher transitivity and lower density than the later one (though in both cases, not by much). We can take this to mean that groups in the earlier network are marginally stronger, and that it is less closely connected overall. This reflect, for instance, the strength of the Bandiagara group and the exposed position of Essouk in this dataset.How does this change when the networks are simplified?
+There is a big difference in the diameter of the networks, with the earlier one at 237 and the later one at 13. What does this mean? Is it true? The weights make this difficult, don't they?
+
+
+Following Wasserman and Faust, p.180-183, we report the degree centralization of the graph, along with its average degree.
+```{r centralization}
+
+flat <- decor_graph %>% flatten(weighted = TRUE)
+igraph::centr_eigen(flat)
+
+flatearly <- decor_graph_early %>% flatten(weighted = TRUE)
+igraph::centr_degree(flatearly)
+
+
+# Transitivity(clustering coefficient)
+
+igraph::transitivity(decor_graph_early)
+igraph::transitivity(decor_graph)
+
+# density - doesn't work for multiple graphs
+igraph::edge_density(flat)
+igraph::edge_density(flatearly)
+```
+
+
+
+
+
+
+Mean distance
+
+```{r}
+# mean distance
+igraph::mean_distance(decor_graph, directed = FALSE, weights = NA)
+igraph::mean_distance(decor_graph_early, directed = FALSE, weights = NA)
+
+# Dogon cluster only
+decor_graph %>%
+  activate(nodes) %>%
+  filter(louvain == 2) %>%
+  igraph::mean_distance(., directed = FALSE, weights = NA)
+
+decor_graph_early %>%
+  activate(nodes) %>%
+  filter(louvain == 2) %>%
+  igraph::mean_distance(., directed = FALSE, weights = NA)
+```
+If we are to use weighted distances, then we should probably negate the values.https://ona-book.org/paths-distance.html . It might be more appropriate to use unweighted distances.
+
+
+
+
+
+```{r}
+# Modularity:
+# how high is the modularity using our louvain clusters?
+
+decor_graph %>% graph_modularity(weights = weight)
+```
+
+We can also try global measures for centrality. These should be distributions that are compared.
+
+```{r compare centrality distributions}
+pull_centralities <- function(graph) {
+  graph %>%
+    activate(nodes) %>%
+    mutate(deg = centrality_degree(weights = weight), eig = centrality_eigen(weights = weight)) %>%
+    select(deg, eig) %>%
+    as_tibble()
+}
+
+early <- pull_centralities(decor_graph_early) %>% mutate(period = "early")
+# %>% mutate(eig = eig/n(), deg = deg/n())
+late <- pull_centralities(decor_graph) %>% mutate(period = "late")
+# %>% mutate(eig = eig/n(), deg = deg/n())
+
+centralities <- bind_rows(early, late)
+
+a <- ggplot(centralities) +
+  geom_boxplot(aes(x = period, y = deg, fill = period)) +
+  theme_minimal() +
+  ylab("degree centrality")
+
+b <- ggplot(centralities) +
+  geom_boxplot(aes(x = period, y = eig, fill = period)) +
+  theme_minimal() +
+  ylab("eigenvector centrality")
+
+a + b
+
+centralities %>%
+  group_by(period) %>%
+  summarise(meandeg = mean(deg), meaneig = mean(eig))
+```
+Degree centrality is clearly lower in the early period, suggesting a less well-connected network. This is an effect of an increasing diversification of decorative techniques. The eigenvector centrality, on the other hand, is relatively equal, but slightly higher and with a lower range in the early period, suggesting that influence on the network was somewhat more evenly distributed. When these values are adjusted for the number of nodes in each network, things change: degree centrality is fairly even, but eigenvector centrality drops drastically in the later period, reflecting a more uneven distribution of influence on the growing network.
+
+Secondly, we can use netdis as a graphlet-based approach.
+Work with this: https://github.com/alan-turing-institute/network-comparison/blob/master/vignettes/quickstart_netdis_2graphs.Rmd
+
+```{r}
+library(netdist)
+# flatten graphs
+decor_early_flat <- flatten(decor_graph_early)
+decor_flat <- flatten(decor_graph)
+
+# set netdis parameters
+# Maximum graphlet size to calculate counts and netdis statistic for.
+max_graphlet_size <- 4
+# Ego network neighbourhood size
+neighbourhood_size <- 2
+# Minimum size of ego networks to consider
+min_ego_nodes <- 3
+min_ego_edges <- 1
+# Ego network density binning parameters
+min_bin_count <- 5
+num_bins <- 100
+
+## Generate ego networks
+
+# Get ego networks for query graphs and reference graph
+ego_1 <- make_named_ego_graph(decor_early_flat,
+  order = neighbourhood_size,
+  min_ego_nodes = min_ego_nodes,
+  min_ego_edges = min_ego_edges
+)
+ego_2 <- make_named_ego_graph(decor_flat,
+  order = neighbourhood_size,
+  min_ego_nodes = min_ego_nodes,
+  min_ego_edges = min_ego_edges
+)
+
+# Count graphlets for ego networks in query and reference graphs
+graphlet_counts_1 <- ego_to_graphlet_counts(ego_1, max_graphlet_size = max_graphlet_size)
+graphlet_counts_2 <- ego_to_graphlet_counts(ego_2, max_graphlet_size = max_graphlet_size)
+
+
+# Load reference graph
+ref_path <- system.file(file.path("extdata", "random", "ER_1250_10_1"),
+  package = "netdist"
+)
+ref_graph <- read_simple_graph(ref_path, format = "ncol")
+ego_ref <- make_named_ego_graph(ref_graph,
+  order = neighbourhood_size,
+  min_ego_nodes = min_ego_nodes,
+  min_ego_edges = min_ego_edges
+)
+graphlet_counts_ref <- ego_to_graphlet_counts(ego_ref, max_graphlet_size = max_graphlet_size)
+# Scale ego-network graphlet counts by dividing by total number of k-tuples in
+# ego-network (where k is graphlet size)
+scaled_graphlet_counts_ref <- scale_graphlet_counts_ego(
+  graphlet_counts_ref,
+  max_graphlet_size
+)
+# Get ego-network densities
+densities_ref <- ego_network_density(graphlet_counts_ref)
+# Adaptively bin ref ego-network densities
+binned_densities <- binned_densities_adaptive(densities_ref,
+  min_counts_per_interval = min_bin_count,
+  num_intervals = num_bins
+)
+ref_ego_density_bins <- binned_densities$breaks
+# Average ref graphlet counts across density bins
+ref_binned_graphlet_counts <- mean_density_binned_graphlet_counts(
+  scaled_graphlet_counts_ref,
+  binned_densities$interval_indexes
+)
+
+# Calculate expected graphlet counts (using ref graph ego network density bins)
+exp_graphlet_counts_1 <- netdis_expected_counts(graphlet_counts_1,
+  ref_ego_density_bins,
+  ref_binned_graphlet_counts,
+  max_graphlet_size,
+  scale_fn = count_graphlet_tuples
+)
+exp_graphlet_counts_2 <- netdis_expected_counts(graphlet_counts_2,
+  ref_ego_density_bins,
+  ref_binned_graphlet_counts,
+  max_graphlet_size,
+  scale_fn = count_graphlet_tuples
+)
+# Centre graphlet counts by subtracting expected counts
+centred_graphlet_counts_1 <- netdis_subtract_exp_counts(
+  graphlet_counts_1,
+  exp_graphlet_counts_1,
+  max_graphlet_size
+)
+centred_graphlet_counts_2 <- netdis_subtract_exp_counts(
+  graphlet_counts_2,
+  exp_graphlet_counts_2,
+  max_graphlet_size
+)
+
+## Sum centred graphlet counts across all ego networks
+sum_graphlet_counts_1 <- colSums(centred_graphlet_counts_1)
+sum_graphlet_counts_2 <- colSums(centred_graphlet_counts_2)
+
+## Calculate netdis statistics
+netdis_result <- netdis_uptok(
+  sum_graphlet_counts_1,
+  sum_graphlet_counts_2,
+  max_graphlet_size
+)
+
+print(netdis_result)
+```
+The result shows us the difference between the two networks using three- and four-node graphlets. The result shows that the three-node graphlet distance is far lower than the four-node one. What does it mean?
+
+We could also see whether the clusters are still there and how the crossings change.
+
+
+Graph centralization:
+Wasserman & Faust p.180-183

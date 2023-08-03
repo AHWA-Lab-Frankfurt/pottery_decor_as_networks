@@ -1,0 +1,135 @@
+---
+title: "prepare map backgrounds"
+author: "Nikolas Gestrich"
+date: '2022-05-02'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(dplyr)
+library(ggplot2)
+library(sf)
+```
+
+This document is intended to make transparent the processes behind the creation of maps in the article associated with this repository. While this is not strictly necessary for scientific reproducibility, it might nevertheless be interesting to some readers.
+
+# Country and continent inset data
+
+## Continent data
+
+For the outline of Africa, we import a shapefile 
+
+```{r}
+africa_outline <- sf::st_read(here::here("analysis", "data", "raw_data", "Africa_outline.shp")) %>% sf::st_crop(xmax = 54, xmin = -20, ymax = 40, ymin = -36)
+```
+
+## country outline
+
+Here, we subset a free dataset of administrative boundaries downloaded from naturalearthdata.com. 
+
+```{r subset adm0}
+mali_adm0 <- ne_countries(scale = "medium", returnclass = "sf") %>% filter(admin == "Mali")
+```
+
+
+These can be used for inset maps inset following manner
+
+```{r plot adm0}
+ggplot()+
+  geom_sf(data = mali_adm0)+
+  geom_sf_text(data = mali_adm0, aes(label = admin))
+
+ggplot(africa_outline)+
+  geom_sf()
+```
+
+# Hydrology
+
+
+```{r}
+rivers <- ne_download(scale = 50, type = "rivers_lake_centerlines", category = "physical", returnclass = "sf") %>% sf::st_intersection(mali_adm0) %>% filter (name == "Niger")
+
+
+```
+
+
+```{r plot hydro}
+ggplot()+
+  geom_sf(data = mali_adm0)+
+  geom_sf_text(data = mali_adm0, aes(label = admin))+
+  geom_sf(data = rivers, fill = '#9ecae1')+
+  geom_sf(data = osm_lakes.sf)
+```
+
+# Relief
+
+## DEM
+
+```{r}
+library(raster)
+#Mali outline
+mali_sp <- sf::as_Spatial(mali_adm0)
+#get SRTM elevation data
+srtm1 <- getData("SRTM", lat = 14, lon = -3, download = TRUE)
+srtm2 <- getData("SRTM", lat = 16, lon = -3, download = TRUE)
+srtm3 <- getData("SRTM", lat = 14, lon = -6, download = TRUE)
+srtm4 <- getData("SRTM", lat = 16, lon = -6, download = TRUE)
+srtm5 <- getData("SRTM", lat = 22, lon = -6, download = TRUE)
+srtm6 <- getData("SRTM", lat = 22, lon = -3, download = TRUE)
+srtm7 <- getData("SRTM", lat = 18, lon = 2, download = TRUE)
+srtm8 <- getData("SRTM", lat = 14, lon = -12, download = TRUE)
+srtm9 <- getData("SRTM", lat = 16, lon = -12, download = TRUE)
+srtm10 <- getData("SRTM", lat = 22, lon = 2, download = TRUE)
+
+#Mosaic/merge srtm tiles
+srtmmosaic <- mosaic(srtm1, srtm2, srtm3, srtm4, srtm5, srtm6, srtm7, srtm8, srtm9, srtm10, fun=mean)
+#crop to Mali
+dem1 <- crop(srtmmosaic, extent(mali_sp))
+mali_srtm <- mask(dem1, mali_sp)
+#downsample
+mali_srtm_a <- terra::aggregate(mali_srtm, fact = 10)
+#convert to df
+dem.df <- rasterToPoints(mali_srtm_a)
+dem.df <- data.frame(dem.df)
+colnames(dem.df) = c("lon", "lat", "alt")
+```
+
+## Hillshade
+
+```{r}
+# extract slope and aspect
+slope.raster <- terrain(mali_srtm_a, opt='slope')
+aspect.raster <- terrain(mali_srtm_a, opt='aspect')
+# calculate hill shade
+hill.raster <- hillShade(slope.raster, aspect.raster, 40, 270)
+# convert to df
+hill.m <- rasterToPoints(hill.raster)
+hill.df <-  data.frame(hill.m)
+colnames(hill.df) <- c("lon", "lat", "hill")
+```
+
+
+```{r}
+ggplot()+
+  #geom_sf(data = mali_adm0)+
+  geom_raster(data = hill.df, aes(lon, lat, fill = hill)) +
+  scale_fill_gradientn(colours = grey.colors(100)) +
+  geom_raster(data = dem.df, aes(lon, lat, fill = alt), alpha = 0.8)+
+  scale_fill_gradientn(colours = terrain.colors(100))+
+  geom_sf_text(data = mali_adm0, aes(label = admin))+
+  geom_sf(data = rivers, colour = "blue")+
+  theme_minimal()
+
+```
+
+
+# Save data
+```{r save geodata}
+save(africa_outline, mali_adm0, rivers, dem.df, hill.df,
+     file = here::here("analysis", "data", "derived_data", "geodata.rda"))
+```
+
+From this data, we create several thematic map backgrounds for use in the article. These are stored in the `/R` folder, and are called to the paper file as source scripts.

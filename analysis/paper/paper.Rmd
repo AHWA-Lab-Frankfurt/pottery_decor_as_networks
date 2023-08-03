@@ -1,0 +1,644 @@
+---
+title: "Pottery decor as networks on the Middle Niger"
+author:
+  - Nikolas Gestrich:
+      email: gestrich@uni-frankfurt.de
+      institute: [FI]
+      correspondence: true
+  - Juan-Marco Puerta-Schardt:
+      email: jmpuertaschardt@outlook.de
+      institute: [GU]
+      correspondence: false
+institute:
+  - FI: Frobenius Institute
+  - GU: Goethe University
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+    bookdown::word_document2:
+      fig_caption: yes
+      reference_docx: "../templates/template.docx" # Insert path for the DOCX file
+      #pandoc_args:
+      #- --lua-filter=../templates/scholarly-metadata.lua
+      #- --lua-filter=../templates/author-info-blocks.lua
+      #- --lua-filter=../templates/pagebreak.lua
+bibliography: references.bib
+csl: "../templates/journal-of-archaeological-science.csl" # Insert path for the bib-style
+abstract: |
+  Text of abstract
+keywords: |
+  keyword 1; keyword 2; keyword 3
+highlights: |
+  These are the highlights. 
+---
+
+<!-- This is the format for text comments that will be ignored during renderings. Do not put R code in these comments because it will not be ignored. -->
+
+<!-- With the following code you can access and display values from the yml header above. -->
+
+Keywords: `r rmarkdown::metadata$keywords`
+
+Highlights: `r rmarkdown::metadata$highlights`
+
+<!-- The following code chunk defines some general settings how code chunks should behave. -->
+
+```{r knitr-setup, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  echo = FALSE,
+  comment = "#>",
+  fig.path = "../figures/",
+  dpi = 300
+)
+```
+
+```{r libraries, echo = FALSE}
+# libraries
+library(dplyr)
+library(knitr)
+library(patchwork)
+library(ggplot2)
+library(tidygraph)
+library(ggraph)
+library(tibble)
+library(igraph)
+library(tidyr)
+library(sf)
+```
+
+<!-- The actual document text starts here: -->
+
+# Introduction
+
+For much of the history of the archaeological discipline, ceramics have been used as markers of similarity and difference.In many areas and periods of the past, they are the most ubiquitous archaeological find category, and have thus contributed greatly to the recognition of archaeological artefact groups, or archaeological cultures. It is not rare to see find complexes and periods named after particular ceramic types. Though the current scholarly consensus is that archaeological cultures do not represent social groups as experienced by past humans, and that pots do not equal people, a large amount of work on archaeological ceramics is engaged in grouping ceramics and distinguishing groups from one another. There are a number of approaches for doing so and the rationales behind them vary. The basis for the creation of archaeological cultures, especially current in works of the first two thirds of the twentieth century, is the 'traditional' typological approach to ceramics and other artefacts. This approach is nowadays most used in the best-explored regions with the longest research traditions, and groups ceramics mainly according to outward appearances, such as shape and surface treatment. The distribution, both spatially and temporally, of such types then becomes the subject of research, which subsequent studies can augment through the recognition of sub-types and variants. A different approach takes as its basis the sequence of manufacture of artefacts, the *chaîne opératoire*. This approach proposes that the manufacture of an artefact involves a series of choices constrained by certain outside factors. These choices are seen as being cultural, so that a similar set of choices under similar constraints are markers of shared cultural knowledge. Here, the archaeological research goal also lies in the identification of spheres of cultural commonality which can be distinguished from one another.
+
+In the archaeology of West Africa, and especially in the wider areas surrounding the upper and middle reaches of the Niger, there has been a strong research focus on ceramics. From the 1st millennium BC onwards, they occur in extremely high numbers on archaeological sites, and their appearance, especially their surface treatment, is highly variable. In contrast to the Great Lakes region of Eastern Africa, for example, the number of different roulette decorations, painted, incised, and applied decors, but also the variety in form, is very high. Consequently, there has been considerable emphasis on ceramics in archaeological and also in ethnoarchaeological work. While much of the ethnoarchaeological work has been based on exploring *chaînes opèratoires*, the archaeological work has mainly relied on attribute-based analyses (the system employed by S.K. McIntosh at Jenné-jeno has been very influential in subsequent work). In a region where large archaeological sites abound and researchers are relatively thin on the ground, the main hope of the analyses usually is to create chrono-stratigraphical sequences in order to be able to give approximate periods to surface assemblages. Despite all the variability, it has been found that a great number of ceramic attributes are not particularly time-sensitive. On the contrary, most sites appear to have diverse assemblages in which the percentages of individual attributes vary, but persist over several centuries, sometimes millennia.
+
+Some researchers have used the attribute-based approach to define types, statistically derived for the most part, which typify the ceramics of a certain place of time (MacDonald's Facies, McIntosh's timeline). The spatiotemporal distribution of individual attributes has also been the subject of some important work, such as individual rouletted decors (Livingstone-Smith) or base-shaping techniques (Huysecom). The most comprehensive treatment so far is in the work of Anne Mayor, combining both shaping techniques and decorative practices from an archaeological and ethnoarchaeological point of view. Focused on the Bandiagara highlands in central Mali, Mayor uses her data to construct an impressive overview of the development of different techniques and the establishment of ceramic traditions, which she closely relates to ethno-linguistic groups. Mayor's work builds on a large body of data and decades of ethnoarchaeological fieldwork, and there is little to add to her conclusions. Here, however, we wish to show that an almost identical dataset as available to Mayor can generate quite a different perspective when analysed as a network, and when connectivity is emphasised over boundaries. 
+
+# Archaeological ceramics as networks
+
+In recent years, the use of network analysis in archaeology has been growing significantly. A large number of these studies focus on ceramics, but they are geographically mainly limited to North America (e.g. Hart 2012, Chiu 2019, Barker and Young 2017, Crabtree 2015, Mills et al. 2013, Peeples and Haas 2013) and the Mediterranean (e.g. Sternini 2019, Iacono 2016, Brughmans and Poblome 2016 torrence & Swadling 2008, de Groot 2019). The archaeological records of these regions are amongst the best studied in the world, with fine-grained pottery typologies and extensive excavations. To our knowledge, this is the first application of a network approach to archaeological material from sub-Saharan Africa, where the conditions are somewhat different.
+
+Ethnographic studies of pottery manufacturing in Africa suggest that the way that pottery is made depends largely on systems of learning and teaching the craft (Gosselain), on local market consumer choices (Dietler & Herbich), or on marriage patterns amongst manufacturing groups (ibid.). In short, the processes underlying the propagation of technical practices through time and across geographical space are dependent on communication and, more specifically, knowledge exchange. Such exchange occurs between humans and we can therefore understand similarities in the *chaine opératoire* as evidence that knowledge was shared. However, different elements of the pottery making process are thought to be reflective of different kinds of social interaction. Gosselain (REF), whose research in the years between XX and XX explored this question, concludes that, on the whole, forming techniques are more stable, reflective of durable cultural ties, sometimes even ethnic groups. On the other end of the spectrum, decorations are thought to be influenced by far more ephemeral contact, in which seeing someone else's pot might be enough to change a potter's production, as could indirect contact via the wishes of customers.
+
+
+
+SNA shifts the focus "from spatial relations to social relations" (cf. Knappett 2011)
+Mills et al. (2015) have been able to compare similarity in wares across sites, but this cannot be done here. They also highlight Knappet's (2011) idea of different scales in archaeological networks. Because of the specific use case scenario here, we are conflating two fo his scales. He sees the community of practice as a meso-scale effect, across maybe a few households. However, we can see in the archaeological ceramic data from Mali that communities of practice in individual stages of the *chaîne operatoire* is often much larger. Thus, certain parts of the pottery manufacturing sequence are distributed across larger or smaller networks, but rarely remain at the household level. Also, we do not really have the luxury of being able to pinpoint certain wares, since typology is not as established.
+
+We need to be aware of the fact that we are conflating consumption with production here. This is why we will need to threshold the networks, to make sure that a site represents the significant potting communities within its area. 
+
+
+
+
+# Methods
+
+```{r import 11c decor data, echo = FALSE}
+library(readr)
+# import decor data
+decors <- read_csv2(here::here("analysis/data/raw_data/decors_late.csv"))
+# import information on sites
+sites <- read_csv2(here::here("analysis/data/raw_data/sites_all.csv"))
+```
+
+
+
+```{r datatable, fig.cap="decor data used for network construction"}
+library(kableExtra)
+kable(decors, digits = 1, "html") %>% 
+  kable_styling("condensed") %>% 
+  save_kable(here::here("analysis/figures/datatable.html"))
+```
+
+In this paper, we use pottery decor data from contexts occupied in the 11th century AD to attempt a reconstruction of networks through which pottery decorative practices were shared. The data is in a common format of percentages of prevalence in the assemblage (see \@ref(tab:datatable) This particular time slice, which represents a cumulative view of a great many individual interactions, will then be compared to earlier contexts in the same wider area, in order to demonstrate the diachronic possibilities of the approach.The sites we have been able to include in the network model are shown in \@ref(fig:sitemap). We can see here that sites are geographically unequally distributed. This is due to research history as well as past cultural dynamics. Certainly, the IND and the areas bordering it (notably the Lakes region) were strongly populated at the time, maybe more so than other areas. The cluster of sites around the Bandiagara escarpment is due to the extraordinarily detailed and long-term research of the University of Geneva's research teams. Blank spaces do not imply a lack of people, in this case people making and using pottery. Global politics and research priorities over the last 50 years have meant that these are areas we do not currently have excavated and dated ceramics for, though we know that sites exist, often in abundance. This means that, when we construct networks, we do so with a geographically unrepresentative sample, which leads to incomplete networks. Sindbaek has pointed out the difficulty in this situation: the actual network is not known, only its effects, from which the network can be partially reconstructed. Accordingly, this study should be seen as an exercise first in the reconstruction of a possible network that led to the data preserved in the archaeological record: a tiny sample of a tiny sample, influenced by an unknown amount of mostly unknowable pre- and post-depositional biases. Nevertheless, we will attempt to analyse the reconstructed network in order to formulate some hypotheses about the nature of innovation and spread in ceramic decors. Future generations of researchers are encouraged to improve upon this initial attempt.
+
+```{r sitemap, fig.cap="location of sites in the analysis", echo = FALSE}
+source(here::here("analysis/R/map plots.R"))
+
+sitepoints <- st_as_sf(sites, coords = c("lon", "lat"), crs = 4326, agr = "constant")
+
+sitemap <- ggplot()+
+  map_bw_grid +
+  geom_sf(data = sitepoints)
+  
+sitemap + inset_element(inset, 0.72, 0.72, 1, 1)
+```
+
+
+The network is constructed from standard archaeological frequency data, in which the proportions of decorative practices are represented across the selected site phases (REF FIG XXX). The decorative practices encode both the tool used and the action performed, for instance a twisted cord (tool) roulette (action). This data is transformed into a network by deciding that every decor that is shared between two sites leads to a link between these sites. The link is weighted by multiplying the proportion at one site with the proportion at the other. This leads to a network in which the nodes (sites) can be connected in more than one manner, known as a multiplex or multilayer network. As is shown in \@ref(fig:total-network), this leads to a very tightly connected network, known as a "hairball". However, the multiplex nature of the network allows us to make an important initial observations on its structure: the networks in which individual decor types are propagated are overlapping. There are no two decor networks that cover one another entirely. This emerges more clearly in \@ref(fig:total-network-sample), when the number of decorative practices is reduced. This indicates that the adoption of decorative techniques ...
+
+```{r make decor network, echo = FALSE}
+# import functions for network construction
+source(here::here("analysis/R/edgelist functions.R"))
+
+# import custom functions for network analysis
+source(here::here("analysis/R/network functions.R"))
+
+# import custom functions for data visualisation
+source(here::here("analysis/R/datavis themes.R"))
+
+# apply function to transform frequency table into edge list
+edgelist <- make_edgelist(decors)
+
+# construct network, remove extraneous sites
+decor_graph <- tbl_graph(sites, edgelist, directed = FALSE) %>%
+  activate(nodes) %>%
+  filter(!node_is_isolated())
+```
+
+```{r total-network, fig.cap="Plot of 11th century AD network of decorative practices. The plot shows the very strongly connected structure of the network."}
+ggraph(decor_graph, layout = "stress") +
+  coloured_edges +
+  theme_graph()
+```
+
+```{r total-network-sample, fig.cap="Partially overlapping networks of four decorative practices", echo = FALSE}
+decor_graph %>%
+  activate(edges) %>%
+  filter(name %in% c("braided_cord_roulette", "braided_strip_roulette", "paint", "straight_cord_mat")) %>%
+  ggraph(layout = "stress") +
+  coloured_edges +
+  theme_graph()
+```
+
+Using the `multinet` package, the statistical distance (Jaccard similarity) between the different decors' networks were calculated based on the nodes they contained. We see in \@ref(fig:layer-comparison) that some networks are more similar to one another than others. This leads us to ask whether there might be groups of decors that were shared within similar networks, and thus, whether there might be groups of sites predominantly sharing specific decors.
+
+```{r import to multinet, echo = FALSE}
+library(multinet)
+# reduce graph to types with over 5 edges
+good_edges <- decor_graph %>%
+  activate(edges) %>%
+  as_tibble() %>%
+  count(name) %>%
+  filter(n > 5)
+
+reduced_graph <- decor_graph %>%
+  activate(edges) %>%
+  filter(name %in% good_edges$name)
+
+# prepare graph and make a vector of different layer names
+prep.graph <- reduced_graph %>%
+  activate(edges) %>%
+  rename(layer = name) %>%
+  activate(nodes) %>%
+  rename(name = label)
+
+layers <- prep.graph %>%
+  activate(edges) %>%
+  as_tibble() %>%
+  distinct(layer) %>%
+  pull(layer)
+
+# get a list of individual networks using the onelayer function (/R/network functions.R)
+graphlist <- purrr::map(layers, onelayer)
+names(graphlist) <- layers
+
+# add layers into a multinet object
+multi <- ml_empty()
+
+for (i in seq_along(layers)) {
+  add_igraph_layer_ml(multi, graphlist[[i]], paste(layers[[i]]))
+}
+```
+
+```{r layer-comparison, fig.cap="Jaccard similarity of nodes present in the networks of individual decorative practices"}
+# perform layer compariosn using jaccard similarity between nodes
+lc <- layer_comparison_ml(multi, method = "jaccard.actors")
+
+# make heatmap
+heatmap_matrix(lc)
+```
+
+# Clustering
+
+We use the Louvain clustering algorithm (Blondel et al 2008) to find communities in the network.
+```{r community detection, hide = 'results', echo=FALSE}
+# use louvain clustering method to assign clusters to nodes
+decor_graph <- decor_graph %>%
+  activate(nodes) %>%
+  mutate(louvain = as.character(group_louvain()))
+
+# calculate modularity of louvain clustering
+modularity <- decor_graph %>%
+  activate(nodes) %>%
+  mutate(modularity = graph_modularity(group = as.factor(louvain))) %>%
+  pull(modularity) %>%
+  head(1)
+```
+The louvain clustering has a modularity of `r modularity` .
+
+```{r plot-clusters, fig.cap="Louvain communities within the decor network", echo = FALSE}
+# set plot colours for communities
+communitycolor <-
+  setNames(
+    c("tomato", "cornflowerblue", "darkgreen"),
+    unique(V(decor_graph)$louvain)
+  )
+
+# disable s2 geometry to plot on map
+sf_use_s2(FALSE)
+
+ggraph(decor_graph, x = lon, y = lat) +
+  geom_sf(data = mali_adm0, fill = NA) +
+  geom_sf(data = rivers, colour = "black") +
+  edges_community +
+  ggforce::geom_mark_hull(aes(x = lon, y = lat, fill = louvain, colour = louvain),
+                          expand = unit(1.5, "mm"),
+                          radius = unit(1.5, "mm")) +
+  scale_fill_manual(values = communitycolor)+
+  scale_colour_manual(values = communitycolor)+
+  nodes_community +
+  theme_community +
+  coord_sf(xlim = c(-7, 2), ylim = c(13, 19), expand = FALSE) +
+  theme_graph()
+```
+
+There are some recent studies in archaeology that use community detection on archaeological networks. Radivojevic and Gruci (2018) have clustered sites on the Balkan based on the source of their copper, Mazucato (2019) has identified communities of building sites in Çatalhöyük to analyse the process of urbanisation, while Vargas and Lanata (2020) used community detection to find distinctive clusters of rock art sites in Patagonia. These studies differ significantly regarding the research object and question, but are similar in data structure and methodological approach. All three used the Louvain method to detect groups of sites that share a lot of edges with each other and have fewer edges with nodes outside of their community. The Louvain method is especially useful for archaeological datasets that typically contain few but heavily connected nodes (Blondel et al. 2008/ Yang et al. 2016).
+
+Here, we employ the same clustering algorithm, which results in three communities with a modularity of 0.3. See \@ref(fig:plot-clusters) Community 1 contains 7 Sites in the Dogon Area. Community 2 is in the Niger bend and the IND, it also contains 7 sites. Both only include sites south of the Niger. Community 3 is the biggest and most widely distributed community. Reaching from Gao to Togu Missiri in the Ségu area it seems to mostly contain sites around the Niger river. The nodes of community 3 often connect with sites of community 1 and 2, while those communities are not connected strongly.
+
+There are two major geographic features influencing the clusters. The first one is obviously the Niger river connecting the sites of community 3. The bend of the Niger river and the Inner Niger delta are the location of various sites of community 2 and probably a zone of contact between this community and community 3. The other geographic landmark that is strongly related to the communities is the Bandiagara Plateau. It is the border between community 1 and 2. Both communities overlap in this area. TMD, a site of community 3, lies in the north of the mountains making them the region where all 3 communities meet each other.
+
+```{r cluster-comparison, fig.cap="Relative edge weights and centralization by cluster"}
+# Relative edge weights (how important are the connections within the cluster)
+rel_edge_weight <- vector("double", length(3))
+for (i in 1:3) {
+  rel_edge_weight[[i]] <- decor_graph %>%
+    # filter community
+    activate(nodes) %>%
+    filter(louvain == i) %>%
+    # relative edge weight (sum of weights / number of edges)
+    activate(edges) %>%
+    as.data.frame() %>%
+    {
+      sum(.$weight) / nrow(.)
+    }
+}
+
+# Centralization of the cluster
+centralization <- vector("double", length(3))
+for (i in 1:3) {
+  centralization[[i]] <- decor_graph %>%
+    # filter community
+    activate(nodes) %>%
+    filter(louvain == i) %>%
+    # degree centralization
+    centr_degree(mode = "all", normalized = TRUE) %>%
+    as_tibble() %>%
+    pull(centralization) %>%
+    head(1)
+}
+
+# put together
+tibble(rel_edge_weight, centralization) %>%
+  mutate(cluster = 1:3) %>%
+  mutate(rel_edge_weight = rel_edge_weight / 100) %>%
+  rename("relative edge weight" = rel_edge_weight) %>%
+  pivot_longer(!cluster, names_to = "key", values_to = "value") %>%
+  
+  # plot
+  ggplot(aes(x = cluster, y = value, fill = key)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_grey() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  theme_publish()
+```
+
+If we look at the edges (divided by 10000 to make it comparable) and the centrality of sites in regard to the communities, we see that while the sites of community 3 are the most central ones in the network the weight of the edges within the community is relatively small. For community 1 and 2 it is vice versa even though community 2 has weaker edges within and is better connected to the whole network. The more isolated a community is from the network, the stronger is its connection within the community. 
+--maybe the bar_plots of the most common decors of all clusters is enough? maybe the first barplot is enough? – maybe the network of every cluster is too much
+
+ see \@ref(fig:cluster-comparison)
+If we take a closer look at the "internal" connections of community 1, we see that "braided_strip_roulette" is present at all sites. The other main decor "straight_cord_mat" on the other hand is missing on 2 sites: Oudalan and Prom. The two decors are spread across the whole area of the community. The only other decor that is common in the community is the "twisted_cord_roulette" which is also abundant across the whole research area. It makes up a rather large part of the assemblage in Oudalan and Prom but was not found at the sites of Sadia and Ambere Dougon.
+The fact that SAO has a high degree of centrality shows that the location is not decisive for the connectedness within this community. This is underlined by the fact that the less central sites are distributed across the whole area. There is an ambivalence between a relative consistency across the whole area and the diversity between sites that are close to each other. One reason for this phenom can be the contact to other communities in the mountain area. Damassogou exemplifies this as the site contains the defining decors of community 1 and 2. But the difference between Oudalan and SAO that are geographically isolated suggest that there might be more reasons for this diversity.
+Community 2 is less diverse with "braided_cord_roulette" as the only outstanding decor type. The weaker connections of the sites Kokolo and Damassogou are based on data bias (the proportion is counted in regard to all sherds not only the decorated ones), the decor was probably equally abundant there. Other decors spread across the community are "folded_strip_roulette" and "dragged_comb". The first one is missing in KAN 4 and TOD H while the second one is missing at Kokolo and Damassogou. The other indicator for the homogeneous character of the community is the nearly equal degree of centrality of every site.
+As mentioned above community 3 is more diverse but also has weaker connections. Instead of one defining decor there are several ones but none is abundant across the whole community. The spatial distribution differs between the decors. While "paint" and "twisted_cord_roulette" appear from Gao to TOG 2, "folded_strip_roulette", "channel" and "incised" are located in the western part of the community's area. Essouk and TMD have the highest degree of centrality. Even though it is located at the margin of the research area, its character as a "market"-site explains the amount of links it has. The role of TMD for the network is elaborated elsewhere (!). 
+
+```{r crossings, fig.cap="Network of edges which cross between clusters"}
+decor_graph %>%
+  activate(edges) %>%
+  
+  # find the edges that cross between communities
+  mutate(crossing = community_crossing(weights = weight)) %>%
+  filter(
+    crossing == TRUE,
+    weight > 200
+  ) %>%
+  activate(nodes) %>% 
+  filter(!node_is_isolated()) %>%
+  
+  #plot
+  ggraph(layout = "nicely") +
+  
+  geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
+  scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = centrality_degree(weights = weight), color = louvain), show.legend = FALSE) +
+  geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  scale_color_manual(values = communitycolor)+
+  theme_graph() +
+  theme_community
+```
+
+Not only the connections within but also those between the communities should be examined. Therefore, only the edges that "cross" the two communities will be considered. While there is no obvious "broker"-site, community 3 could be described as a "broker"-community. There are few strong crossings between community 1 and 2. Even though most decors that cross communities connect all three, those are mostly decors that are most abundant at the sites of community 3. See \@ref(fig:crossings)
+
+The crossings also show the limits of the community detection at the research area. The clusters that were found are congruent with the results of earlier works and help to understand the network, but they do not capture all the networks and connections of the region. To grasp the dynamics of pottery production we must go beyond those boundaries.
+
+For an archaeological interpretation of the results, we need to take a step back and examine what our edges represent. If we take decoration techniques as the result of cultural practices, the communities we detect may be interpreted as communities of practice. Those are the result of the exchange of knowledge with various facets. Intergenerational teaching is one of them and might link our communities to ethnic groups (as Mayor did). But this is only one aspect and we should also consider communities as trading spheres where the demands influence the production. The exchange of goods is also fuelling the exchange of ideas that might cross ethnic boundaries. Hence our communities are foremost spheres of similar cultural knowledge that was intertemporally and -spatially exchanged.
+
+Community 1 and 2 are spheres were the two decors respectively one decor dominates. The cultural practice was revolving around them. Even though there were other decors present at the sites, they might have played a local role but were not cons. Behind this might be a teaching network and demand, that at least is similar at the sites if not crossing their boundaries. The relatively weak links towards the outside show that these groups of practice were somewhat resilient. The difference regarding the centrality of the sites within community 1 demonstrates that the grade of involvement in this group of practice alter in this sphere. 
+
+Community 3 is another type of sphere cultural knowledge. Instead of a distinct decoration technique the variety of those techniques was crucial. The exchange of knowledge on the production side but also the choices of consumers vary strongly. While there are some decors that belong only to this exchange network, especially the sites in the west are part of other spheres of cultural practice. 
+
+Outcomes: three communities of different scales are identified. Two of these appear to be geographically bounded, and are maybe representative of intensive information exchange on a regional level, if not even within cultural groups. This ethno-linguistic dimension remains to be discussed re: Swiss research. The last community is not locally bounded and instead represents the exchange of information on ceramic decors through long-distance contacts. We might want to find out how well connected this network is in comparison to the two others. A lower network density or weight of ties would suggest that contacts are not as intensive.
+membership in these networks is not mutually exclusive, there are crossing points in all of them. As our initial look at the network structure shows, the networks of each individual decor overlap, and these groups should not be seen as bounded entities, but rather as nodes with a higher propensity for sharing information. 
+The next step then examines the pathways through which information is likely to have travelled.
+
+# Sparsification
+
+# Simplified network backbone
+
+we can now try to extract a backbone from the simplified network
+
+```{r flatten}
+decor.flat <- flatten(decor_graph, weighted = TRUE)
+```
+
+extract the binary backbone of the flattened graph and play around with the alpha to get a good representation. See \@ref(fig:backbone-extraction)
+
+```{r backbone-extraction, fig.cap="Extraction of binary backbones at decreasing significance levels: a) 0.05, b) 0.15, c) 0.20"}
+# extract binary backbones at decreasing levels of significance
+decor.05 <- extract_backbone(decor.flat, 0.05)
+decor.15 <- extract_backbone(decor.flat, 0.15)
+decor.20 <- extract_backbone(decor.flat, 0.20)
+
+# plot
+p1 <- plot.bb(decor.05)
+p2 <- plot.bb(decor.15)
+p3 <- plot.bb(decor.20) + geom_node_text(aes(label = label), repel = TRUE)
+
+(p1 | p2) / p3 + plot_annotation(tag_levels = "a")
+```
+
+The three communities from the previous section are also visible in the extracted backbone, albeit with some major differences in configuration. The site of Kokolo NE Phase 2 is placed in the closely connected cluster of sites in the IND and Lakes region, featuring the sites of the Jenné cluster and Toguére Galia, Toguére Doupwil, and Kawinza. The spread-out cluster of long-distance contact now also includes the sites at Dia, while the "Dogon" cluster remains largely intact. Akumbu is isolated from the network, and remains so until the significance is lowered to 0.2.
+
+On this backbone, whose ties are no longer weighted, we can perform a number of network calculations that were meaningless in the raw network due to its large number of connections. We will begin by asking which nodes are the most influential in the network, i.e. possess the highest potential for spreading information. This, calculated through eigenvalue centrality, gives us a first idea of how pottery decor knowledge might have spread.
+
+```{r backbone-eigenvalue, fig.cap="Binary backbone at alpha = 0.15 showing eigenvector centralities"}
+decor.15 <- decor.15 %>% activate(nodes) %>% filter(!node_is_isolated())
+
+#decor.15 %>%
+#  activate(nodes) %>%
+#  mutate(eigen = centrality_eigen()) %>%
+#  select(label, eigen) %>%
+#  arrange(desc(eigen)) %>%
+#  kable()
+
+ggraph(decor.15, layout = "nicely") +
+  geom_node_point(aes(size = centrality_eigen())) +
+  geom_edge_fan(color = "red", alpha = 0.8) +
+  scale_edge_width(range = c(0.2, 3)) +
+  geom_node_text(aes(label = label), repel = TRUE) +
+  theme_graph()
+```
+
+The result (\@ref(fig:backbone-eigenvalue)) shows that the highest influence on the network is exerted by the sites in the Eastern IND and Lakes cluster. We should not forget that the network is partial, i.e. many connections to many sites are missing, and that the central position of the IND has to do with our sample selection and research history. Nevertheless, it suggests this region specifically as a centre through which information and thus also innovation in pottery decoration was disseminated in this period. The other network clusters are more homogenous, at this time probably less diverse and more stable in their decors.
+
+Betweenness centrality shows nodes in brokerage positions within the network. These are interesting to us in finding out where the different network cliques connect, and which sites are at crossroads positions in the pottery knowledge exchange. These are likely to be places with diverse markets, where producers belonging to different networks meet, and where information thus "jumps" between network cliques.
+
+```{r backbone-betweenness, fig.cap="Binary backbone at alpha = 0.15 showing betweenness centralities"}
+#decor.15 %>%
+#  activate(nodes) %>%
+#  mutate(eigen = centrality_betweenness()) %>%
+#  select(label, eigen) %>%
+#  arrange(desc(eigen)) %>%
+#  kable()
+
+ggraph(decor.15, layout = "nicely") +
+  geom_node_point(aes(size = centrality_betweenness())) +
+  geom_edge_fan(color = "red", alpha = 0.8) +
+  scale_edge_width(range = c(0.2, 3)) +
+  geom_node_text(aes(label = label), repel = TRUE) +
+  theme_graph()
+```
+
+We can see (\@ref(fig:backbone-betweenness)) that Hambarketolo appears as the main gatekeeper to the Jenné site cluster, and to the eastern IND network clique, while Tongo Maaré Diabal, and to a lesser extent also Gao-Saney and Togu Missiri, stand in a brokerage role between the IND and the greater Niger cluster. The Dogon cluster exists at two removes from the IND, passing through Dammassogou and Ambéré-Dougon.At alpha = 0.2, this cluster is also connected to the large niger cluster via the Sangha "tellem" cave sites.
+
+Also interesting is the edge betweenness value. This measures how important the edge between two nodes is for traversing the network. In our case it might indicate areas that were important axes of knowledge exchange.
+```{r backbone-edge-betweenness, fig.cap="Binary backbone at alpha = 0.15 showing edge betweenness centralities"}
+ggraph(decor.15, layout = "stress") +
+  geom_node_point() +
+  geom_edge_fan(color = "red", alpha = 0.8, aes(width = centrality_edge_betweenness())) +
+  scale_edge_width(range = c(0.2, 3)) +
+  geom_node_text(aes(label = label), repel = TRUE) +
+  theme_graph()
+
+ggraph(decor.15, x = lon, y= lat) +
+  geom_sf(data = mali_adm0, fill = NA) +
+  geom_sf(data = rivers, colour = "black") +
+  geom_node_point() +
+  geom_edge_fan(color = "red", alpha = 0.8, aes(width = centrality_edge_betweenness())) +
+  scale_edge_width(range = c(0.2, 3)) +
+  geom_node_text(aes(label = label), repel = TRUE) +
+  coord_sf(xlim = c(-7, 2), ylim = c(13, 19), expand = FALSE) +
+  theme_graph()
+```
+
+The edge betweenness measure (\@ref(fig:backbone-edge-betweenness)) shows a central path through the network, connecting the sites of Togu Missiri, Tongo Maaré Diabal, Hambarketolo, Damassogou, Ambéré-Dougon, and Sadia, as well as a prominent side route connecting Gao and Kawinza.These might roughly represent two routes of knowledge exchange: one important one passing through the eastern side of the Inland Niger Delta and below the Niger Bend, in which the Jenné site cluster plays a pivotal role as the meeting place between the three networks of knowledge exchange, and another, though less important to the network we have sampled, along the western side of the IND and north of the Niger Bend to Gao. 
+
+
+## Check for robustness of centrality measures
+
+In order to know whether these centrality measures are valid, rather than random effects of the backbone sparsification, we implement a variation on Peeples' suggested method for estimating the robustness of centrality measures in archaeological networks. In order to do so, the edges of the original graph are sampled at 10 % intervals, from 10 to 90 %. The binary backbone of each of these samples is then extracted and the centrality measures calculated. A Spearman's rank correlation test is run between the samples to see how the deletion of edges influences the  centrality within the backbone. Figure \@ref(fig:validity-test) shows how there is a relatively significant correlation between the betweenness ranks of nodes in the original graph and the sampled graphs, all the way down to the 30% sample. Only on the 20% sample does the correlation statistic drop lower. We can take this to mean that, for our case, the betweenness centrality shown in the MST is dependable.
+
+
+
+```{r validity-test, warning = FALSE, message = FALSE}
+p1 <- test_centralities(decor_graph, "eigen", 100)
+p2 <- test_centralities(decor_graph, "betweenness", 100)
+
+(p1 | p2) + plot_annotation(tag_levels = "a")
+```
+
+
+```{r}
+#make boxplots instead
+test_centralities2 <- function(graph, centrality, reps) {
+
+  # check for correct arguments
+  if (centrality %in% c("eigen", "betweenness") == F) {
+    stop("centrality must be 'eigen' or 'betweenness'")
+  }
+
+  # get sample names
+  s <- seq(10, 90, 10)
+  samples <- paste("s", s, sep = "")
+
+  # replicate the test
+  replicate(reps, spearman_samples(graph, centrality)) %>%
+    as_tibble() %>%
+    mutate(sample = samples) %>%
+    pivot_longer(!sample, names_to = "iteration", values_to = "value") %>%
+    select(-iteration) %>%
+    #group_by(sample) %>%
+    #summarise(mean_rho = mean(value)) %>%
+    # plot
+    ggplot() +
+    geom_boxplot(aes(x = sample)) +
+    labs(y = expression(paste("mean Spearman's ", rho))) +
+    ylim(0, 1) +
+    theme_publish()
+}
+
+test_centralities2(decor_graph, "eigen", 100)
+```
+
+
+eigenvector centrality is fine, betweenness less impressive. 
+For edge betweenness, the validation is much harder, as the flattening procedure means that edges cannot reliably be numbered, and thus correlation is hard to achieve. We can, however, manually inspect the result (\@ref(fig:edge-betweenness-validity)).
+
+```{r edge-betweenness-validity, fig.cap="edge bewteenness validity",warning = FALSE, message=FALSE}
+bb.edge.betw <- function(x) {
+
+  # sample graph
+  g <- decor_graph %>%
+    activate(edges) %>%
+    tidygraph::sample_n(size = x) %>%
+    flatten(weighted = TRUE) %>%
+    as.igraph()
+
+  # extract backbone
+  bb <- backbone::disparity(g, alpha = 0.15, narrative = FALSE) %>%
+    tidygraph::as_tbl_graph()
+
+  # put node attributes back
+  decor.nodes <- decor_graph %>%
+    activate(nodes) %>%
+    as_tibble()
+  bb <- bb %>%
+    activate(nodes) %>%
+    mutate(label = decor.nodes$label, lat = decor.nodes$lat, lon = decor.nodes$lon)
+
+  # plot
+  ggraph(bb, layout = "stress") +
+    geom_node_point() +
+    geom_edge_fan(color = "red", alpha = 0.8, aes(width = centrality_edge_betweenness())) +
+    scale_edge_width(range = c(0.2, 3)) +
+    geom_node_text(data = . %>% filter(centrality_betweenness(weights = weight) > mean(centrality_betweenness(weights = weight))), aes(label = label), repel = TRUE) +
+    theme_graph() +
+    theme(legend.position = "none")
+}
+
+p1 <- bb.edge.betw(90) + ggtitle("90%")
+p2 <- bb.edge.betw(80) + ggtitle("80%")
+p3 <- bb.edge.betw(70) + ggtitle("70%")
+p4 <- bb.edge.betw(60) + ggtitle("60%")
+
+p1 + p2 + p3 + p4
+```
+What is clear is that the backbone is, predictably, quite sensitive to random edge deletion, and therefore edge_betweenness is very much dependent on whether an edge exists or not. For the purposes of generating hypotheses for archaeological testing, we have still found this method superior to other methods of finding paths through networks, such as an inverted version of Kruskal's minimum spanning tree (for details and code, see Annex) 
+
+
+The edge betweenness measure shows a central path through the network, connecting the sites of Togu Missiri, Tongo Maaré Diabal, Hambarketolo, Damassogou, Ambéré-Dougon, and Sadia, as well as a prominent side route connecting Gao and Kawinza.These might roughly represent two routes of knowledge exchange: one important one passing through the eastern side of the Inland Niger Delta and below the Niger Bend, in which the Jenné site cluster plays a pivotal role as the meeting place between the three networks of knowledge exchange, and another, though less important to the network we have sampled, along the western side of the IND and north of the Niger Bend to Gao.
+
+# Diachronic analysis
+
+## NB clean this part and update the site list.
+
+```{r import-new-data}
+library(readr)
+decorsearly <- read_csv2(here::here("analysis/data/raw_data/decors_early.csv"))
+
+# apply function to transform frequency table into edge list
+edgelist <- make_edgelist(decorsearly)
+
+# construct network, remove extraneous sites
+decor_graph_early <- tbl_graph(sites, edgelist, directed = FALSE) %>%
+  activate(nodes) %>%
+  filter(!node_is_isolated())
+
+decor_graph_early
+```
+
+
+## Backbone extraction
+
+```{r early-backbone, fig.cap="early backbone"}
+# flatten with weights
+early_flat <- flatten(decor_graph_early, weighted = TRUE)
+
+library(backbone)
+# extract backbone
+early.flat.bb <- backbone::disparity(as.igraph(early_flat), alpha = 0.31, narrative = TRUE) %>%
+  tidygraph::as_tbl_graph()
+
+# igraph transformation loses the node attributes, so we put them back
+early.flat.nodes <- early_flat %>%
+  activate(nodes) %>%
+  as_tibble()
+early.flat.bb <- early.flat.bb %>%
+  activate(nodes) %>%
+  mutate(label = early.flat.nodes$label, lat = early.flat.nodes$lat, lon = early.flat.nodes$lon)
+
+ggraph(early.flat.bb, layout = "stress") +
+  geom_node_point() +
+  geom_edge_fan(color = "red", alpha = 0.8) +
+  scale_edge_width(range = c(0.2, 3)) +
+  geom_node_text(aes(label = label), repel = TRUE) +
+  theme_graph()
+```
+
+This backbone (\@ref(fig:early-backbone))looks significantly different from the later one, though we still distinguish an IND group, a very clear Dogon group, and one that includes "others": Kawinza, TMD, Tiebala, Akumbu. Essouk is isolated. Clustering similarly revelas these two communities.
+
+A more in-depth treatment of the temporal development of the pottery networks in this area will be the subject of a future publication. For now, we might draw the following preliminary conclusions: The comparison of the two networks appears to show a process of increasing fragmentation between the two periods reflected by the graphs, but also the growth of netwroks to incorporate more diverse influences. 
+# Results
+
+
+# Discussion
+
+Potter communities and the propagation of knowledge within them, has been the subject of several very detailed ethnoarchaeological and archaeological studies in this region. This study has left these out, quite purposefully. Their boundaries might be seen in other elements of the pottery making sequence, notably in the forming technique, and they do not necessarily overlap with decors. Our network model instead is intended to represent communication of knowledge about pottery that transcends smaller communities of practice. As such, it shows a first picture of how decorative techniques might have developed and what mechanisms are at the basis of the patterns in archaeological ceramics that are seen on sites along the Middle Niger. 
+
+The results of our analyses suggest that the propagation of pottery decor motifs occurs within networks of differing magnitudes. Some of these networks are local, geographically and possibly also culturally bounded. This can, for instance, be seen in the group of sites on the Bandiagara massif and in the Seno plain, or in the eastern part of the IND. Cross-cutting such local developments, however, are long-distance contacts along the Niger River, which led to similarities between very distant sites. This underlines a key aspect of past cultural dynamics in the wider region: there is both a high level of cultural diversity, of human groups and languages, and overarching regional connectivity. These two processes, the local and the global, have been in exchange with one another shaping the Middle Niger cultural landscape. Every site assemblage can therefore be seen to be reflective of how strongly innovation and tradition influenced local potting communities. Changes in the diversity of decors in an assemblage, noted for instance at XXX, might therefore reflect changes to the degree in which the population supplying pottery to a site was exposed and open to new influences.
+
+It is of key importance in this approach to note where this interaction between network groups takes place. While the archaeological record is necessarily only a sample and many nodes are missing, we can nevertheless gain a preliminary insight into the channels along which information on pottery decoration was shared, identify those sites within the record which occupy key positions in this exchange, and to suggest key routes. The latter, built on edge betweenness, is significant in that it might suggest those areas (for instance between Kawinza and Gao) which are not represented by nodes in the model, but were nevertheless important to the exchange network.
+
+The diachronic comparison of two networks from different periods begins to show us processes of innovation, and how these change networks. This must be seen as a work in progress, and a fuller picture will be the subject of future publications.Nevertheless, we can detect how the sites within the IND became a major centre for diversification and diffusion of decorative techniques, while the close-knit and formerly more isolated "Bandiagara cluster" opened up to outside influences. Overall, the later period is marked by more ties, an intensifying network. This is likely due to an increased frequency of contact between heterogenous potter communities, perhaps as a result of a combination of increases in population size, the establishment of new markets, and an increased flow of goods contained in pottery. Mayor (REF) has also suggested political factors behind the spread of some decors, though we are not entirely sure of the causality behind this hypothesis. This pattern is less likely to stem from an overall higher mobility of individual potters, since the overlapping structure of the individual technique networks suggests gradual change.
+
+Chronological and spatial approaches to pottery decor in the study region have been largely frustrating, with changes only in percentages of decors which rarely provided the basis for clear phase changes or cultural boundaries. This approach emphasises that this picture of gradual differences points to a strongly connected society, in which pottery producers were routinely exposed to their neighbours' productions, and in which the decorative techniques were mostly able to propagate without impediment. Nevertheless, within this picture, local traditions can be discerned as cliques within the networks, whose degree of isolation varies, but which are never without outside contact.   
+
+
+# Conclusion
+
+Modelling pottery decorative techniques along the Middle Niger as a knowledge exchange network presents a change of perspective on the subject. Previous work has focused on distribution areas and relative prevalence at different sites. We have taken the same information to indicate the degree to which pottery producers supplying the various sites were part of contact networks in which knowledge of decors could spread. While this approach is certainly as reductive as any other, we draw the novel conclusion that the relatively static record of pottery decor in this area is due to a diverse and very well connected population of pottery producers. They exchanged their techniques most frequently on a local level, where geographically bounded closer networks shared intensively. Such exchange might have taken many forms, such as marriage-related mobility, kinship-based learning networks, much more ephemeral exchanges in marketplaces, or even indirect contact by seeing another potter's product. The latter form is the most likely basis for the way in which these local networks corresponded to a larger one: all along the Middle Niger, from our southernmost sample in the Ségou area to Gao and the Saharan entrepot of Essouk, pottery and the knowledge of certain decorative techniques appears to have travelled. Our model suggests that two routes are likely to have been important in this long-distance contact: one along the western IND, the Lakes Region and north of the Niger Bend, and another along the IND's eastern edge and below the Niger Bend. 
+
+These results feed into long-standing discussions on the Middle Niger, and West Africa in general, as a highly connected and interdependent cultural space in the late first and early second millennium AD (for a recent discussion, see Gestrich et al. 2021).
+
+# Acknowledgements
+
+<!-- The following line inserts a page break  -->
+
+\newpage
+
+# References 
+
+<!-- The following line ensures the references appear here for the MS Word or HTML output files, rather than right at the end of the document (this will not work for PDF files):  -->
+
+<div id="refs"></div>
+
+\newpage
+
+### Colophon
+
+This report was generated on `r Sys.time()` using the following computational environment and dependencies: 
+
+```{r colophon, cache = FALSE}
+# which R packages and versions?
+#if ("devtools" %in% installed.packages()) devtools::session_info()
+```
+
+The current Git commit details are:
+
+```{r}
+# what commit is this file at? 
+if ("git2r" %in% installed.packages() & git2r::in_repository(path = ".")) git2r::repository(here::here())  
+```
