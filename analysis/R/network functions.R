@@ -177,7 +177,7 @@ test_centralities <- function(graph, centrality, reps) {
     geom_boxplot(aes(sample, value)) +
     labs(y = expression(paste("Spearman's ", rho))) +
     ylim(0, 1) +
-    theme_publish()
+    theme_bw()
 }
 
 
@@ -202,7 +202,7 @@ test_centralities2 <- function(graph, centrality, reps) {
     geom_boxplot(aes(sample, value)) +
     labs(y = expression(paste("mean Spearman's ", rho))) +
     ylim(0, 1) +
-    theme_publish()
+    theme_bw()
 }
 
 
