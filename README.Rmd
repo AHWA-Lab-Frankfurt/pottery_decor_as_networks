@@ -11,16 +11,16 @@ knitr::opts_chunk$set(
   fig.path = "README-"
 )
 # Please put your title here to include it in the file below.
-Title <- "Title of your paper goes here"
+Title <- "Pottery decor as networks on the Middle Niger"
 ```
 
-# Mali.decor.networks
+# Pottery decor as networks
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/AHWA-Lab-Frankfurt/Mali.decor.networks/master?urlpath=rstudio)
 
 This repository contains the data and code for our paper:
 
-> Authors, (YYYY). _`r Title`_. Name of journal/book <https://doi.org/xxx/xxx>
+> Nikolas Gestrich & Juan-Marco Puerta Schardt, (2023). _`r Title`_. Name of journal/book <https://doi.org/xxx/xxx>
 
 Our pre-print is online here:
 
@@ -49,6 +49,8 @@ The **analysis** directory contains:
     supplementary-materials](/analysis/supplementary-materials):
     Supplementary materials including notes and other documents
     prepared and collected during the analysis.
+  - [:file\_folder: R](/analysis/R): functions for the analysis
+  - [:file\_folder: templates](/analysis/templates): visualisation code
 
 ## How to run in your browser or download and run locally
 
