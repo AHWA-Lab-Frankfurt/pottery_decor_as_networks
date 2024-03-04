@@ -140,11 +140,15 @@ The analysis of the network will attempt to generate hypotheses on how such know
 library(readr)
 # import decor data
 
-decors <- read_csv2(here::here("analysis/data/raw_data/decors_late.csv")) |>
-  select(-1)
+decors <- read_csv2(here::here("analysis/data/raw_data/decors12.csv")) |>
+  select(-1) |> 
+  rename(sites = Site) |> 
+  select(-slip, -unidentified_roulette, -"twisted_cord_roulette?")
 
 # import information on sites
-sites <- read_csv2(here::here("analysis/data/raw_data/sites_all.csv"))
+sites <- read_csv2(here::here("analysis/data/raw_data/sites_all3.csv"))
+
+
 ```
 
 ## Data
@@ -170,6 +174,93 @@ sitemap + inset_element(inset, 0.72, 0.72, 1, 1)
 ## Network construction
 
 Our theoretical approach to what the network represents informs the way in which the network model is constructed. So far, the most frequent form of making ties in archaeological ceramic data has been by calculating the statistical similarity between assemblages. (Hart and Engelbrecht 2012) use the Brainerd-Robinson similarity coefficient, as do, for instance, (Mills et al. 2015), while (de Groot 2019) uses the Jaccard and Kulczyinski-2 similarity measures. The similarity value is then used as the basis and weight for forming a tie between the two assemblage nodes. Since we did not only want to base our network on overall similarity but wanted to be able to closer analyze the networks of individual decors, we have constructed a multiplex network. This is a network in which edges can have different types, and thus the network can be envisaged as having layers. A multiplex network is distinct from a multilayer network, in which connections can also exist between layers, and which has recently seen its first application to archaeological ceramics by (Upton 2019). In our multiplex network, each decorative practice is represented as a distinct layer. The layers share the site assemblages as nodes, though not every node is necessarily represented on every layer. The ties are weighted by the product of the percentages of a given décor in two assemblages. This network construction is implemented in R (R Core Team 2022) using the tidygraph package (Pedersen 2022).
+## quality of data
+```{r}
+library(iNEXT)
+data("ciliates")
+as.data.frame(decors) |> 
+  column_to_rownames("site") |> 
+  t() |> 
+iNEXT(q=0, datatype="incidence_freq", size=NULL, endpoint=NULL, knots=40, se=TRUE, conf=0.95,
+nboot=50)
+
+
+
+```
+```{r}
+ #install_github('AnneChao/iNEXT.4steps') #not currently on CRAN
+ library(iNEXT)
+ library(iNEXT)
+# library(iNEXT.4steps)
+ library(ggplot2)
+ data("ciliates")   #included in package iNEXT
+ 
+ i <- as.data.frame(decors) |> 
+  column_to_rownames("site") |> 
+   head(3) |> 
+  t() |> 
+  iNEXT(q=0, datatype="abundance", size=NULL, endpoint=NULL, knots=40, se=TRUE, conf=0.95,
+nboot=50)
+ 
+ ggiNEXT(i, type=1, facet.var="Assemblage")
+
+ i$figure   #automatically generate plots shown below
+ i
+i$summary
+
+
+i$summary$`STEP2. Asymptotic analysis`
+       
+
+i$summary$`STEP3. Non-asymptotic coverage-based rarefaction and extrapolation analysis`
+       
+
+i$summary$`STEP4. Evenness among species abundances`
+              
+
+
+i$figure
+i$figure[[1]]
+
+i$figure[[2]]
+
+i$figure[[3]]
+
+i$figure[[4]]
+
+i$figure[[5]]
+
+i$figure[[6]]
+
+
+# Example data
+data <- read.table(text = "A B C
+                     X 1 0 1
+                     Y 0 1 1
+                     Z 1 1 0", header = TRUE)
+
+# Correspondence Analysis
+library(FactoMineR)
+data <- read.table(text = "A B C
+                     X 1 0 1
+                     Y 0 1 1
+                     Z 1 1 0", header = TRUE)
+ca_result <- CA(data, graph = FALSE)
+
+# Custom plot combining rows and columns
+plot(ca_result$ind$coord, type = "n", xlab = "Dimension 1", ylab = "Dimension 2", main = "CA Rows and Columns")
+
+# Plot rows
+points(ca_result$row$coord, col = "blue", pch = 16)
+
+# Plot columns
+points(ca_result$col$coord, col = "red", pch = 17)
+
+# Add legend
+legend("topright", legend = c("Rows", "Columns"), col = c("blue", "red"), pch = c(16, 17))
+
+```
+
 
 # Analysis
 
@@ -278,8 +369,10 @@ We approach this question by clustering, or community analysis, which a number o
 ```{r community detection, hide = 'results', echo=FALSE}
 # use louvain clustering method to assign clusters to nodes
 decor_graph <- decor_graph |>
+  activate(edges) |> 
+  filter(!name == "twisted_cord_roulette") |> 
   activate(nodes) |>
-  mutate(louvain = as.character(group_louvain()))
+  mutate(louvain = as.character(group_optimal()))
 
 # calculate modularity of louvain clustering
 modularity <- decor_graph |>
@@ -287,6 +380,10 @@ modularity <- decor_graph |>
   mutate(modularity = graph_modularity(group = as.factor(louvain))) |>
   pull(modularity) |>
   head(1)
+
+
+decor_graph
+
 ```
 
 Here, we employ the same clustering algorithm, which results in three communities with a modularity of `r modularity`. [Modularity shows how clearly the communities can be defined]{.underline} on a scale [from -1 to 1]{.underline} (1 [being a network with completely separated sub-networks]{.underline})[.]{.underline} As is shown in \@ref(fig:plot-clusters), community 1 contains seven sites in an area centered on the Inland Niger Delta. Community 2 also contains seven sites, but located in the so-called "Dogon Country", on the eastern edge of the IND, on the Bandiagara plateau and in the Seno plain. Community 3 has the fewest nodes, but geographically the largest extent, containing the southernmost site of the study near Ségou, Togu Missiri, as well as the northernmost at Essouk in the Sahara. The nodes of community 3 show frequent connections to sites of communities 1 and 2, while those communities are not as strongly connected between each other.
@@ -571,14 +668,14 @@ The network of interactions that we have been working with up to this point is b
 ```{r import-new-data}
 library(readr)
 decorsearly <- 
-  read_csv2(here::here("analysis/data/raw_data/decors_early.csv")) |>
+  read_csv2(here::here("analysis/data/raw_data/decors9.csv")) |>
   select(-1)
 
 # apply function to transform frequency table into edge list
 edgelist <- make_edgelist(decorsearly)
 
 # construct network, remove extraneous sites
-decor_graph_early <- tbl_graph(sites, edgelist, directed = FALSE) |>
+decor_graph_early <- tbl_graph(sites, edgelist, directed = FALSE) |> 
   activate(nodes) |>
   filter(!node_is_isolated())
 ```
@@ -600,7 +697,9 @@ early_flat_nodes <- early_flat |>
 early_flat_bb <- early_flat_bb |>
   activate(nodes) |>
   mutate(label = early_flat_nodes$label,
-         lat = early_flat_nodes$lat, lon = early_flat_nodes$lon)
+         lat = early_flat_nodes$lat, 
+         lon = early_flat_nodes$lon
+         )
 
 #plot
 ggraph(early_flat_bb, layout = "stress") +
