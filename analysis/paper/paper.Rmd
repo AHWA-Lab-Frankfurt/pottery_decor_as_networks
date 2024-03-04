@@ -369,6 +369,8 @@ We approach this question by clustering, or community analysis, which a number o
 ```{r community detection, hide = 'results', echo=FALSE}
 # use louvain clustering method to assign clusters to nodes
 decor_graph <- decor_graph |>
+  activate(edges) |> 
+  filter(!name == "twisted_cord_roulette") |> 
   activate(nodes) |>
   mutate(louvain = as.character(group_optimal()))
 
@@ -378,6 +380,10 @@ modularity <- decor_graph |>
   mutate(modularity = graph_modularity(group = as.factor(louvain))) |>
   pull(modularity) |>
   head(1)
+
+
+decor_graph
+
 ```
 
 Here, we employ the same clustering algorithm, which results in three communities with a modularity of `r modularity`. [Modularity shows how clearly the communities can be defined]{.underline} on a scale [from -1 to 1]{.underline} (1 [being a network with completely separated sub-networks]{.underline})[.]{.underline} As is shown in \@ref(fig:plot-clusters), community 1 contains seven sites in an area centered on the Inland Niger Delta. Community 2 also contains seven sites, but located in the so-called "Dogon Country", on the eastern edge of the IND, on the Bandiagara plateau and in the Seno plain. Community 3 has the fewest nodes, but geographically the largest extent, containing the southernmost site of the study near Ségou, Togu Missiri, as well as the northernmost at Essouk in the Sahara. The nodes of community 3 show frequent connections to sites of communities 1 and 2, while those communities are not as strongly connected between each other.
@@ -669,7 +675,7 @@ decorsearly <-
 edgelist <- make_edgelist(decorsearly)
 
 # construct network, remove extraneous sites
-decor_graph_early <- tbl_graph(sites, edgelist, directed = FALSE) |>
+decor_graph_early <- tbl_graph(sites, edgelist, directed = FALSE) |> 
   activate(nodes) |>
   filter(!node_is_isolated())
 ```
@@ -691,7 +697,9 @@ early_flat_nodes <- early_flat |>
 early_flat_bb <- early_flat_bb |>
   activate(nodes) |>
   mutate(label = early_flat_nodes$label,
-         lat = early_flat_nodes$lat, lon = early_flat_nodes$lon)
+         lat = early_flat_nodes$lat, 
+         lon = early_flat_nodes$lon
+         )
 
 #plot
 ggraph(early_flat_bb, layout = "stress") +
