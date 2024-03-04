@@ -76,6 +76,8 @@ library(igraph)
 
 # Load the tidyr package for data tidying and reshaping
 library(tidyr)
+library(tidyverse)
+
 
 # Load the sf package for reading, writing, and manipulating spatial data
 library(sf)
@@ -374,6 +376,13 @@ decor_graph <- decor_graph |>
   activate(nodes) |>
   mutate(louvain = as.character(group_optimal()))
 
+decor_graph1 <- decor_graph |>
+    activate(edges) |> 
+   filter(str_detect(name, "roulette") | name %in% c("paint", "straight_mat_impression"))  |> 
+  activate(nodes) |>
+  mutate(louvain = as.character(group_louvain()))
+
+
 # calculate modularity of louvain clustering
 modularity <- decor_graph |>
   activate(nodes) |>
@@ -381,9 +390,29 @@ modularity <- decor_graph |>
   pull(modularity) |>
   head(1)
 
+decor_graph1 <- decor_18 |>
+  activate(nodes) |>
+  mutate(louvain = as.character(group_louvain()))
 
-decor_graph
+decor_graph1 <- decor_graph |>
+  activate(nodes) |>
+  mutate(louvain = as.data.frame(decor_graph1, "vertices")$louvain)
 
+decor_graph1
+
+decor_graph |>
+  activate(edges) |> 
+  filter(str_detect(name, "roulette") | name %in% c("paint", "straight_mat_impression"))  |> 
+  as.data.frame("edges") |> 
+  group_by(name) |> 
+  summarise()
+
+decor_graph |>
+  activate(edges) |> 
+  filter(str_detect(name, "strip_roulette")| str_detect(name, "cord_roulette"))  |> 
+  as.data.frame("edges") |> 
+  group_by(name) |> 
+  summarise()
 ```
 
 Here, we employ the same clustering algorithm, which results in three communities with a modularity of `r modularity`. [Modularity shows how clearly the communities can be defined]{.underline} on a scale [from -1 to 1]{.underline} (1 [being a network with completely separated sub-networks]{.underline})[.]{.underline} As is shown in \@ref(fig:plot-clusters), community 1 contains seven sites in an area centered on the Inland Niger Delta. Community 2 also contains seven sites, but located in the so-called "Dogon Country", on the eastern edge of the IND, on the Bandiagara plateau and in the Seno plain. Community 3 has the fewest nodes, but geographically the largest extent, containing the southernmost site of the study near Ségou, Togu Missiri, as well as the northernmost at Essouk in the Sahara. The nodes of community 3 show frequent connections to sites of communities 1 and 2, while those communities are not as strongly connected between each other.
@@ -392,7 +421,7 @@ Here, we employ the same clustering algorithm, which results in three communitie
 # set plot colours for communities
 communitycolor <-
   setNames(
-    c("tomato", "cornflowerblue", "darkgreen"),
+    c("tomato", "cornflowerblue", "darkgreen", "yellow"),
     unique(V(decor_graph)$louvain)
   )
 
@@ -416,7 +445,7 @@ decorcolor <- setNames(col_21, decortypes)
 # disable s2 geometry to plot on map
 sf_use_s2(FALSE)
 
-ggraph(decor_graph, x = lon, y = lat) +
+ggraph(decor_graph1, x = lon, y = lat) +
   geom_sf(data = mali_adm0, fill = NA) +
   geom_sf(data = rivers, colour = "black") +
   edges_community +
@@ -435,7 +464,7 @@ ggraph(decor_graph, x = lon, y = lat) +
 The clustering of the network appears to be influenced quite strongly by geographic features. In the case of community 1, this is the IND and its adjacent areas, which were heavily populated at this time (McIntosh 1995, pp. 373--377). The population density is likely to have been a significant factor in the spread of pottery decors, as Gosselain has suggested. \@ref(fig:cluster1) shows that there is a very well connected group of geographically close sites in the eastern IND (Jenné-jeno (J-J), Hambarketolo (Hamb), and Kaniana are part of the same wider site cluster). This community mainly shared braided cord roulettes, dragged comb incisions.Interestingly, this also includes the site of Kawinza in the Malian Lakes Region (Raimbault and Sanogo 1991). Sites on the western margin of the IND, Dia and Akumbu, are less well connected in this period, conforming to the observations of McIntosh (1995, pp. 369--370), but these remain connected via folded strip roulettes and painted decors.
 
 ```{r cluster1, fig.cap="Internal connections within community 1"}
-decor_graph %>%
+decor_graph1 %>%
   activate(nodes) %>%
   mutate(deg = centrality_eigen(weights = weight)) %>%
   filter(louvain == 1) %>%
@@ -443,7 +472,7 @@ decor_graph %>%
   geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
   scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
   scale_edge_width(range = c(0.2, 2)) +
-  geom_node_point(size = 3, colour = "cornflowerblue") +
+  geom_node_point(aes(size = centrality_degree(weights = weight)), colour = "cornflowerblue") +
   geom_node_text(aes(label = label), col = "black", repel = TRUE) +
   theme_graph()
 ```
@@ -451,7 +480,7 @@ decor_graph %>%
 The main geographic factor affecting community 2, and isolating it from community 1, is the mountainous region of the Bandiagara plateau. The cluster has strong links, mostly because of the common use of braided strip roulettes and impressions of a straight-woven cord mat (\@ref(fig:cluster2). The networks exchanging these decors, which are in part linked to base forming techniques, appear to have had a spatial component, with mat impressions linking sites in the Seno plain while braided strip roulettes are more strongly shared on the Bandiagara plateau. These spheres, however, had considerable overlap, most notably at the Sangha cave sites (Tellem) and at Sadia.
 
 ```{r cluster2, fig.cap="Internal connections within community 2"}
-decor_graph %>%
+decor_graph1 %>%
   activate(nodes) %>%
   mutate(deg = centrality_eigen(weights = weight)) %>%
   filter(louvain == 2) %>%
@@ -459,7 +488,7 @@ decor_graph %>%
   geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
   scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
   scale_edge_width(range = c(0.2, 2)) +
-  geom_node_point(size = 3, colour = "tomato") +
+  geom_node_point(aes(size = centrality_degree(weights = weight)), colour = "tomato") +
   geom_node_text(aes(label = label), col = "black", repel = TRUE) +
   theme_graph()
 ```
@@ -467,7 +496,7 @@ decor_graph %>%
 Community 3 appears to be linked through the wider Niger river system and the long-distance exchange routes that linked into it. This cluster is the most diverse one regarding the types of decoration techniques shared (\@ref(fig:cluster3)), yet the weak nature of the resulting ties shows that this might be due to more exchange of artifacts and less in common shared knowledge across artisans. This is particularly visible at Essouk, which has the weakest connections that, due to its position and cultural history (Nixon 2017), are probably due to imports more than a shared cultural sphere. All of the sites in the community have been linked to long-distance trade (Insoll 1996; Nixon 2017; Gestrich and MacDonald 2018; Gestrich et al. 2021), though this applies just as well to some of the sites in the other communities. The fact that these cluster together is likely due to the fact that their closer local communities are not part of the network model. This, however, allows us to see such ephemeral, long-distance connections based on weaker ties that might be obscured by more intense local exchange.
 
 ```{r cluster3, fig.cap="Internal connections within community 3"}
-decor_graph %>%
+decor_graph1 %>%
   activate(nodes) %>%
   mutate(deg = centrality_eigen(weights = weight)) %>%
   filter(louvain == 3) %>%
@@ -475,29 +504,43 @@ decor_graph %>%
   geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
   scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
   scale_edge_width(range = c(0.2, 2)) +
-  geom_node_point(size = 3, colour = "darkgreen") +
+  geom_node_point(aes(size = centrality_degree(weights = weight)), colour = "darkgreen") +
   geom_node_text(aes(label = label), col = "black", repel = TRUE) +
   theme_graph()
 ```
+```{r cluster3, fig.cap="Internal connections within community 3"}
+decor_graph1 %>%
+  activate(nodes) %>%
+  mutate(deg = centrality_eigen(weights = weight)) %>%
+  filter(louvain == 4) %>%
+  ggraph(layout = "graphopt") +
+  geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
+  scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+  scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = centrality_degree(weights = weight)), colour = "yellow") +
+  geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  theme_graph()
+```
+
 
 The measures of network centralization and the mean weight of the edges relative to their number show us that communities 1 and 2 are more equally connected with higher weights, whereas community 3's network is more centralized, thus more uneven, but also much less intense (@ref(fig:cluster-comparison)). This suggests to us a fundamental difference in the nature of the networks. Communities 1 and 2 may have been founded on close cultural ties, frequent exchanges, and maybe even kinship bonds within specialized potter communities. Cultural frontiers, accentuated by geographical boundaries, hindered the spread of decorative techniques between them. Community 3 seems to have been a network based on far less intense contacts, such as sporadic movement of individuals in the context of trade or migration or indirect, down-the-line, exchange of knowledge. \@ref(fig:cluster_centralities) shows the distribution of the weighted degree and eigenvector centralities for each community within the overall network. Clearly, community 1 consists of nodes that both have more and stronger connections and consequently a higher potential for influence on the network. This reflects a number of points in the archaeological record. Firstly, the ceramics in the IND are highly decorated with diverse decors during this period. The clustered urban sites in this area are likely to have been culturally diverse, both drawing in populations from surrounding areas and exerting cultural influence across the wider region. McIntosh sees the Eastern IND as becoming increasingly culturally distinct from the Western and Northern IND during this period (McIntosh 1995, p. 372), and the emergence of new material cultural practices may well be reflected in these measures.
 
 ```{r cluster-comparison, fig.cap="Relative edge weights and centralization by cluster"}
 # adding community/crossing to the edges
-decor_graph <- decor_graph |>
+decor_graph1 <- decor_graph1 |>
   add_community_edges()
 
 # mean edge weights
-mean_edge_weight <- decor_graph |>
+mean_edge_weight <- decor_graph1 |>
   get.data.frame("edges") |>
   filter(community != "crossing") |>
   group_by(community) |>
   summarise(mean_weight = mean(weight))
 
 # Centralization of the cluster
-centralization <- vector("double", length(3))
-for (i in 1:3) {
-  centralization[[i]] <- decor_graph |>
+centralization <- vector("double", length(4))
+for (i in 1:4) {
+  centralization[[i]] <- decor_graph1 |>
     # filter community
     activate(nodes) |>
     filter(louvain == i) |>
@@ -520,7 +563,7 @@ g1 <- mean_edge_weight |>
 
 # Graph of centralization of the different communities
 g2 <- tibble(centralization) |>
-  mutate(community = 1:3) |>
+  mutate(community = 1:4) |>
   pivot_longer(!community, names_to = "key", values_to = "centralisation") |>
   ggplot(aes(x = community, y = centralisation)) +
   geom_bar(stat = "identity", position = "dodge") +
@@ -535,7 +578,7 @@ g1 + g2
 ```{r cluster_centralities, fig.cap="Distribution of weighted degree and eigenvector centralities by community."}
 
 # Calculate centralities for each cluster
-centr <- pull_centralities_clust(decor_graph)
+centr <- pull_centralities_clust(decor_graph1)
 
 # Display boxplots of centralities for degree centrality
 a <- ggplot(centr) +
@@ -564,7 +607,7 @@ These three communities, however, were by no means separate from one another. If
 ```{r crossings, fig.cap="Network of edges which cross between clusters"}
 
 #show crossings with a weight over 3
-decor_graph |>
+decor_graph1 |>
   filter(
     community == "crossing",
     weight > 3
@@ -597,7 +640,7 @@ decor_flat <- flatten(decor_graph, weighted = TRUE)
 # extract binary backbones at decreasing levels of significance
 decor_05 <- extract_backbone(decor_flat, 0.05)
 decor_15 <- extract_backbone(decor_flat, 0.15)
-decor_18 <- extract_backbone(decor_flat, 0.18)
+decor_18 <- extract_backbone(decor_flat, 0.20) #20 ideale anzahl?
 
 # plot
 p1 <- plot.bb(decor_05)
