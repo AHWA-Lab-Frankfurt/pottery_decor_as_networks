@@ -140,11 +140,13 @@ The analysis of the network will attempt to generate hypotheses on how such know
 library(readr)
 # import decor data
 
-decors <- read_csv2(here::here("analysis/data/raw_data/decors_late.csv")) |>
-  select(-1)
+decors <- read_csv2(here::here("analysis/data/raw_data/decors12.csv")) |>
+  select(-1) |> 
+  rename(sites = Site) |> 
+  select(-slip, -unidentified_roulette, -"twisted_cord_roulette?")
 
 # import information on sites
-sites <- read_csv2(here::here("analysis/data/raw_data/sites_all.csv"))
+sites <- read_csv2(here::here("analysis/data/raw_data/sites_all3.csv"))
 
 
 ```
@@ -368,7 +370,7 @@ We approach this question by clustering, or community analysis, which a number o
 # use louvain clustering method to assign clusters to nodes
 decor_graph <- decor_graph |>
   activate(nodes) |>
-  mutate(louvain = as.character(group_louvain()))
+  mutate(louvain = as.character(group_optimal()))
 
 # calculate modularity of louvain clustering
 modularity <- decor_graph |>
@@ -660,7 +662,7 @@ The network of interactions that we have been working with up to this point is b
 ```{r import-new-data}
 library(readr)
 decorsearly <- 
-  read_csv2(here::here("analysis/data/raw_data/decors_early.csv")) |>
+  read_csv2(here::here("analysis/data/raw_data/decors9.csv")) |>
   select(-1)
 
 # apply function to transform frequency table into edge list
