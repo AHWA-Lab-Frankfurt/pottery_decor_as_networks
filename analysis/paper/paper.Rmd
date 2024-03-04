@@ -145,6 +145,8 @@ decors <- read_csv2(here::here("analysis/data/raw_data/decors_late.csv")) |>
 
 # import information on sites
 sites <- read_csv2(here::here("analysis/data/raw_data/sites_all.csv"))
+
+
 ```
 
 ## Data
@@ -170,6 +172,93 @@ sitemap + inset_element(inset, 0.72, 0.72, 1, 1)
 ## Network construction
 
 Our theoretical approach to what the network represents informs the way in which the network model is constructed. So far, the most frequent form of making ties in archaeological ceramic data has been by calculating the statistical similarity between assemblages. (Hart and Engelbrecht 2012) use the Brainerd-Robinson similarity coefficient, as do, for instance, (Mills et al. 2015), while (de Groot 2019) uses the Jaccard and Kulczyinski-2 similarity measures. The similarity value is then used as the basis and weight for forming a tie between the two assemblage nodes. Since we did not only want to base our network on overall similarity but wanted to be able to closer analyze the networks of individual decors, we have constructed a multiplex network. This is a network in which edges can have different types, and thus the network can be envisaged as having layers. A multiplex network is distinct from a multilayer network, in which connections can also exist between layers, and which has recently seen its first application to archaeological ceramics by (Upton 2019). In our multiplex network, each decorative practice is represented as a distinct layer. The layers share the site assemblages as nodes, though not every node is necessarily represented on every layer. The ties are weighted by the product of the percentages of a given décor in two assemblages. This network construction is implemented in R (R Core Team 2022) using the tidygraph package (Pedersen 2022).
+## quality of data
+```{r}
+library(iNEXT)
+data("ciliates")
+as.data.frame(decors) |> 
+  column_to_rownames("site") |> 
+  t() |> 
+iNEXT(q=0, datatype="incidence_freq", size=NULL, endpoint=NULL, knots=40, se=TRUE, conf=0.95,
+nboot=50)
+
+
+
+```
+```{r}
+ #install_github('AnneChao/iNEXT.4steps') #not currently on CRAN
+ library(iNEXT)
+ library(iNEXT)
+# library(iNEXT.4steps)
+ library(ggplot2)
+ data("ciliates")   #included in package iNEXT
+ 
+ i <- as.data.frame(decors) |> 
+  column_to_rownames("site") |> 
+   head(3) |> 
+  t() |> 
+  iNEXT(q=0, datatype="abundance", size=NULL, endpoint=NULL, knots=40, se=TRUE, conf=0.95,
+nboot=50)
+ 
+ ggiNEXT(i, type=1, facet.var="Assemblage")
+
+ i$figure   #automatically generate plots shown below
+ i
+i$summary
+
+
+i$summary$`STEP2. Asymptotic analysis`
+       
+
+i$summary$`STEP3. Non-asymptotic coverage-based rarefaction and extrapolation analysis`
+       
+
+i$summary$`STEP4. Evenness among species abundances`
+              
+
+
+i$figure
+i$figure[[1]]
+
+i$figure[[2]]
+
+i$figure[[3]]
+
+i$figure[[4]]
+
+i$figure[[5]]
+
+i$figure[[6]]
+
+
+# Example data
+data <- read.table(text = "A B C
+                     X 1 0 1
+                     Y 0 1 1
+                     Z 1 1 0", header = TRUE)
+
+# Correspondence Analysis
+library(FactoMineR)
+data <- read.table(text = "A B C
+                     X 1 0 1
+                     Y 0 1 1
+                     Z 1 1 0", header = TRUE)
+ca_result <- CA(data, graph = FALSE)
+
+# Custom plot combining rows and columns
+plot(ca_result$ind$coord, type = "n", xlab = "Dimension 1", ylab = "Dimension 2", main = "CA Rows and Columns")
+
+# Plot rows
+points(ca_result$row$coord, col = "blue", pch = 16)
+
+# Plot columns
+points(ca_result$col$coord, col = "red", pch = 17)
+
+# Add legend
+legend("topright", legend = c("Rows", "Columns"), col = c("blue", "red"), pch = c(16, 17))
+
+```
+
 
 # Analysis
 
