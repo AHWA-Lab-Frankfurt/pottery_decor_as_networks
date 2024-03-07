@@ -1,0 +1,912 @@
+---
+title: "Data preparation"
+author: "Nikolas Gestrich and Juan Marco Puerta Schardt"
+format: html
+editor: visual
+---
+
+```{r libraries}
+library(dplyr)
+library(readxl)
+library(readr)
+library(tibble)
+library(tidyr)
+library(stringr)
+```
+
+## Jenné-jeno
+
+For the 12^th^ century network, Jenne -jeno LXN levels 15-24 were used, which date to the period AD 1030-1200. For the 9^th^ century network, LXN levels 29-40 were used which date to the late 9^th^ early 10^th^ centuries (S. K. McIntosh pers.comm.) The raw sherd data were kindly given to us by Susan Keech McIntosh.
+
+```{r jenne-jeno data prep 1}
+# read data
+Jj <- read_xlsx(here::here("analysis/data/raw_data/Jenne-jeno 1981 rim sherd data.xlsx"), sheet = 2)
+
+# subset 12th century contexts
+Jj12 <- Jj |> 
+  filter(PIT == 1,
+         Level > 14,
+         Level < 25)
+
+# subset 9th century contexts
+Jj9 <- Jj |> 
+  filter(PIT == 1,
+         Level > 28,
+         Level < 41)
+```
+
+Decors are coded separately in three columns, Twine, Paint, and Plastic. The slip coded in the surface columns is left our due to uneven reporting at other sites. We now prepare percentage tables for each of these, standardise their naming, and then merge them together.
+
+```{r jenne-jeno data prep 2}
+# Twine decors
+Jj12twine <- Jj12 |> 
+  count(Twine) |> 
+  mutate(percent = n/143 * 100) |> 
+  select(!n) |> 
+  pivot_wider(names_from = Twine, values_from = percent) |> 
+  rename_with( ~ paste0("tw", .x))
+
+# standardise nomenclature
+Jj12twine <- Jj12twine |> 
+  mutate(braided_cord_roulette = tw1 + tw2 + tw3, # Twine patterns 1, 2, and 3 are all made by rouletting a braided cord
+         folded_strip_roulette = tw4 + tw5, # Twines 4 and 5 are folded strip roulette patterns
+         twisted_cord_roulette = tw6 + tw7) |>  # twines 6 and 7 are made using a twisted cord roulette
+  select(ends_with("roulette"))
+
+# the code 40 in twine is unclear, and thus left out 
+
+
+# Paint decors
+Jj12paint <- Jj12 |> 
+  count(Paint) |> 
+  mutate(percent = n/143 * 100) |> 
+  select(!n) |> 
+  pivot_wider(names_from = Paint, values_from = percent) |> 
+  rename_with( ~ paste0("x", .x))
+
+Jj12paint <- Jj12paint |>  
+  select(-x0)
+  
+Jj12paint <- Jj12paint |>    
+  mutate(paint = rowSums(Jj12paint)) |> # summing all paint decors regardless of colour
+  select(-starts_with("x")) 
+
+
+# Plastic decors
+Jj12plastic <- Jj12 |> 
+  count(Plastic) |> 
+  mutate(percent = n/143 * 100) |> 
+  select(!n) |> 
+  pivot_wider(names_from = Plastic, values_from = percent) |> 
+  rename_with( ~ paste0("x", .x))
+
+Jj12plastic <- Jj12plastic |> 
+  mutate(channel = x1+x2, #single and multiple grooves are treated as one category
+         nonparallel_grooves = x3,
+         impressed_comb = x4+x46+x47,
+         finger_arcs = x13,
+         dragged_comb = x24+x29+x93,
+         punctate = x27, 
+         applied_plastic = x91) |> 
+  select(-starts_with("x")) 
+         
+ Jj12decor <- bind_cols(Jj12paint, Jj12plastic, Jj12twine)  
+ rownames(Jj12decor) <- "Jenne-jeno12"
+```
+
+Same procedure for the 9th century contexts
+
+```{r jenne-jeno data prep 3}
+# Twine decors
+Jj9twine <- Jj9 |> 
+  count(Twine) |> 
+  mutate(percent = n/360 * 100) |> 
+  select(!n) |> 
+  pivot_wider(names_from = Twine, values_from = percent) |> 
+  rename_with( ~ paste0("tw", .x))
+
+# standardise nomenclature
+Jj9twine <- Jj9twine |> 
+  mutate(braided_cord_roulette = tw1 + tw2 + tw3 + tw10, # Twine patterns 1, 2, 3, and 10 are all made by rouletting a braided cord
+         folded_strip_roulette = tw4 + tw5, # Twines 4 and 5 are folded strip roulette patterns
+         twisted_cord_roulette = tw6 + tw7 + tw12, # twines 6 and 7 are made using a twisted cord roulette
+         cord_wrapped_stick_roulette = tw14) |> 
+  select(ends_with("roulette"))
+
+# the code 40 in twine is unclear, and thus left out 
+
+
+# Paint decors
+Jj9paint <- Jj9 |> 
+  count(Paint) |> 
+  mutate(percent = n/360 * 100) |> 
+  select(!n) |> 
+  pivot_wider(names_from = Paint, values_from = percent) |> 
+  rename_with( ~ paste0("x", .x))
+
+Jj9paint <- Jj9paint |> 
+  select(-x0)
+
+Jj9paint <- Jj9paint |> 
+  mutate(paint = rowSums(Jj9paint)) |> # summing all paint decors regardless of colour
+  select(-starts_with("x")) 
+
+
+# Plastic decors
+Jj9plastic <- Jj9 |> 
+  count(Plastic) |> 
+  mutate(percent = n/360 * 100) |> 
+  select(!n) |> 
+  pivot_wider(names_from = Plastic, values_from = percent) |> 
+  rename_with( ~ paste0("x", .x))
+
+Jj9plastic <- Jj9plastic |> 
+  mutate(channel = x1+x2+x18, #single and multiple grooves are treated as one category
+         nonparallel_grooves = x3,
+         finger_arcs = x13, 
+         applied_plastic = x91,
+         applied_ridges = x11,
+         incised = x9+x12+x39,
+         fingernail_impression = x18) |> 
+  select(-starts_with("x")) 
+         
+ Jj9decor <- bind_cols(Jj9paint, Jj9plastic, Jj9twine)  
+ rownames(Jj9decor) <- "Jenne-jeno9"
+ 
+
+```
+
+Creating a dataframe with the number of decorations in Jenne-Jeno
+
+```{r}
+n_jj <- data.frame(
+  site = c("Jenne-jeno9","Jenne-jeno12"),
+  n = c(360,143)
+)
+```
+
+## Togu Missiri
+
+The data for the 12th century network includes rim and body sherds from two site phases, C and D (contexts 12 - 23), which comprised of several midden and two floor level deposits. They are dated with two radiocarbon dates to span a period from 1039 to 1222 cal AD.
+
+```{r Togu data prep 1}
+togu <- read_csv2(here::here("analysis/data/raw_data/TOG2 Rim sherds.csv"))
+
+ # subset 12th century contexts
+togu12 <- togu |>
+  mutate(Context = as.numeric(Context)) |> 
+  filter(Context > 11,
+         Context < 24)
+```
+
+Decors are coded in four columns, beginning with "Motif". These are counted and their percentages of the assemblage calculated. Their naming is then standardised.
+
+```{r Togu data prep 2}
+# calculate percentages
+togu_decor <- c(togu12$Motif1, togu12$Motif2, togu12$Motif3, togu12$Motif4) |> 
+  as_tibble() |> 
+  count(value) |> 
+  mutate(percent = (n/148)*100) |> 
+  select(-n) |> 
+  pivot_wider(names_from = value, values_from = percent) |> 
+  rename_with( ~ paste0("x", .x))
+
+# standardise naming
+togu_decor <- togu_decor |> 
+  mutate(
+    channel = xCH+xMCH,
+    braided_cord_roulette = xCR2,
+    folded_strip_roulette = xCR4+xCR4G,
+    twisted_cord_roulette = xCR6,
+    paint = `xP-R` + `xP-R-L` + `xP-R-L-N` + `xP-R-W` + `xP-W-L`,
+    applied_plastic = xPA,
+    applied_ridges = xPA3,
+    fish_spine_roulette = xVPR
+  ) |> 
+  select(-starts_with("x"))
+
+rownames(togu_decor) <- "Togu"
+
+#number of decors in togu missiri
+n_togu <- data.frame(
+  site = c("Togu"),
+  n = c(148)
+)
+```
+
+## **Marakaduguba**
+
+Finds used here come from an unpublished sequence in Unit C, excavated by Mamadou Cissé, Bourahima Ouedraogo and Nafogo Coulibaly. Levels 38, 39, and 40 are used, which consist of construction materials as well as a midden deposit. The levels are dated with two radiocarbon dates (from 40 and 38) to between 770 and 900 cal CE.
+
+```{r MDB data prep 1}
+mdb <- read_csv(here::here("analysis/data/raw_data/MDB_rims.csv"))
+
+ # subset 9th century contexts
+mdb9 <- mdb |>
+  mutate(Context = as.numeric(Context)) |> 
+  filter(Context %in% c(38,39,40))
+```
+
+Decors are coded in five columns, beginning with "Motif". These are counted and their percentages of the assemblage calculated. Their naming is then standardised.
+
+```{r MDB data prep 2}
+# calculate percentages 
+mdb_decor <- c(mdb9$Motif1, mdb9$Motif2, mdb9$Motif3, mdb9$Motif4, mdb9$Motif5) |>    
+  as_tibble() |>    
+  count(value) |>    
+  mutate(percent = (n/59)*100) |>    
+  select(-n) |>    
+  pivot_wider(names_from = value, values_from = percent) |>
+  rename_with( ~ paste0("x", .x))  
+
+# standardise naming 
+mdb_decor <- mdb_decor |>    
+  mutate(     
+    channel = xCH+xMCH,     
+    folded_strip_roulette = xCR4,     
+    twisted_cord_roulette = xCR6,     
+    paint = `xPR`,     
+    incised= xSI2+xSI4,     
+    fish_spine_roulette = xVPR   
+    ) |>   
+  select(-starts_with("x"))  
+
+rownames(mdb_decor) <- "Marakaduguba"
+
+#number of decorations in Marakaduguba
+n_mdb <- data.frame(
+  site = c("Marakaduguba"),
+  n = c(59)
+)
+```
+
+## Tongo Maaré Diabal
+
+Sherds used in the 12^th^ century network stem from the upper levels of Horizon 5, which is dated to 1000-1150. By using only the uppermost layers of this Phase, we attempt to eliminate most of the 11^th^ century material from our sample. For the 9^th^ century network, sherds from Horizon 3 upper (750-900) are used.
+
+```{r TMD data prep 1}
+tmd <- read.csv2(here::here("analysis/data/raw_data/TMD93-96 decor.csv"))
+
+# subset 9th and 12th century contexts
+tmd12 <- tmd |> 
+  filter(Phase == "5 up")
+
+tmd9 <- tmd |> 
+  filter(Phase == "3 up")
+```
+
+As at Togu Missiri and Duguba, the decorative elements are coded in columns prefixed with "Motif". These are extracted, percentages calculated, and names standardised.
+
+```{r TMD data prep 2}
+# 12th c.
+# calculate percentages 
+tmd12_decor <- c(tmd12$Motif1, tmd12$Motif2, tmd12$Motif3, tmd12$Motif4)|>    
+  as_tibble() |> 
+  mutate(value = if_else(value=="", NA_character_ ,value))|>    
+  count(value) |>    
+  mutate(percent = (n/143)*100) |>    
+  select(-n) |>    
+  pivot_wider(names_from = value, values_from = percent) |>
+  rename_with( ~ paste0("x", .x))  
+
+# standardise naming 
+tmd12_decor <- tmd12_decor |>    
+  mutate(  
+    applied_ridges = xAP3,
+    braided_cord_roulette = xCCRY+xTW1,
+    channel = xCH+xMCH, 
+    cord_wrapped_stick_roulette = xCSR1+xCSR7,
+    dragged_comb = xDC1+xDC2,
+    dragged_organics = xGRASS,
+    straight_mat_impression = xICS1+xICS4+xICS7,
+    folded_strip_roulette = xTW4,     
+    twisted_cord_roulette = xTW6+xTW12,     
+    paint = `xP`+ `xP B`+`xP B-G`+`xP B-W`+`xP R`+`xP R-W`+`xP W`+   `xP W+B`+ `xP W-G` + `xP W-W`,     
+    incised= xSI1+xSI3   
+    ) |>   
+  select(-starts_with("x"))  
+
+rownames(tmd12_decor) <- "TMD12"
+
+# 9th century
+
+# calculate percentages 
+tmd9_decor <- c(tmd9$Motif1, tmd9$Motif2, tmd9$Motif3, tmd9$Motif4)|>    
+  as_tibble() |> 
+  mutate(value = if_else(value=="", NA_character_ ,value))|>    
+  count(value) |>    
+  mutate(percent = (n/73)*100) |>    
+  select(-n) |>    
+  pivot_wider(names_from = value, values_from = percent) |>
+  rename_with( ~ paste0("x", .x))  
+
+# standardise naming 
+tmd9_decor <- tmd9_decor |>    
+  mutate(  
+    braided_cord_roulette = xCCRX+xCCRY,
+    channel = xCH+xMCH, 
+    cord_wrapped_stick_roulette = xCSR1+xCSR7+xCSR8+xTW14,
+    dragged_comb = xDC2,
+    dragged_organics = xGRASS,
+    straight_mat_impression = xICS1+`xPD/O`,
+    twisted_cord_impression = xTI1,
+    folded_strip_roulette = xTW4,     
+    twisted_cord_roulette = xTW6+xTW12,     
+    paint = `xP B`+`xP B-G`+`xP B-W`+`xP R`+`xP R-W`+`xP W`+`xP W-G` + `xP W-W`  
+    ) |>   
+  select(-starts_with("x"))  
+
+rownames(tmd9_decor) <- "TMD9"
+```
+
+```{r}
+n_tmd <- data.frame(
+  site = c("TMD9","TMD12"),
+  n = c(73,143)
+)
+```
+
+## Dia Mara
+
+For the 12th century network, we have, by necessity, used body sherd data for Unit D6 Levels 6-8 (Haskell et al. 1988 Table 15 and approximated data from Figure 36), which McIntosh and McIntosh have recently reinterpreted as mostly falling into the 11th century (McIntosh et al. 2023, 21) with new AMS dates from levels 5 and 8 giving a combined span of 1026-1149 cal CE (McIntosh et al. 2023, 19, Table 7)
+
+For the 9th century network, we have used the Horizon III data reported in Arazi (2005) Table 6.34 and 6.35. This is an agglomerate of rim and body sherd decors from Units M, S and Q. This is somewhat problematic as the Horizon III deposits in Unit M are undated, whereas those in Units Q and S are dated by a single date each (Bedaux et al. 2005; Arazi 2005). The date range for both is from the mid-7th to the mid-10th centuries (Q: GX-28750, 1250 +- 60; S: GX-30007-AMS, 1210+-40). Despite the fact that the main probablity ranges for both dates are in the 9th century, considerable insecurity over the stratigraphic and chronological integrity of this sample must remain.  
+
+```{r Mara data prep}
+# 12th century
+mara_12 <- read_csv2(here::here("analysis/data/raw_data/Mara 12.csv"))
+
+n_mara12 <- mara_12 |> 
+  filter(level == "total") |> 
+  pull(n_total)
+
+mara_12 <- mara_12|> 
+  filter(level == "percent") |> 
+  select(-c(n_total, level))
+
+rownames(mara_12) <- "Mara12"
+
+#renaming comb_impression
+mara_12 <- mara_12 |> 
+  rename(impressed_comb = comb_impression)
+# 9th century
+mara_9 <- read_csv2(here::here("analysis/data/raw_data/Mara 9.csv"))
+
+#renaming comb_impression
+mara_9 <- mara_9 |> 
+  rename(impressed_comb = comb_impression,
+         incised = incision)
+
+
+rownames(mara_9) <- "Mara9"
+
+#n of decorations at mara (number of Mara taken from Bedaux et al. 2005, 231)
+n_mara <- data.frame(
+  site = c("Mara9","Mara12"),
+  n = c(281,512)
+)
+```
+
+## ***Dia Shoma***
+
+For the 12th century network, we use body sherd data from Unit Sh7 levels 6-9 (Haskell et al. 1988, Table 11 and Figure 34) which are dated by an AMS date from level 7 spanning from 1040-1165 cal CE (McIntosh et al. 2023, 19, Table 7). The only other date from occupation layers to fall into the 12th century range is from Unit C (1025-1159 cal CE.), but the corresponding ceramic data could not be isolated from the data published by Bedaux et al. or Arazi. The ceramics from these particular levels in Sh7 is discussed by McIntosh and McIntosh (2023) as being unusual and unknown in the remaining sequence at Dia, and as having clear affinities with the eastern IND. In including this material in the network, we should be aware of the fact that it might not well represent "typical" western IND pottery in this period.
+
+For the 9th century, we did not feel comfortable using Horizon III ceramics, as reported in Bedaux et al. (2005). While most Horizon III dates from Shoma stem from burials, a further indication of the problematic nature of deposits from this period, Units F and B have dated Horizon III occupation layers whose dates span the entire second half of the first millennium CE, making the bracket too wide for meaningful comparison. 
+
+```{r Shoma data prep}
+# 12th century
+shoma_12 <- read_csv2(here::here("analysis/data/raw_data/Shoma 12.csv"))
+
+n_Shoma12 <- shoma_12 |> 
+    filter(level == "total") |> 
+  rename(n = n_total) |> 
+mutate(site = "Shoma12")|> 
+select(site, n) 
+
+shoma_12 <- shoma_12|> 
+  filter(level == "percent") |> 
+  select(-c(n_total, level))
+
+
+rownames(shoma_12) <- "Shoma12"
+```
+
+## **Essouk-Tadmekka**
+
+The handmade and unglazed pottery data from Unit Ek-A Periods 3 a and 3b were used in the 12th century network \[\@nixonEssoukTadmekkaEarlyIslamic2017 Appendix E:21\]. It is not entirely certain whether this data refers to rims sherds only, or to rim and body sherds. The overall numbers of studied sherds in table E.21 does not correspond to any of the counts given in Table 12.2, and is somewhat higher than the numbers given for the total number of decorated sherds indicated there. It is therefore unclear what the sample represents. We assume that this an effect of multiple decors on some sherds and have taken the total number of decorated rim and body sherds as a basis for percentage calculation.
+
+Despite the fact that Nixon (2017, 97) includes the 12th and 13th century in the dating for these phases, the radiocarbon dates for the deposits would rather indicate the 11th and 12th centuries as the date range. While only the basal layers of the preceding Period 2 are radiocarbon dated, the beginning of Period 3a has a *terminus post quem* of the 11th century from a sherd of Chinese Qingbai pottery \[\@nixonEssoukTadmekkaEarlyIslamic2017, p. 99-100\]. It therefore seems likely that the bulk of the deposits in these phases stem from the 12th century AD, with some possible admixture from the late 11th and early 13th centuries.
+
+While there are 9th century deposits at Essouk-Tadmekka, they are either too insecurely dated (as in Unit Ek-B), or as in Unit Ek-A Periods 1 and 2, the pottery data presentation does not allow sufficient differentiation of the 9th century deposits from earlier and later ones.
+
+```{r Essouk data prep}
+essouk <- read_csv2(here::here("analysis/data/raw_data/Essouk Phase 3 pottery.csv")) |> 
+  select(n,`decor description`) |> 
+  mutate(percent = (n/450)*100) |> 
+  select(-n) |> 
+  pivot_wider(names_from = `decor description`, 
+              values_from = percent, 
+              values_fn = sum)|> 
+  rename_with( ~ paste0("x", .x)) |> 
+  mutate(across(everything(), as.numeric))
+
+# standardise names
+essouk <- essouk |>
+  mutate(
+    channel = `xsingle channel`+`xmultiple channels`,
+    paint = `xpaint white cross-hatch`+
+      `xpaint white line`+
+      `xpaint whitetriangle`+
+      `xpaint white wash`+
+      `xpaint black line`+
+      `xpaint black wash`+
+      `xpaint red line`+
+      `xpaint-red wash`,
+    finger_impression = `xfinger impressions`+
+      `xfingernail impression`, 
+    dragged_comb = `xdragged comb linear` + 
+      `xdragged comb geometric`,
+    cord_wrapped_impression = `ximpressed cord-wrapped` +
+      `ximpressed cord-wrapped stick`,
+    incised_patterns = `xincised dashed lines`+
+      `xincised geometric`+
+      `xpunctate circular` +
+      `xsideways stylus impression`
+  ) |> 
+  rename(
+    twisted_cord_roulette = `xtwisted cord roulette`, 
+    cord_wrapped_roulette = `xcord-wrapped roulette`
+  ) |> 
+  select(-starts_with("x"))
+
+rownames(essouk) <- "Essouk"
+
+#n of decorations in Essouk
+n_ess <- data.frame(
+  site = c("Essouk"),
+  n = c(450)
+)
+```
+
+## Sanga
+
+While the cave sites studied by Bedaux were only sporadically dated, some contexts are secure enough to be useful for our analysis. This is in particular Grotte C, where very little disturbance was noted by the excavators, and where three dates on human bones in a collective burial of 170 individuals in the excavated 4,5 m2 have their main probability peaks in the late 11^th^ to late 13^th^ centuries. The two sigma range, however, extends from 979 to 1394. Given the nature of the site and the estimated total number of up to 3500 individual skeletons, a long use must be assumed. Grotte C is associated by the excavators with Grotte D below it, which are assumed to have been used at the same time.
+
+For the 12^th^ century network, we have used ceramics from Grotte D recorded at the Rijksmuseum voor Volkenkunde in Leiden in 2012. We include this data despite its time range and problematic dating because the non-settlement nature of the site provides a counterpoint to the other assemblages. Due caution in the interpretation is necessary.
+
+```{r tellem data prep}
+tellem <- read_csv2(here::here("analysis/data/raw_data/LEIDEN_TELLEM.csv")) |> 
+  filter(str_detect(Site, "^D")) 
+
+# calculate percentages
+tellem_decors <- tellem |> 
+  select(starts_with("Decor")) |> 
+  pivot_longer(cols = everything()) |> 
+  count(value) |> 
+  mutate(percent = (n/57)*100) |> 
+  select(-n) |> 
+  pivot_wider(names_from = value, values_from = percent) |> 
+  rename_with( ~ paste0("x", .x))
+
+# standardise decors
+tellem_decors <- tellem_decors |> 
+  mutate(
+    channel = xCH + xMCH,
+    knotted_cord_roulette = xCR1,
+    braided_cord_roulette = xCR2,
+    twisted_cord_roulette = xCR6 + `xB4,CR6`,
+    dragged_organics = xHERB,
+    applied_ridges = xPA4,
+    dragged_comb = xPE1,
+    cord_wrapped_roulette = xPFR1 + xPFR2,
+    incised_patterns = xSI4,
+    braided_strip_roulette = xBSR
+  ) |> 
+  select(-starts_with("x"))
+
+rownames(tellem_decors) <- "Sanga D"
+
+#n of decorations in Essouk
+n_sanga <- data.frame(
+  site = c("Sanga"),
+  n = c(57)
+)
+```
+
+## Toguéré Doupwil
+
+Sherds from section C, period k are used in the 12^th^ century network. The date GrN-7944 (1046-1275 cal CE) dates the lower layer 3 in section C. This layer consists of laminated sands, charcoal and pottery directly overlying the first evidence of building at the site in section C layer 2. This is summarised as period k in section C, which, also contains material from the underlying level 1, a thin occupational layer directly on floodplain material. While it is unlikely that level 2 is much older than the C14 date indicates, the relationship to level 1 is unclear. It is therefore possible that this sample contains material that significantly predates the 12th century.
+
+In section B, Period e also includes the second half of the 12th century, as dated by GrN-7943 (1165-1283 cal CE), but the main peaks of this date fall in the 13th century and the sherds have therefore been excluded from the sample.
+
+```{r doupwil data prep}
+doupwil <- read_csv(here::here("analysis/data/raw_data/Toguere_Doupwil.csv"))
+
+rownames(doupwil) <- "Doupwil"
+
+n_doupwil <- data.frame(
+  site = c("Doupwil"),
+  n = c(33)
+)
+```
+
+## Toguéré Galia
+
+The12^th^ century network includes pottery from Period II. This period, comprising of deposit groups C and D, is dated with a single C14 date to 1026--1217 cal CE (GrN-8555). This date was originally rejected by the excavators as being somewhat too late, since the uncalibrated BP range did not overlap with the underlying date for period I (GrN-7945). The latter date's calibrated range of 1038--1383 cal CE, however, removes this objection. Nevertheless, it must be cautioned that the sequence at this site is not securely dated.
+
+```{r galia data prep}
+#changing names to fit dataset
+galia <- read_csv(here::here("analysis/data/raw_data/Toguere Galia.csv")) |> 
+  rename(dragged_comb = drageed_comb,
+         incised_patterns = incised_pattern) 
+
+rownames(galia) <- "Galia"
+
+n_galia <- data.frame(
+  site = c("Galia"),
+  n = c(99)
+)
+```
+
+## Akumbu
+
+Stratigraphically detailed pottery décor data is available for the body sherds from units AK1 (Togola 2008, pp. 55–57) and AK5 (McIntosh 2017). The body sherd decor from AKB4 is reported in Horizons (Cissé et al. 2017, pp. 41–43). Décor data for rim sherds are not published for any of the excavations.
+
+For the 12th century network, we have used selected data from Akumbu Mound A, Unit AK1’s Middle Assemblage layers. In this unit, a living surface dated to 1266-1425 cal. CE (Beta-40441, 640 +- 70) was constructed above a refuse pit cut into mixed deposits, which the excavator believes to have accumulated slowly. The upper portion of the pit was dated to 1175-1329 cal. CE at 82.6% (Beta-40442, 750+-70). A further, undated, construction episode lay between these deposits and a curvilinear structure with a date (Beta-40443, 980+-70) of 954-1219 cal. CE at 92.7%. While the calibrated date range is rather wide, it was decided to use the pit levels (8,10,13,15) in our analysis. Unfortunately, the pottery data for these layers also includes layer 12, a wall collapse layer with uncertain stratigraphic relationship to the pit, rendering the dating of the sample more insecure. A sample more securely dated to the 12th century might have come from the upper levels of AK4, but the pottery was not recorded.
+
+On Akumbu Mound B, the upper levels in the adjacent Units AK3 and AKB4 date to a range including the 9th century. However, the nearby AK5 has a thin 13th midden deposit overlying 3rd-4th century CE deposits. While the AK3 pottery is not described in detail, AKB4 Horizon 1 has two AMS dates, both from Level 2, which date to 771-976 cal. CE at 98.2% and 771-894 cal. CE at 88.3%. However, the nature of the levels is not made clear in the publication, most of the levels of Horizon 1 lie below this dated deposit, and it is unclear whether Horizon 1 includes the 5^th^-7^th^ century Level 8 or not (cf. Cissé et al. 2017, pp. 36 & 41). Trusting that this is not the case, as is also McIntosh’s (McIntosh 2017, p. 197) interpretation, we have used the Horizon 1 body sherd data for the 9th century network.
+
+There are problems with the pottery data, because paint and incisions are not listed separately even though they are mentioned at being present at the site of AKB4.
+
+```{r}
+#downloading the data from Cisse& Takezawa for the 9th century network
+Akumbu9_decor <- read_csv2(here::here("analysis/data/raw_data/Akumbu early.csv")) |> rename("braided_cord_roulette" = "Cordelette roulee tressee en natte TW1",
+          "folded_strip_roulette" = "Fibre plate pliee TW4",
+"twisted_cord_roulette" = "Cordelette Torsadee TW6",
+"dragged_comb" = "Peigne filete roule", #translation unsure
+"slip" = "Engobe",
+"other" = "Autre") 
+
+#getting the amount of sherds in Akumbu
+n_Aku9 <- Akumbu9_decor |> 
+  pull(n)
+
+#removing undefinded sherds and n from table 
+Aku9_decor <- Akumbu9_decor |> 
+  select(-n, -other)|> 
+  mutate(Site = "Akumbu9") |> 
+  column_to_rownames("Site")
+
+
+
+names(Aku9_decor)
+
+```
+
+```{r}
+Akumbu12 <- read_csv2(here::here("analysis/data/raw_data/Akumbu_12.csv"))
+
+#absolute numbers into proportion
+Akumbu12_decor <- Akumbu12 |> 
+  rename(Site = 1) |> 
+column_to_rownames("Site")  
+  
+  n_Aku12 <- Akumbu12_decor |> 
+  select_if(is.numeric) |> 
+  rowSums()
+
+Aku12_decor <- Akumbu12_decor |> 
+  add_column(n_Aku12) |> 
+  mutate_if(is.numeric, function(x) x/n_Aku12*100) |> 
+  select(-n_Aku12)
+  
+```
+
+```{r}
+n_akumbu <- data.frame(
+  site = c("Akumbu9", "Akumbu12"),
+  n = c(n_Aku9, n_Aku12)
+)
+```
+
+## Ambere-Dougon
+
+```{r}
+AD <- read_csv2(here::here("analysis/data/raw_data/Ambere-Dougon.csv")) |> 
+  rename(straight_mat_impression = "Impression de Vannerie",
+         simple_braided_strip_roulette = "Impression de fibres plates tresses simple",
+         alternate_braided_strip_roulette = "Impressions de Fibre plates tresses alterne",
+        carved_wooden_roulette = "Cylindre grave",
+        slip = "Engobe",
+        twisted_cord_roulette = "Cordelette torsadee") |> 
+  select(-Context) |> 
+  mutate(Site = "Ambere-Dougon")  |> 
+    column_to_rownames("Site") |> 
+  mutate_all(as.numeric) |> 
+  mutate(braided_strip_roulette = simple_braided_strip_roulette + alternate_braided_strip_roulette) |> 
+  select(-slip, -simple_braided_strip_roulette, -alternate_braided_strip_roulette) 
+
+n_AD <- AD  |> 
+  rowSums()
+ 
+  
+
+AD12_decor <- AD |> 
+ mutate_if(is.numeric, function(x) x/33*100)
+
+n_AD <- data.frame(
+  site = c("Ambere-Dougon"),
+  n = c(n_AD)
+)
+
+names(AD)
+```
+
+## Damassogou
+
+```{r}
+Dmssg <- read_csv2(here::here("analysis/data/raw_data/Damassogou.csv")) |> 
+  rename(straight_mat_impression = "Impression de Vannerie",
+         simple_braided_strip_roulette = "Impression de fibres plates tresses simple",
+         alternate_braided_strip_roulette = "Impressions de Fibre plates tresses alterne",
+        carved_wooden_roulette = "Cylindre grave",
+        undecorated = "non decores",
+        braided_cord_roulette = "Cordolette tressee simple",
+        finger_impression = "Empreinte digitale",
+        incised = "Incision")|> 
+  mutate(Site = "Damassogou") |> 
+    column_to_rownames("Site") |> 
+  mutate_all(as.numeric) |> 
+  mutate(braided_strip_roulette = simple_braided_strip_roulette + alternate_braided_strip_roulette) |> 
+  select(-undecorated, -simple_braided_strip_roulette, -alternate_braided_strip_roulette)
+
+
+n_Dmssg <- Dmssg  |> 
+  rowSums()
+ 
+  
+
+Dmssg12_decor <- Dmssg |> 
+ mutate_all(function(x) x/179*100)
+
+names(Dmssg)
+
+#n of pottery decors in Damassagou
+n_Dmssg <- data.frame(
+  site = c("Damassagou"),
+  n = c(n_Dmssg)
+)
+```
+
+## Gao
+
+```{r}
+Gao <- read_csv2(here::here("analysis/data/raw_data/Gao.csv")) |> rename("dragged_comb" = "Comb_tot",
+    "channel" = "Channel_comb",
+          "folded_strip_roulette" = "Folded strip roulette",
+"twisted_cord_roulette" = "Twisted twine",
+"paint" = "Paint_total", #translation unsure
+"unidentified_roulette" = "Unident. Twine",
+"cord_wrapped_roulette" = "Sisal", # Cisse (2011, 161) identifies them as cord_wrapped_roulette after Nixon (2008, 183)
+"straight_mat_impression" = "Birdfood" # Cisse (2011, 161) identified it as mat, but not completly sure, maybe other mat than straight
+) |> 
+mutate_if(is.numeric, round, digits=0) #rounding the numbers (because they were extracted from graphics there were minor deviations)
+
+
+
+
+n_gao <- Gao |> 
+  select_if(is.numeric) |> 
+  rowSums()
+
+Gao <- Gao |> 
+  add_column(n_gao) |> 
+  mutate_if(is.numeric, function(x) x/n_gao*100)
+
+
+Gao9_decor <- Gao |> 
+  filter(Phase == "lower") |> 
+  select(-"Site-Code", -"Phase", -"n_gao") |> 
+  mutate(Site = "Gao9") |> 
+  column_to_rownames("Site")
+
+Gao12_decor <- Gao |> 
+  filter(Phase == "final") |> 
+  select(-"Site-Code", -"Phase", -"n_gao") |> 
+  mutate(Site = "Gao12") |> 
+  column_to_rownames("Site")
+
+names(Gao)
+
+n_gao <- data.frame(
+  site = c("Gao12", "Gao9"),
+  n = c(n_gao)
+)
+```
+
+## Kokolo NE
+
+```{r}
+Kokolo <- read_csv2(here::here("analysis/data/raw_data/Kokolo NE.csv")) |> 
+  rename(folded_strip_roulette = "fibres plates et pliees",
+         twisted_cord_roulette = "cordelette torsadee",
+         braided_cord_roulette = "tresse simple", #only as "l’impression à la tresse simple" in Keita 2011, pp. 33
+        cord_wrapped_roulette = "roulette de cordelette enroulee")
+
+
+n_Kokolo <- Kokolo |> 
+  pull(n)
+
+Kkl12 <- Kokolo |> 
+  mutate(Site = "Kokolo")  |> 
+  column_to_rownames("Site") |> 
+  select(-n, -Context)
+  
+
+names(Kokolo)
+
+n_kkl <- data.frame(
+  site = c("Kokolo"),
+  n = c(n_Kokolo)
+)
+```
+
+## Nin-Bére
+
+```{r}
+Nin_Bere <- read_csv2(here::here("analysis/data/raw_data/Nin-Bére.csv")) |> 
+  rename(folded_strip_roulette = "Impression de fibres plates plies",
+         braided_cord_roulette = "Cordolette tressee simple",
+         undefined = "Non determines") |> 
+  mutate(Site = "Nin_Bere") |> 
+  select(-Context) |> 
+  column_to_rownames("Site")
+
+n_NB <- Nin_Bere |> 
+  rowSums()
+
+Nin_Bere9 <- Nin_Bere |> 
+    mutate_if(is.numeric, function(x) x/n_NB*100) |> 
+  select(-undefined)
+
+names(Nin_Bere)
+
+n_NB <- data.frame(
+  site = c("Nin-Bere"),
+  n = c(n_NB)
+)
+```
+
+## Promontoire site of Ounjougou
+
+```{r}
+Ounjg <- read_csv2(here::here("analysis/data/raw_data/Promontoire Ounjougou.csv")) 
+
+#use T3 for the 12th century network and removing columns without values for this level
+Ounjg12 <- Ounjg |> 
+  filter(Level == "T3") |> 
+  mutate(Site = "Ounjougou12") |> 
+  column_to_rownames("Site") |> 
+  select_if(is.numeric) |> 
+    select_if(~all(. > 0)) |> 
+  select(-"Non decore")
+
+#renaming decorations
+Ounjg12 <- Ounjg12 |> 
+  rename(braided_strip_roulette = "Fibre plate tressee simple ou alterne",
+         twisted_cord_roulette = "Cordelette torsadee",
+         incised = "Incicions au couteau seules",
+         cord = "Cordons" #this is described as "presénce d'un petit cordon sous un bord 
+         )
+
+#amount of sherds
+n_ounjg <- Ounjg12 |> 
+  rowSums()
+
+# number of decorations as percentage
+Ounjg12 <- Ounjg12 |> 
+    mutate_if(is.numeric, function(x) x/n_ounjg*100)
+
+
+names(Ounjg12)
+
+n_ounjg <- data.frame(
+  site = c("Ounjougou12"),
+  n = c(n_ounjg)
+)
+```
+
+## Sadia
+
+```{r}
+Sadia <- read_csv2(here::here("analysis/data/raw_data/Sadia.csv")) |> 
+  rename(straight_mat_impression = "mat impression",
+         folded_strip_roulette = "cr4",
+         braided_strip_roulette = "braided.strip",
+         braided_cord_roulette = "braided.cord",
+        unid_c_r_a = "unidentified composite roulette - A",
+         unid_c_r_b = "unidentified composite roulette - B") |> 
+  mutate(cord_wrapped_stick_roulette = unid_c_r_a + unid_c_r_b) |> 
+  select(-plain, -unid_c_r_a, -unid_c_r_b) 
+
+#get total sherd number and percentage
+n_sadia <- Sadia |> 
+  select_if(is.numeric) |> 
+  rowSums()
+
+Sadia <- Sadia |> 
+  add_column(n_sadia) |> 
+  mutate_if(is.numeric, function(x) x/n_sadia*100)
+
+#Selecting SE1 and SE2 for the 12th century network
+Sadia12 <- Sadia |> 
+  filter(Phase == "SE1" | Phase == "SE2") |> 
+  summarise_if(is.numeric, mean) |> 
+  select(-others,-n_sadia) |> 
+  mutate(Site = "Sadia12") |> 
+  column_to_rownames("Site")
+
+
+
+#Selecting SE5 for the 9th century network
+Sadia9 <- Sadia |> 
+  filter(Phase == "SE5")|> 
+  mutate(Site = "Sadia9") |> 
+  column_to_rownames("Site")|> 
+  select(-others, -Phase,-n_sadia)
+
+#
+
+names(Sadia)
+
+
+n_sadia <- data.frame(
+  site = c("Sadia12", "Sadia12", "Sadia9"),
+  n = c(n_sadia[c(1, 2, 5)])
+) |> 
+  group_by(site) |> 
+  summarise(n = sum(n))
+```
+
+# Collate datasets
+
+Here we create two separate collated dataset for the 12th and 9th century networks by binding together the previously created data for each site and then further cleaning and standardising.
+
+```{r 12c bind}
+decors_12 <- bind_rows(Aku12_decor, AD12_decor, Dmssg12_decor, doupwil, essouk, galia, Gao12_decor, Jj12decor, Kkl12, mara_12, Ounjg12, Sadia12, shoma_12, tmd12_decor, togu_decor, tellem_decors) |> 
+ mutate_all(~ifelse(is.na(.), 0, .)) |> 
+  mutate(incised = incised + incised_patterns) |> 
+  select(-incised_patterns) |> 
+  rownames_to_column("Site")
+  
+```
+
+```{r 9c bind}
+decors_9 <- bind_rows(Aku9_decor, Gao9_decor, Jj9decor, mara_9, Nin_Bere9, Sadia9, tmd9_decor, mdb_decor)|> 
+ mutate_all(~ifelse(is.na(.), 0, .))|> 
+  rownames_to_column("Site")
+  
+```
+
+```{r}
+n_decor <- rbind(n_akumbu, n_AD, n_Dmssg, n_doupwil, n_ess, n_galia, n_gao, n_jj, n_kkl, n_mara, n_mdb, n_NB, n_ounjg, n_sadia, n_sanga, n_Shoma12, n_tmd, n_togu)
+```
+
+# Saving data
+
+We create two csv datasets to be used in further analyses.
+
+```{r}
+#12th century decor data
+decors_12 |> 
+write.csv2(here::here("analysis/data/derived_data/decors12.csv"))
+
+#9th century decor data
+decors_9 |> 
+write.csv2(here::here("analysis/data/derived_data/decors9.csv"))
+
+n_decor |> 
+  write.csv2(here::here("analysis/data/derived_data/n_decor.csv"))
+
+
+```
