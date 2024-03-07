@@ -147,10 +147,18 @@ decors <- read_csv2(here::here("analysis/data/raw_data/decors12.csv")) |>
   rename(sites = Site) |> 
   select(-slip, -unidentified_roulette, -"twisted_cord_roulette?")
 
+decorsearly <-  read_csv2(here::here("analysis/data/raw_data/decors9.csv")) |>
+  select(-1) |> 
+  rename(sites = Site) |> 
+  select(-slip, -unidentified_roulette)
+
 # import information on sites
 sites <- read_csv2(here::here("analysis/data/raw_data/sites_all3.csv"))
 
-
+# import decor count per site
+n_decors <- read_csv2(here::here("analysis/data/raw_data/n_decor.csv")) |> 
+  rename(sites = site) |> 
+  select(-1)
 ```
 
 ## Data
@@ -180,15 +188,23 @@ Our theoretical approach to what the network represents informs the way in which
 ```{r}
 library(iNEXT)
 data("ciliates")
-as.data.frame(decors) |> 
-  column_to_rownames("site") |> 
-  t() |> 
-iNEXT(q=0, datatype="incidence_freq", size=NULL, endpoint=NULL, knots=40, se=TRUE, conf=0.95,
-nboot=50)
+data("ant")
+data("bird")
+
+decors_abs <- decors |> 
+  left_join(n_decors) |> 
+    mutate(across(where(is.numeric), ~ .*n/100)) |> 
+  mutate(across(where(is.numeric), ~ round(.))) |> 
+    column_to_rownames("sites") |> 
+  select(-n) |> 
+t()
+
+iNEXT(decors_abs, q=0, datatype="abundance")
 
 
 
 ```
+
 ```{r}
  #install_github('AnneChao/iNEXT.4steps') #not currently on CRAN
  library(iNEXT)
@@ -197,69 +213,20 @@ nboot=50)
  library(ggplot2)
  data("ciliates")   #included in package iNEXT
  
- i <- as.data.frame(decors) |> 
-  column_to_rownames("site") |> 
-   head(3) |> 
-  t() |> 
-  iNEXT(q=0, datatype="abundance", size=NULL, endpoint=NULL, knots=40, se=TRUE, conf=0.95,
-nboot=50)
+ i <- decors_abs[,c(2,5,8)]|> 
+ iNEXT(q=c(0,1,2), datatype="abundance")
  
  ggiNEXT(i, type=1, facet.var="Assemblage")
-
- i$figure   #automatically generate plots shown below
- i
-i$summary
-
-
-i$summary$`STEP2. Asymptotic analysis`
-       
-
-i$summary$`STEP3. Non-asymptotic coverage-based rarefaction and extrapolation analysis`
-       
-
-i$summary$`STEP4. Evenness among species abundances`
-              
+ggiNEXT(i, type=3, facet.var="Order.q", color.var="Assemblage")
+ 
+ i <- decors_abs[,c(2)]|> 
+ iNEXT(q=c(0,1,2), datatype="abundance")
+ 
+ ggiNEXT(i, type=1, facet.var="Assemblage")
+ggiNEXT(i, type=3, facet.var="Order.q", color.var="Assemblage")
 
 
-i$figure
-i$figure[[1]]
 
-i$figure[[2]]
-
-i$figure[[3]]
-
-i$figure[[4]]
-
-i$figure[[5]]
-
-i$figure[[6]]
-
-
-# Example data
-data <- read.table(text = "A B C
-                     X 1 0 1
-                     Y 0 1 1
-                     Z 1 1 0", header = TRUE)
-
-# Correspondence Analysis
-library(FactoMineR)
-data <- read.table(text = "A B C
-                     X 1 0 1
-                     Y 0 1 1
-                     Z 1 1 0", header = TRUE)
-ca_result <- CA(data, graph = FALSE)
-
-# Custom plot combining rows and columns
-plot(ca_result$ind$coord, type = "n", xlab = "Dimension 1", ylab = "Dimension 2", main = "CA Rows and Columns")
-
-# Plot rows
-points(ca_result$row$coord, col = "blue", pch = 16)
-
-# Plot columns
-points(ca_result$col$coord, col = "red", pch = 17)
-
-# Add legend
-legend("topright", legend = c("Rows", "Columns"), col = c("blue", "red"), pch = c(16, 17))
 
 ```
 
@@ -369,26 +336,9 @@ heatmap_matrix(lc)
 We approach this question by clustering, or community analysis, which a number of recent studies have successfully used on archaeological netoworks. Radivojevic and Grujic (2018) have clustered sites on the Balkan based on the source of their copper, Mazzucato (2019) has identified communities of building sites in Çatalhöyük to analyse the process of urbanisation, while Vargas et al. (2020) used community detection to find distinctive clusters of rock art sites in Patagonia. These studies differ significantly as regards the object of research and their questions, but are similar in data structure and methodological approach. All three used the Louvain clustering algorithm (Blondel et al. 2008) to detect groups of sites that share a lot of edges with each other and have fewer edges with nodes outside of their community. The Louvain method is especially useful for archaeological datasets that typically contain few but heavily connected nodes (Blondel et al. 2008; Yang et al. 2016).
 
 ```{r community detection, hide = 'results', echo=FALSE}
-# use louvain clustering method to assign clusters to nodes
-decor_graph <- decor_graph |>
-  activate(edges) |> 
-  filter(!name == "twisted_cord_roulette") |> 
+decor_graph1 <- decor_flat |>
   activate(nodes) |>
   mutate(louvain = as.character(group_optimal()))
-
-decor_graph1 <- decor_graph |>
-    activate(edges) |> 
-   filter(str_detect(name, "roulette") | name %in% c("paint", "straight_mat_impression"))  |> 
-  activate(nodes) |>
-  mutate(louvain = as.character(group_louvain()))
-
-
-# calculate modularity of louvain clustering
-modularity <- decor_graph |>
-  activate(nodes) |>
-  mutate(modularity = graph_modularity(group = as.factor(louvain))) |>
-  pull(modularity) |>
-  head(1)
 
 decor_graph1 <- decor_18 |>
   activate(nodes) |>
@@ -397,6 +347,16 @@ decor_graph1 <- decor_18 |>
 decor_graph1 <- decor_graph |>
   activate(nodes) |>
   mutate(louvain = as.data.frame(decor_graph1, "vertices")$louvain)
+
+
+# calculate modularity of louvain clustering
+modularity <- decor_graph1 |>
+  activate(nodes) |>
+  mutate(modularity = graph_modularity(group = as.factor(louvain))) |>
+  pull(modularity) |>
+  head(1)
+
+
 
 decor_graph1
 
@@ -413,6 +373,8 @@ decor_graph |>
   as.data.frame("edges") |> 
   group_by(name) |> 
   summarise()
+
+decor_flat
 ```
 
 Here, we employ the same clustering algorithm, which results in three communities with a modularity of `r modularity`. [Modularity shows how clearly the communities can be defined]{.underline} on a scale [from -1 to 1]{.underline} (1 [being a network with completely separated sub-networks]{.underline})[.]{.underline} As is shown in \@ref(fig:plot-clusters), community 1 contains seven sites in an area centered on the Inland Niger Delta. Community 2 also contains seven sites, but located in the so-called "Dogon Country", on the eastern edge of the IND, on the Bandiagara plateau and in the Seno plain. Community 3 has the fewest nodes, but geographically the largest extent, containing the southernmost site of the study near Ségou, Togu Missiri, as well as the northernmost at Essouk in the Sahara. The nodes of community 3 show frequent connections to sites of communities 1 and 2, while those communities are not as strongly connected between each other.
@@ -422,7 +384,7 @@ Here, we employ the same clustering algorithm, which results in three communitie
 communitycolor <-
   setNames(
     c("tomato", "cornflowerblue", "darkgreen", "yellow"),
-    unique(V(decor_graph)$louvain)
+    unique(V(decor_graph1)$louvain)
   )
 
 # creating a palette with the proper amount of colors
@@ -459,6 +421,8 @@ ggraph(decor_graph1, x = lon, y = lat) +
   theme_community +
   coord_sf(xlim = c(-7, 2), ylim = c(13, 19), expand = FALSE) +
   theme_graph()
+
+
 ```
 
 The clustering of the network appears to be influenced quite strongly by geographic features. In the case of community 1, this is the IND and its adjacent areas, which were heavily populated at this time (McIntosh 1995, pp. 373--377). The population density is likely to have been a significant factor in the spread of pottery decors, as Gosselain has suggested. \@ref(fig:cluster1) shows that there is a very well connected group of geographically close sites in the eastern IND (Jenné-jeno (J-J), Hambarketolo (Hamb), and Kaniana are part of the same wider site cluster). This community mainly shared braided cord roulettes, dragged comb incisions.Interestingly, this also includes the site of Kawinza in the Malian Lakes Region (Raimbault and Sanogo 1991). Sites on the western margin of the IND, Dia and Akumbu, are less well connected in this period, conforming to the observations of McIntosh (1995, pp. 369--370), but these remain connected via folded strip roulettes and painted decors.
@@ -470,6 +434,24 @@ decor_graph1 %>%
   filter(louvain == 1) %>%
   ggraph(layout = "graphopt") +
   geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
+  scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+  scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = centrality_degree(weights = weight)), colour = "cornflowerblue") +
+  geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  theme_graph()
+
+decor_18 %>%
+  ggraph(layout = "graphopt") +
+  geom_edge_fan(aes(edge_width = weight, edge_alpha = weight)) +
+  scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
+  scale_edge_width(range = c(0.2, 2)) +
+  geom_node_point(aes(size = centrality_degree(weights = weight)), colour = "cornflowerblue") +
+  geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  theme_graph()
+
+decor_flat %>%
+  ggraph(layout = "graphopt") +
+  geom_edge_fan(aes(edge_width = weight, edge_alpha = weight)) +
   scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
   scale_edge_width(range = c(0.2, 2)) +
   geom_node_point(aes(size = centrality_degree(weights = weight)), colour = "cornflowerblue") +
@@ -528,14 +510,21 @@ The measures of network centralization and the mean weight of the edges relative
 ```{r cluster-comparison, fig.cap="Relative edge weights and centralization by cluster"}
 # adding community/crossing to the edges
 decor_graph1 <- decor_graph1 |>
+ # flatten(weighted = TRUE) |> 
   add_community_edges()
+
+decor_graph1
 
 # mean edge weights
 mean_edge_weight <- decor_graph1 |>
   get.data.frame("edges") |>
-  filter(community != "crossing") |>
-  group_by(community) |>
-  summarise(mean_weight = mean(weight))
+#  filter(community != "crossing") |>
+  group_by(from,to, community) |> 
+  summarise(weight = sum(weight),
+  div = n()) #|> 
+ # group_by(community) |>
+ # summarise(median_weight = median(weight),
+  #          mean_weight = mean(weight))
 
 # Centralization of the cluster
 centralization <- vector("double", length(4))
@@ -573,6 +562,31 @@ g2 <- tibble(centralization) |>
 
 # plot:
 g1 + g2
+
+
+ggplot(mean_edge_weight) +
+  geom_boxplot(aes(x = community, y = weight, fill = community)) +
+  scale_fill_grey(start = 0.5, end  = 1) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(y = "degree centrality",
+       x = "community")
+
+ggplot(mean_edge_weight) +
+  geom_boxplot(aes(x = community, y = div, fill = community)) +
+  scale_fill_grey(start = 0.5, end  = 1) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(y = "degree centrality",
+       x = "community")
+
+ggplot(centrali) +
+  boxplot(aes(x = community, y = div, fill = community)) +
+  scale_fill_grey(start = 0.5, end  = 1) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(y = "degree centrality",
+       x = "community")
 ```
 
 ```{r cluster_centralities, fig.cap="Distribution of weighted degree and eigenvector centralities by community."}
@@ -609,8 +623,9 @@ These three communities, however, were by no means separate from one another. If
 #show crossings with a weight over 3
 decor_graph1 |>
   filter(
-    community == "crossing",
-    weight > 3
+    community == "crossing" &
+    weight > 3 
+  # & !name %in% c("channel", "twisted_cord_roulette")
   ) |>
   activate(nodes) |>
   filter(!node_is_isolated()) |>
@@ -633,7 +648,9 @@ decor_graph1 |>
 While the hyperconnected hairball network has shown us key elements of the structure of pottery décor sharing, it is of less use for more traditional network analyses. These include finding key nodes in the network and key routes through it. In our case, such network statistics might tell us which of the sites, on the basis of their assemblages, were influential in the propagation of pottery decorations, and through which channels the knowledge of different décors might have preferentially passed. In order to extract such measures, the number of connections needs to be reduced. Network sparsification or 'backbone extraction', as this process is also called, is a common challenge in network analysis across its different applications (Serrano et al. 2009; Saha et al. 2013). In archaeological networks, this has frequently been achieved through thresholding, i.e. retaining only the strongest connections and discarding the others (as implemented for example in Hart & Engelbrecht 2012). There are, however, a number of other recent approaches to network sparsification. For our purposes, we have found the best results to come from a process called the "disparity filter" (Serrano et al. 2009). This evaluates the weight of each edge against a null model in which the overall edge weights of a node are evenly distributed among its edges. If an edge is found to diverge from the null model at a set probability, it is retained. The backbone package (Domagalski et al. 2021) implements this in R. In order to use it, we must first 'flatten' the multiplex graph, by adding the weights of the edges between each pair of nodes on all layers. We then extract the backbone of the graph using the disparity filter at different probability thresholds (\@ref(fig:backbone-extraction)).
 
 ```{r flatten}
-decor_flat <- flatten(decor_graph, weighted = TRUE)
+decor_flat <- flatten(decor_graph, weighted = TRUE) |> 
+activate(nodes) 
+
 ```
 
 ```{r backbone-extraction, fig.cap="Extraction of binary backbones at decreasing significance levels: a) 0.05, b) 0.15, c) 0.18"}
@@ -655,6 +672,7 @@ decor_18 <- decor_18 |>
   #isolated nodes are removed
   activate(nodes) |>
   filter(!node_is_isolated())
+
 ```
 
 The three communities from the previous section are also visible in the extracted backbone, albeit with some major differences in configuration. The spread-out cluster of long-distance contact now also includes the sites at Akumbu and Kawinza which were placed in the IND cluster. The latter is now reduced to the sites of the Eastern IND, while the Dia sites take a central position within the network, and the "Dogon" cluster remains largely intact. Dammassogou and Kokolo NE 2 are isolated from the network, and remain so until the significance is lowered to 0.2. We will use the backbone at alpha = 0.18 to proceed with our analysis. If this selection of significance values seems rather arbitrary, we point out that analogous situations exist in other attempts at archaeological network simplifications. Hart & Engelbrecht (2012, p. 339), for instance, threshold their similarity network to the point where all nodes form a network but for a single outlier. Higher significance values also do not necessarily mean we get a more reliable network model, especially in a situation where sampling and recovery bias is as extreme as here.
@@ -730,7 +748,7 @@ early_flat <- flatten(decor_graph_early, weighted = TRUE)
 library(backbone)
 # extract backbone
 early_flat_bb <- 
-  backbone::disparity(as.igraph(early_flat), alpha = 0.25, narrative = TRUE) |>
+  backbone::disparity(as.igraph(early_flat), alpha = 0.22, narrative = TRUE) |>
   tidygraph::as_tbl_graph()
 
 # igraph transformation loses the node attributes, so we put them back
