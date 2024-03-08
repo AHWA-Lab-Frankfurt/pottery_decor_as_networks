@@ -353,11 +353,13 @@ p1 <- plot.bb(decor_05)
 p2 <- plot.bb(decor_15)
 p3 <- plot.bb(decor_20) + geom_node_text(aes(label = label), repel = TRUE)
 
+
 (p1 | p2) / p3 +
   plot_annotation(tag_levels = "a") +
   plot_layout(heights = unit(c(1, 8), c("cm", "null")))
 
-decor_20 <- decor_20 |>
+
+decor_20 <- decor_20 
   #isolated nodes are removed
   activate(nodes) |>
   filter(!node_is_isolated())
@@ -416,6 +418,7 @@ p2 <- test_centralities(decor_graph, "betweenness", 100)
 We approach this question by clustering, or community analysis, which a number of recent studies have successfully used on archaeological netoworks. Radivojevic and Grujic (2018) have clustered sites on the Balkan based on the source of their copper, Mazzucato (2019) has identified communities of building sites in Çatalhöyük to analyse the process of urbanisation, while Vargas et al. (2020) used community detection to find distinctive clusters of rock art sites in Patagonia. These studies differ significantly as regards the object of research and their questions, but are similar in data structure and methodological approach. All three used the Louvain clustering algorithm (Blondel et al. 2008) to detect groups of sites that share a lot of edges with each other and have fewer edges with nodes outside of their community. The Louvain method is especially useful for archaeological datasets that typically contain few but heavily connected nodes (Blondel et al. 2008; Yang et al. 2016).
 
 ```{r community detection, hide = 'results', echo=FALSE}
+
 #sparsifying 
 decor_graph_c <- decor_20 |>
   activate(nodes) |>
