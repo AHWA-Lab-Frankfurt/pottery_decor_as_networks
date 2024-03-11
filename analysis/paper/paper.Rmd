@@ -359,7 +359,7 @@ p3 <- plot.bb(decor_20) + geom_node_text(aes(label = label), repel = TRUE)
   plot_layout(heights = unit(c(1, 8), c("cm", "null")))
 
 
-decor_20 <- decor_20 
+decor_20 <- decor_20 |> 
   #isolated nodes are removed
   activate(nodes) |>
   filter(!node_is_isolated())
@@ -587,7 +587,7 @@ g1 <- ggplot(mean_edge_weight) +
   scale_fill_grey(start = 0.5, end  = 1) +
   theme_bw() +
   theme(legend.position = "none") +
-  labs(y = "degree centrality",
+  labs(y = "mean edge weight",
        x = "community")
 
 # Graph of centralization of the different communities
