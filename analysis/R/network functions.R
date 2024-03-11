@@ -27,6 +27,8 @@ add_community_edges <- function(x) {
         to %in% which(nodes$louvain == 2) ~ "2",
       from %in% which(nodes$louvain == 3) &
         to %in% which(nodes$louvain == 3) ~ "3",
+      from %in% which(nodes$louvain == 4) &
+        to %in% which(nodes$louvain == 4) ~ "4",
       TRUE ~ "crossing"
     ))
 
