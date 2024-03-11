@@ -53,7 +53,7 @@ Jj12twine <- Jj12twine |>
          twisted_cord_roulette = tw6 + tw7) |>  # twines 6 and 7 are made using a twisted cord roulette
   select(ends_with("roulette"))
 
-# the code 40 in twine is unclear, and thus left out 
+# the code 40 in twine is unclear from the literature, and thus left out 
 
 
 # Paint decors
@@ -81,7 +81,7 @@ Jj12plastic <- Jj12 |>
   rename_with( ~ paste0("x", .x))
 
 Jj12plastic <- Jj12plastic |> 
-  mutate(channel = x1+x2, #single and multiple grooves are treated as one category
+  mutate(channel = x1+x2, #single and multiple channels are treated as one category
          nonparallel_grooves = x3,
          impressed_comb = x4+x46+x47,
          finger_arcs = x13,
@@ -520,7 +520,8 @@ Sherds from section C, period k are used in the 12^th^ century network. The date
 In section B, Period e also includes the second half of the 12th century, as dated by GrN-7943 (1165-1283 cal CE), but the main peaks of this date fall in the 13th century and the sherds have therefore been excluded from the sample.
 
 ```{r doupwil data prep}
-doupwil <- read_csv(here::here("analysis/data/raw_data/Toguere_Doupwil.csv"))
+doupwil <- read_csv(here::here("analysis/data/raw_data/Toguere_Doupwil.csv")) |> 
+  rename(twisted_cord_roulette = 'twisted_cord_roulette?')
 
 rownames(doupwil) <- "Doupwil"
 
@@ -550,11 +551,11 @@ n_galia <- data.frame(
 
 ## Akumbu
 
-Stratigraphically detailed pottery décor data is available for the body sherds from units AK1 (Togola 2008, pp. 55–57) and AK5 (McIntosh 2017). The body sherd decor from AKB4 is reported in Horizons (Cissé et al. 2017, pp. 41–43). Décor data for rim sherds are not published for any of the excavations.
+Stratigraphically detailed pottery décor data is available for the body sherds from units AK1 (Togola 2008, pp. 55--57) and AK5 (McIntosh 2017). The body sherd decor from AKB4 is reported in Horizons (Cissé et al. 2017, pp. 41--43). Décor data for rim sherds are not published for any of the excavations.
 
-For the 12th century network, we have used selected data from Akumbu Mound A, Unit AK1’s Middle Assemblage layers. In this unit, a living surface dated to 1266-1425 cal. CE (Beta-40441, 640 +- 70) was constructed above a refuse pit cut into mixed deposits, which the excavator believes to have accumulated slowly. The upper portion of the pit was dated to 1175-1329 cal. CE at 82.6% (Beta-40442, 750+-70). A further, undated, construction episode lay between these deposits and a curvilinear structure with a date (Beta-40443, 980+-70) of 954-1219 cal. CE at 92.7%. While the calibrated date range is rather wide, it was decided to use the pit levels (8,10,13,15) in our analysis. Unfortunately, the pottery data for these layers also includes layer 12, a wall collapse layer with uncertain stratigraphic relationship to the pit, rendering the dating of the sample more insecure. A sample more securely dated to the 12th century might have come from the upper levels of AK4, but the pottery was not recorded.
+For the 12th century network, we have used selected data from Akumbu Mound A, Unit AK1's Middle Assemblage layers. In this unit, a living surface dated to 1266-1425 cal. CE (Beta-40441, 640 +- 70) was constructed above a refuse pit cut into mixed deposits, which the excavator believes to have accumulated slowly. The upper portion of the pit was dated to 1175-1329 cal. CE at 82.6% (Beta-40442, 750+-70). A further, undated, construction episode lay between these deposits and a curvilinear structure with a date (Beta-40443, 980+-70) of 954-1219 cal. CE at 92.7%. While the calibrated date range is rather wide, it was decided to use the pit levels (8,10,13,15) in our analysis. Unfortunately, the pottery data for these layers also includes layer 12, a wall collapse layer with uncertain stratigraphic relationship to the pit, rendering the dating of the sample more insecure. A sample more securely dated to the 12th century might have come from the upper levels of AK4, but the pottery was not recorded.
 
-On Akumbu Mound B, the upper levels in the adjacent Units AK3 and AKB4 date to a range including the 9th century. However, the nearby AK5 has a thin 13th midden deposit overlying 3rd-4th century CE deposits. While the AK3 pottery is not described in detail, AKB4 Horizon 1 has two AMS dates, both from Level 2, which date to 771-976 cal. CE at 98.2% and 771-894 cal. CE at 88.3%. However, the nature of the levels is not made clear in the publication, most of the levels of Horizon 1 lie below this dated deposit, and it is unclear whether Horizon 1 includes the 5^th^-7^th^ century Level 8 or not (cf. Cissé et al. 2017, pp. 36 & 41). Trusting that this is not the case, as is also McIntosh’s (McIntosh 2017, p. 197) interpretation, we have used the Horizon 1 body sherd data for the 9th century network.
+On Akumbu Mound B, the upper levels in the adjacent Units AK3 and AKB4 date to a range including the 9th century. However, the nearby AK5 has a thin 13th midden deposit overlying 3rd-4th century CE deposits. While the AK3 pottery is not described in detail, AKB4 Horizon 1 has two AMS dates, both from Level 2, which date to 771-976 cal. CE at 98.2% and 771-894 cal. CE at 88.3%. However, the nature of the levels is not made clear in the publication, most of the levels of Horizon 1 lie below this dated deposit, and it is unclear whether Horizon 1 includes the 5^th^-7^th^ century Level 8 or not (cf. Cissé et al. 2017, pp. 36 & 41). Trusting that this is not the case, as is also McIntosh's (McIntosh 2017, p. 197) interpretation, we have used the Horizon 1 body sherd data for the 9th century network.
 
 There are problems with the pottery data, because paint and incisions are not listed separately even though they are mentioned at being present at the site of AKB4.
 
@@ -796,7 +797,7 @@ Ounjg12 <- Ounjg12 |>
   rename(braided_strip_roulette = "Fibre plate tressee simple ou alterne",
          twisted_cord_roulette = "Cordelette torsadee",
          incised = "Incicions au couteau seules",
-         cord = "Cordons" #this is described as "presénce d'un petit cordon sous un bord 
+         channel = "Cordons" #this is described as "presénce d'un petit cordon sous un bord 
          )
 
 #amount of sherds
@@ -870,20 +871,39 @@ n_sadia <- data.frame(
 
 # Collate datasets
 
-Here we create two separate collated dataset for the 12th and 9th century networks by binding together the previously created data for each site and then further cleaning and standardising.
+Here we create two separate collated datasets for the 12th and 9th century networks by binding together the previously created data for each site and then further cleaning and standardising.
 
 ```{r 12c bind}
 decors_12 <- bind_rows(Aku12_decor, AD12_decor, Dmssg12_decor, doupwil, essouk, galia, Gao12_decor, Jj12decor, Kkl12, mara_12, Ounjg12, Sadia12, shoma_12, tmd12_decor, togu_decor, tellem_decors) |> 
  mutate_all(~ifelse(is.na(.), 0, .)) |> 
-  mutate(incised = incised + incised_patterns) |> 
-  select(-incised_patterns) |> 
+  mutate(incised = incised + incised_patterns,
+         cord_wrapped_roulette = cord_wrapped_roulette + cord_wrapped_stick_roulette,
+         applied_plastic = applied_plastic + applied_ridges,
+         punctate = punctate + impressed_stick,
+         comb_impression = impressed_comb) |> 
+  select(-c(incised_patterns,
+            cord_wrapped_stick_roulette,
+            slip, # suffers from uneven reporting
+            unidentified_roulette,
+            nonparallel_grooves,
+            finger_arcs,
+            applied_ridges,
+            impressed_stick,
+            impressed_comb)) |> 
   rownames_to_column("Site")
   
 ```
 
 ```{r 9c bind}
 decors_9 <- bind_rows(Aku9_decor, Gao9_decor, Jj9decor, mara_9, Nin_Bere9, Sadia9, tmd9_decor, mdb_decor)|> 
- mutate_all(~ifelse(is.na(.), 0, .))|> 
+  mutate_all(~ifelse(is.na(.), 0, .))|> 
+  mutate(applied_plastic = applied_plastic + applied_ridges,
+         cord_wrapped_roulette = cord_wrapped_roulette + cord_wrapped_stick_roulette) |> 
+  select(-c(slip,
+            unidentified_roulette,
+            nonparallel_grooves,
+            applied_ridges,
+            cord_wrapped_stick_roulette)) |> 
   rownames_to_column("Site")
   
 ```
