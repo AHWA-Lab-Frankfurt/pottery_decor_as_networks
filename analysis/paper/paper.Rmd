@@ -159,6 +159,8 @@ sites <- read_csv2(here::here("analysis/data/raw_data/sites_all3.csv"))
 n_decors <- read_csv2(here::here("analysis/data/raw_data/n_decor.csv")) |> 
   rename(sites = site) |> 
   select(-1)
+
+
 ```
 
 ## Data
@@ -189,6 +191,7 @@ Our theoretical approach to what the network represents informs the way in which
 ```{r iNext overview, echo = FALSE}
 library(iNEXT)
 
+
 #getting absolute numbers of decorations
 decors_abs <- decors |> 
   left_join(n_decors) |> 
@@ -198,10 +201,40 @@ decors_abs <- decors |>
   select(-n) |> 
 t()
 
+i <- iNEXT(decors_abs, q=0, datatype="abundance")
+
+i
+
+ i <- decors_abs[,c(2,4,11)]|> 
+ iNEXT(q=c(0,1,2), datatype="abundance")
+ ggiNEXT(i, type=1, facet.var="Assemblage")
+  
+  i <- decors_abs[,c(4)]|> 
+ iNEXT(q=c(0), datatype="abundance")
+ ggiNEXT(i, type=1, facet.var="Assemblage")
+
+  
+ i <- decors_abs[,c(8,15,16)]|> 
+ iNEXT(q=c(0,1,2), datatype="abundance")
+  ggiNEXT(i, type=1, facet.var="Assemblage")
+ 
+  i <- decors_abs[,c(8)]|> 
+ iNEXT(q=c(0), datatype="abundance")
+  ggiNEXT(i, type=1, facet.var="Assemblage")
+  
+    i <- decors_abs[,c(13)]|> 
+ iNEXT(q=c(0), datatype="abundance")
+  ggiNEXT(i, type=1, facet.var="Assemblage")
+
+decors_abs <- decorsearly |> 
+  left_join(n_decors) |> 
+    mutate(across(where(is.numeric), ~ .*n/100)) |> 
+  mutate(across(where(is.numeric), ~ round(.))) |> 
+    column_to_rownames("sites") |> 
+  select(-n) |> 
+t()
+
 iNEXT(decors_abs, q=0, datatype="abundance")
-
-
-
 ```
 
 ```{r}
@@ -212,9 +245,15 @@ iNEXT(decors_abs, q=0, datatype="abundance")
  library(ggplot2)
 
  
- i <- decors_abs[,c(2,5,8)]|> 
+ i <- decors_abs[,c(2,4,11)]|> 
  iNEXT(q=c(0,1,2), datatype="abundance")
- 
+ ggiNEXT(i, type=1, facet.var="Assemblage")
+  
+  
+ i <- decors_abs[,c(8,15,16)]|> 
+ iNEXT(q=c(0,1,2), datatype="abundance")
+  ggiNEXT(i, type=1, facet.var="Assemblage")
+
  ggiNEXT(i, type=1, facet.var="Assemblage")
 ggiNEXT(i, type=3, facet.var="Order.q", color.var="Assemblage")
  
@@ -227,6 +266,14 @@ ggiNEXT(i, type=3, facet.var="Order.q", color.var="Assemblage")
 
 
 
+```
+```{r}
+i$DataInfo |> 
+  arrange(n) |> 
+  mutate_at(vars(2:14), as.numeric) |> 
+  ggplot(aes(x = Assemblage))+
+  geom_point(aes(y = n)) +
+  geom_point(aes(x = Assemblage, y = SC))
 ```
 
 
@@ -359,7 +406,7 @@ p3 <- plot.bb(decor_20) + geom_node_text(aes(label = label), repel = TRUE)
   plot_layout(heights = unit(c(1, 8), c("cm", "null")))
 
 
-decor_20 <- decor_20 
+decor_20 <- decor_20 |> 
   #isolated nodes are removed
   activate(nodes) |>
   filter(!node_is_isolated())
