@@ -689,35 +689,37 @@ Gao <- read_csv2(here::here("analysis/data/raw_data/Gao.csv")) |> rename("dragge
 "paint" = "Paint_total", #translation unsure
 "unidentified_roulette" = "Unident. Twine",
 "cord_wrapped_roulette" = "Sisal", # Cisse (2011, 161) identifies them as cord_wrapped_roulette after Nixon (2008, 183)
-"straight_mat_impression" = "Birdfood", # Cisse (2011, 161) identified it as mat, but not completly sure, maybe other mat than straight
-"n_gao" = "n") |> 
+"straight_mat_impression" = "Birdfood" # Cisse (2011, 161) identified it as mat, but not completly sure, maybe other mat than straight
+) |> 
   filter(Phase != "lower") |> 
   mutate(Site = "Gao") |> 
 mutate_if(is.numeric, round, digits=0) #rounding the numbers (because they were extracted from graphics there were minor deviations)
 
-
+Gao <- as.data.frame(Gao)
 
 
 n_gao <- Gao |> 
-  select(n_gao) 
+  select_if(is.numeric) |> 
+    rowSums()
 
-Gao <- Gao |>
-  mutate_if(is.numeric, function(x) (x/n_gao)*100)
+
+Gao <- Gao |> 
+  add_column(n_gao) |> 
+  mutate_if(is.numeric, function(x) x/n_gao*100)
 
 
 Gao9_decor <- Gao |> 
   filter(Phase == "upper") |> 
-  select(-"Site-Code", -"Phase", -"n_gao") |> 
+  select(-"Site-Code", -"Phase") |> 
   mutate(Site = "Gao9") |> 
-  column_to_rownames("Site")
+  column_to_rownames("Site") |> 
+  select(-"n_gao")
 
 Gao12_decor <- Gao |> 
   filter(Phase == "final") |> 
   select(-"Site-Code", -"Phase", -"n_gao") |> 
   mutate(Site = "Gao12") |> 
   column_to_rownames("Site")
-
-names(Gao12_decor)
 
 n_gao <- data.frame(
   site = c("Gao12", "Gao9"),
