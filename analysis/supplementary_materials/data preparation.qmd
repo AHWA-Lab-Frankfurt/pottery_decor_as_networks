@@ -691,7 +691,7 @@ Gao <- read_csv2(here::here("analysis/data/raw_data/Gao.csv")) |> rename("dragge
 "cord_wrapped_roulette" = "Sisal", # Cisse (2011, 161) identifies them as cord_wrapped_roulette after Nixon (2008, 183)
 "straight_mat_impression" = "Birdfood" # Cisse (2011, 161) identified it as mat, but not completly sure, maybe other mat than straight
 ) |> 
-  filter(Phase != "lower") |> 
+  filter(Phase != "lower") |> #removing the lowest phase as it is probably to old
   mutate(Site = "Gao") |> 
 mutate_if(is.numeric, round, digits=0) #rounding the numbers (because they were extracted from graphics there were minor deviations)
 
