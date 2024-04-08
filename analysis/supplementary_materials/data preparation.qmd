@@ -689,24 +689,24 @@ Gao <- read_csv2(here::here("analysis/data/raw_data/Gao.csv")) |> rename("dragge
 "paint" = "Paint_total", #translation unsure
 "unidentified_roulette" = "Unident. Twine",
 "cord_wrapped_roulette" = "Sisal", # Cisse (2011, 161) identifies them as cord_wrapped_roulette after Nixon (2008, 183)
-"straight_mat_impression" = "Birdfood" # Cisse (2011, 161) identified it as mat, but not completly sure, maybe other mat than straight
-) |> 
+"straight_mat_impression" = "Birdfood", # Cisse (2011, 161) identified it as mat, but not completly sure, maybe other mat than straight
+"n_gao" = "n") |> 
+  filter(Phase != "lower") |> 
+  mutate(Site = "Gao") |> 
 mutate_if(is.numeric, round, digits=0) #rounding the numbers (because they were extracted from graphics there were minor deviations)
 
 
 
 
 n_gao <- Gao |> 
-  select_if(is.numeric) |> 
-  rowSums()
+  select(n_gao) 
 
-Gao <- Gao |> 
-  add_column(n_gao) |> 
-  mutate_if(is.numeric, function(x) x/n_gao*100)
+Gao <- Gao |>
+  mutate_if(is.numeric, function(x) (x/n_gao)*100)
 
 
 Gao9_decor <- Gao |> 
-  filter(Phase == "lower") |> 
+  filter(Phase == "upper") |> 
   select(-"Site-Code", -"Phase", -"n_gao") |> 
   mutate(Site = "Gao9") |> 
   column_to_rownames("Site")
@@ -717,12 +717,14 @@ Gao12_decor <- Gao |>
   mutate(Site = "Gao12") |> 
   column_to_rownames("Site")
 
-names(Gao)
+names(Gao12_decor)
 
 n_gao <- data.frame(
   site = c("Gao12", "Gao9"),
   n = c(n_gao)
 )
+
+Gao
 ```
 
 ## Kokolo NE
