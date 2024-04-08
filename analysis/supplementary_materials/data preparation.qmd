@@ -612,6 +612,10 @@ n_akumbu <- data.frame(
 
 ## Ambere-Dougon
 
+The site was excavated by Guindo (Guindo 2011, 243f). At the base of the uppermost layer, a piece of charcoal was found, dating to 1029-1209 cal. CE (Ly-3712, 915 ± 30 BP). We used the pottery from this Layer for our 12^th^-century network. The other date from the excavation comes from layer 5, the oldest of the excavation, dated to 430-599 cal. CE (Ly-3968, 1545 ± 30 BP). Unfortunately, the other layers cannot be precisely chronologically assigned, which makes it possible that one or more of these layers could correspond to our 9^th^-century network. However, for a reliable assignment, the corresponding radiocarbon d
+
+During the recording of ceramic decorations, no distinction was made between red painting and slip. However, the author's descriptions lean more towards slip.
+
 ```{r}
 AD <- read_csv2(here::here("analysis/data/raw_data/Ambere-Dougon.csv")) |> 
   rename(straight_mat_impression = "Impression de Vannerie",
@@ -644,6 +648,10 @@ names(AD)
 ```
 
 ## Damassogou
+
+The site was excavated by Néma Guindo (2011, 171). For the 12^th^-century network, pottery from Layer 2 was utilized. At the bottom of Layer 2 there is a structure that is only described as friable. The layer is dated to 925 ± 30 BP, corresponding to 1024-1206 AD44 (Ly 3189).
+
+During the recording of ceramic decorations, no distinction was made between red painting and slip. However, the author's descriptions lean more towards slip.
 
 ```{r}
 Dmssg <- read_csv2(here::here("analysis/data/raw_data/Damassogou.csv")) |> 
@@ -731,6 +739,8 @@ Gao
 
 ## Kokolo NE
 
+The Site was excavated by Keita (2011, 74). At the structure in Horizon 2 of the trench section A of Kokolo a radiocarbon date was taken (790 ± 35 BP 1190-1278 cal. CE). The author uses this date to contextualize horizons in other trenches to the same settlement Phase in the 12^th^ and 13^th^ century. Nevertheless, we will only use pottery from the dated horizon itself for our 12^th^ century network model.
+
 ```{r}
 Kokolo <- read_csv2(here::here("analysis/data/raw_data/Kokolo NE.csv")) |> 
   rename(folded_strip_roulette = "fibres plates et pliees",
@@ -758,6 +768,10 @@ n_kkl <- data.frame(
 
 ## Nin-Bére
 
+Nin-Bére was excavated by Guindo (2011, 227).From the Nin-Bèrè archaeological. site, there are two radiocarbon datings: one from Layer 2 dated to 730 ± 40 BP 1225-1376 cal. CE (Ly-13211) and another from Layer 5, which represents the latest excavation, dated to 1095 ± 35 BP 889-1016 cal. CE (Ly-13212). Since there are no structures providing a more precise chronological. placement for the other layers, only pottery from Layer 5 can be considered for inclusion in the 9^th^ century network.
+
+During the recording of ceramic decorations, no distinction was made between red painting and slip. However, the author's descriptions lean more towards slip.
+
 ```{r}
 Nin_Bere <- read_csv2(here::here("analysis/data/raw_data/Nin-Bére.csv")) |> 
   rename(folded_strip_roulette = "Impression de fibres plates plies",
@@ -783,6 +797,10 @@ n_NB <- data.frame(
 ```
 
 ## Promontoire site of Ounjougou
+
+The excavation at the Promontoire site of the Ounjougou site complex was conducted by Downing as part of a diploma thesis. Ounjougou comprises seven levels, sometimes divisible into different horizons, with their summits appearing to correspond to occupation levels (Mayor et al., 2005). Level 4 is composed of two horizons. T4.2 was dated to 1315 ± 45 BP 660--720 cal. CE (Ly-1284 OXA), making it unsuitable for our 9^th^ century network. The other horizon of this level, T4.1, dates to 1005 ± 30 BP 990--1040 cal. CE (Ly-9340), thus being not beeintpart of our 12^th^ century network. We only used level T3, dating to 885 ± 50 BP 1040--1220 cal. CE (Ly-10150), for this network.
+
+For our network models, we utilize pottery decoration data published by Mayor (2010). Her reassessment of the sherds aids in making them comparable to those from other sites within our model. But some decorations that are mentioned in other publications, like incisions will therefore not be taken into account.
 
 ```{r}
 Ounjg <- read_csv2(here::here("analysis/data/raw_data/Promontoire Ounjougou.csv")) 
@@ -822,6 +840,12 @@ n_ounjg <- data.frame(
 ```
 
 ## Sadia
+
+The site was excavated as part of the \"Human Population and Paleoenvironment in Africa\" by Huysecom et al.. The dates of the different stratigraphic ensembles of the site are the results of a bayesian model based on 27 radiocarbon dates. For our 12^th^ century network we used pottery from the stratigraphic ensembles SE1 (1068-1209) and SE2 (1030-1133). In our 7^th^-9^th^ century network pottery from the earliest stratigraphic ensemble, SE5 (792-887), was included.
+
+The ceramic data was taken from figure 9 of Huysecom et al. (2017).
+
+It is problematic that for some SE the proportion of not specifally named decorations is high (especially for SE5 where this is the case for 25% of the decorations).
 
 ```{r}
 Sadia <- read_csv2(here::here("analysis/data/raw_data/Sadia.csv")) |> 
