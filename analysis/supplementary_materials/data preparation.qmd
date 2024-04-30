@@ -53,7 +53,7 @@ Jj12twine <- Jj12twine |>
          twisted_cord_roulette = tw6 + tw7) |>  # twines 6 and 7 are made using a twisted cord roulette
   select(ends_with("roulette"))
 
-# the code 40 in twine is unclear, and thus left out 
+# the code 40 in twine is unclear from the literature, and thus left out 
 
 
 # Paint decors
@@ -81,7 +81,7 @@ Jj12plastic <- Jj12 |>
   rename_with( ~ paste0("x", .x))
 
 Jj12plastic <- Jj12plastic |> 
-  mutate(channel = x1+x2, #single and multiple grooves are treated as one category
+  mutate(channel = x1+x2, #single and multiple channels are treated as one category
          nonparallel_grooves = x3,
          impressed_comb = x4+x46+x47,
          finger_arcs = x13,
@@ -520,7 +520,8 @@ Sherds from section C, period k are used in the 12^th^ century network. The date
 In section B, Period e also includes the second half of the 12th century, as dated by GrN-7943 (1165-1283 cal CE), but the main peaks of this date fall in the 13th century and the sherds have therefore been excluded from the sample.
 
 ```{r doupwil data prep}
-doupwil <- read_csv(here::here("analysis/data/raw_data/Toguere_Doupwil.csv"))
+doupwil <- read_csv(here::here("analysis/data/raw_data/Toguere_Doupwil.csv")) |> 
+  rename(twisted_cord_roulette = 'twisted_cord_roulette?')
 
 rownames(doupwil) <- "Doupwil"
 
@@ -550,11 +551,11 @@ n_galia <- data.frame(
 
 ## Akumbu
 
-Stratigraphically detailed pottery décor data is available for the body sherds from units AK1 (Togola 2008, pp. 55–57) and AK5 (McIntosh 2017). The body sherd decor from AKB4 is reported in Horizons (Cissé et al. 2017, pp. 41–43). Décor data for rim sherds are not published for any of the excavations.
+Stratigraphically detailed pottery décor data is available for the body sherds from units AK1 (Togola 2008, pp. 55--57) and AK5 (McIntosh 2017). The body sherd decor from AKB4 is reported in Horizons (Cissé et al. 2017, pp. 41--43). Décor data for rim sherds are not published for any of the excavations.
 
-For the 12th century network, we have used selected data from Akumbu Mound A, Unit AK1’s Middle Assemblage layers. In this unit, a living surface dated to 1266-1425 cal. CE (Beta-40441, 640 +- 70) was constructed above a refuse pit cut into mixed deposits, which the excavator believes to have accumulated slowly. The upper portion of the pit was dated to 1175-1329 cal. CE at 82.6% (Beta-40442, 750+-70). A further, undated, construction episode lay between these deposits and a curvilinear structure with a date (Beta-40443, 980+-70) of 954-1219 cal. CE at 92.7%. While the calibrated date range is rather wide, it was decided to use the pit levels (8,10,13,15) in our analysis. Unfortunately, the pottery data for these layers also includes layer 12, a wall collapse layer with uncertain stratigraphic relationship to the pit, rendering the dating of the sample more insecure. A sample more securely dated to the 12th century might have come from the upper levels of AK4, but the pottery was not recorded.
+For the 12th century network, we have used selected data from Akumbu Mound A, Unit AK1's Middle Assemblage layers. In this unit, a living surface dated to 1266-1425 cal. CE (Beta-40441, 640 +- 70) was constructed above a refuse pit cut into mixed deposits, which the excavator believes to have accumulated slowly. The upper portion of the pit was dated to 1175-1329 cal. CE at 82.6% (Beta-40442, 750+-70). A further, undated, construction episode lay between these deposits and a curvilinear structure with a date (Beta-40443, 980+-70) of 954-1219 cal. CE at 92.7%. While the calibrated date range is rather wide, it was decided to use the pit levels (8,10,13,15) in our analysis. Unfortunately, the pottery data for these layers also includes layer 12, a wall collapse layer with uncertain stratigraphic relationship to the pit, rendering the dating of the sample more insecure. A sample more securely dated to the 12th century might have come from the upper levels of AK4, but the pottery was not recorded.
 
-On Akumbu Mound B, the upper levels in the adjacent Units AK3 and AKB4 date to a range including the 9th century. However, the nearby AK5 has a thin 13th midden deposit overlying 3rd-4th century CE deposits. While the AK3 pottery is not described in detail, AKB4 Horizon 1 has two AMS dates, both from Level 2, which date to 771-976 cal. CE at 98.2% and 771-894 cal. CE at 88.3%. However, the nature of the levels is not made clear in the publication, most of the levels of Horizon 1 lie below this dated deposit, and it is unclear whether Horizon 1 includes the 5^th^-7^th^ century Level 8 or not (cf. Cissé et al. 2017, pp. 36 & 41). Trusting that this is not the case, as is also McIntosh’s (McIntosh 2017, p. 197) interpretation, we have used the Horizon 1 body sherd data for the 9th century network.
+On Akumbu Mound B, the upper levels in the adjacent Units AK3 and AKB4 date to a range including the 9th century. However, the nearby AK5 has a thin 13th midden deposit overlying 3rd-4th century CE deposits. While the AK3 pottery is not described in detail, AKB4 Horizon 1 has two AMS dates, both from Level 2, which date to 771-976 cal. CE at 98.2% and 771-894 cal. CE at 88.3%. However, the nature of the levels is not made clear in the publication, most of the levels of Horizon 1 lie below this dated deposit, and it is unclear whether Horizon 1 includes the 5^th^-7^th^ century Level 8 or not (cf. Cissé et al. 2017, pp. 36 & 41). Trusting that this is not the case, as is also McIntosh's (McIntosh 2017, p. 197) interpretation, we have used the Horizon 1 body sherd data for the 9th century network.
 
 There are problems with the pottery data, because paint and incisions are not listed separately even though they are mentioned at being present at the site of AKB4.
 
@@ -611,6 +612,10 @@ n_akumbu <- data.frame(
 
 ## Ambere-Dougon
 
+The site was excavated by Guindo (Guindo 2011, 243f). At the base of the uppermost layer, a piece of charcoal was found, dating to 1029-1209 cal. CE (Ly-3712, 915 ± 30 BP). We used the pottery from this Layer for our 12^th^-century network. The other date from the excavation comes from layer 5, the oldest of the excavation, dated to 430-599 cal. CE (Ly-3968, 1545 ± 30 BP). Unfortunately, the other layers cannot be precisely chronologically assigned, which makes it possible that one or more of these layers could correspond to our 9^th^-century network. However, for a reliable assignment, the corresponding radiocarbon d
+
+During the recording of ceramic decorations, no distinction was made between red painting and slip. However, the author's descriptions lean more towards slip.
+
 ```{r}
 AD <- read_csv2(here::here("analysis/data/raw_data/Ambere-Dougon.csv")) |> 
   rename(straight_mat_impression = "Impression de Vannerie",
@@ -643,6 +648,10 @@ names(AD)
 ```
 
 ## Damassogou
+
+The site was excavated by Néma Guindo (2011, 171). For the 12^th^-century network, pottery from Layer 2 was utilized. At the bottom of Layer 2 there is a structure that is only described as friable. The layer is dated to 925 ± 30 BP, corresponding to 1024-1206 AD44 (Ly 3189).
+
+During the recording of ceramic decorations, no distinction was made between red painting and slip. However, the author's descriptions lean more towards slip.
 
 ```{r}
 Dmssg <- read_csv2(here::here("analysis/data/raw_data/Damassogou.csv")) |> 
@@ -690,14 +699,17 @@ Gao <- read_csv2(here::here("analysis/data/raw_data/Gao.csv")) |> rename("dragge
 "cord_wrapped_roulette" = "Sisal", # Cisse (2011, 161) identifies them as cord_wrapped_roulette after Nixon (2008, 183)
 "straight_mat_impression" = "Birdfood" # Cisse (2011, 161) identified it as mat, but not completly sure, maybe other mat than straight
 ) |> 
+  filter(Phase != "lower") |> #removing the lowest phase as it is probably to old
+  mutate(Site = "Gao") |> 
 mutate_if(is.numeric, round, digits=0) #rounding the numbers (because they were extracted from graphics there were minor deviations)
 
-
+Gao <- as.data.frame(Gao)
 
 
 n_gao <- Gao |> 
   select_if(is.numeric) |> 
-  rowSums()
+    rowSums()
+
 
 Gao <- Gao |> 
   add_column(n_gao) |> 
@@ -705,10 +717,11 @@ Gao <- Gao |>
 
 
 Gao9_decor <- Gao |> 
-  filter(Phase == "lower") |> 
-  select(-"Site-Code", -"Phase", -"n_gao") |> 
+  filter(Phase == "upper") |> 
+  select(-"Site-Code", -"Phase") |> 
   mutate(Site = "Gao9") |> 
-  column_to_rownames("Site")
+  column_to_rownames("Site") |> 
+  select(-"n_gao")
 
 Gao12_decor <- Gao |> 
   filter(Phase == "final") |> 
@@ -716,15 +729,17 @@ Gao12_decor <- Gao |>
   mutate(Site = "Gao12") |> 
   column_to_rownames("Site")
 
-names(Gao)
-
 n_gao <- data.frame(
   site = c("Gao12", "Gao9"),
   n = c(n_gao)
 )
+
+Gao
 ```
 
 ## Kokolo NE
+
+The Site was excavated by Keita (2011, 74). At the structure in Horizon 2 of the trench section A of Kokolo a radiocarbon date was taken (790 ± 35 BP 1190-1278 cal. CE). The author uses this date to contextualize horizons in other trenches to the same settlement Phase in the 12^th^ and 13^th^ century. Nevertheless, we will only use pottery from the dated horizon itself for our 12^th^ century network model.
 
 ```{r}
 Kokolo <- read_csv2(here::here("analysis/data/raw_data/Kokolo NE.csv")) |> 
@@ -753,6 +768,10 @@ n_kkl <- data.frame(
 
 ## Nin-Bére
 
+Nin-Bére was excavated by Guindo (2011, 227).From the Nin-Bèrè archaeological. site, there are two radiocarbon datings: one from Layer 2 dated to 730 ± 40 BP 1225-1376 cal. CE (Ly-13211) and another from Layer 5, which represents the latest excavation, dated to 1095 ± 35 BP 889-1016 cal. CE (Ly-13212). Since there are no structures providing a more precise chronological. placement for the other layers, only pottery from Layer 5 can be considered for inclusion in the 9^th^ century network.
+
+During the recording of ceramic decorations, no distinction was made between red painting and slip. However, the author's descriptions lean more towards slip.
+
 ```{r}
 Nin_Bere <- read_csv2(here::here("analysis/data/raw_data/Nin-Bére.csv")) |> 
   rename(folded_strip_roulette = "Impression de fibres plates plies",
@@ -779,6 +798,10 @@ n_NB <- data.frame(
 
 ## Promontoire site of Ounjougou
 
+The excavation at the Promontoire site of the Ounjougou site complex was conducted by Downing as part of a diploma thesis. Ounjougou comprises seven levels, sometimes divisible into different horizons, with their summits appearing to correspond to occupation levels (Mayor et al., 2005). Level 4 is composed of two horizons. T4.2 was dated to 1315 ± 45 BP 660--720 cal. CE (Ly-1284 OXA), making it unsuitable for our 9^th^ century network. The other horizon of this level, T4.1, dates to 1005 ± 30 BP 990--1040 cal. CE (Ly-9340), thus being not beeintpart of our 12^th^ century network. We only used level T3, dating to 885 ± 50 BP 1040--1220 cal. CE (Ly-10150), for this network.
+
+For our network models, we utilize pottery decoration data published by Mayor (2010). Her reassessment of the sherds aids in making them comparable to those from other sites within our model. But some decorations that are mentioned in other publications, like incisions will therefore not be taken into account.
+
 ```{r}
 Ounjg <- read_csv2(here::here("analysis/data/raw_data/Promontoire Ounjougou.csv")) 
 
@@ -796,7 +819,7 @@ Ounjg12 <- Ounjg12 |>
   rename(braided_strip_roulette = "Fibre plate tressee simple ou alterne",
          twisted_cord_roulette = "Cordelette torsadee",
          incised = "Incicions au couteau seules",
-         cord = "Cordons" #this is described as "presénce d'un petit cordon sous un bord 
+         channel = "Cordons" #this is described as "presénce d'un petit cordon sous un bord 
          )
 
 #amount of sherds
@@ -817,6 +840,12 @@ n_ounjg <- data.frame(
 ```
 
 ## Sadia
+
+The site was excavated as part of the \"Human Population and Paleoenvironment in Africa\" by Huysecom et al.. The dates of the different stratigraphic ensembles of the site are the results of a bayesian model based on 27 radiocarbon dates. For our 12^th^ century network we used pottery from the stratigraphic ensembles SE1 (1068-1209) and SE2 (1030-1133). In our 7^th^-9^th^ century network pottery from the earliest stratigraphic ensemble, SE5 (792-887), was included.
+
+The ceramic data was taken from figure 9 of Huysecom et al. (2017).
+
+It is problematic that for some SE the proportion of not specifally named decorations is high (especially for SE5 where this is the case for 25% of the decorations).
 
 ```{r}
 Sadia <- read_csv2(here::here("analysis/data/raw_data/Sadia.csv")) |> 
@@ -870,20 +899,39 @@ n_sadia <- data.frame(
 
 # Collate datasets
 
-Here we create two separate collated dataset for the 12th and 9th century networks by binding together the previously created data for each site and then further cleaning and standardising.
+Here we create two separate collated datasets for the 12th and 9th century networks by binding together the previously created data for each site and then further cleaning and standardising.
 
 ```{r 12c bind}
 decors_12 <- bind_rows(Aku12_decor, AD12_decor, Dmssg12_decor, doupwil, essouk, galia, Gao12_decor, Jj12decor, Kkl12, mara_12, Ounjg12, Sadia12, shoma_12, tmd12_decor, togu_decor, tellem_decors) |> 
  mutate_all(~ifelse(is.na(.), 0, .)) |> 
-  mutate(incised = incised + incised_patterns) |> 
-  select(-incised_patterns) |> 
+  mutate(incised = incised + incised_patterns,
+         cord_wrapped_roulette = cord_wrapped_roulette + cord_wrapped_stick_roulette,
+         applied_plastic = applied_plastic + applied_ridges,
+         punctate = punctate + impressed_stick,
+         comb_impression = impressed_comb) |> 
+  select(-c(incised_patterns,
+            cord_wrapped_stick_roulette,
+            slip, # suffers from uneven reporting
+            unidentified_roulette,
+            nonparallel_grooves,
+            finger_arcs,
+            applied_ridges,
+            impressed_stick,
+            impressed_comb)) |> 
   rownames_to_column("Site")
   
 ```
 
 ```{r 9c bind}
 decors_9 <- bind_rows(Aku9_decor, Gao9_decor, Jj9decor, mara_9, Nin_Bere9, Sadia9, tmd9_decor, mdb_decor)|> 
- mutate_all(~ifelse(is.na(.), 0, .))|> 
+  mutate_all(~ifelse(is.na(.), 0, .))|> 
+  mutate(applied_plastic = applied_plastic + applied_ridges,
+         cord_wrapped_roulette = cord_wrapped_roulette + cord_wrapped_stick_roulette) |> 
+  select(-c(slip,
+            unidentified_roulette,
+            nonparallel_grooves,
+            applied_ridges,
+            cord_wrapped_stick_roulette)) |> 
   rownames_to_column("Site")
   
 ```

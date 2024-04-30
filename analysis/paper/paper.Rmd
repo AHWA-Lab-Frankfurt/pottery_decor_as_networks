@@ -639,7 +639,7 @@ g1 <- ggplot(mean_edge_weight) +
   scale_fill_grey(start = 0.5, end  = 1) +
   theme_bw() +
   theme(legend.position = "none") +
-  labs(y = "edge weight",
+  labs(y = "mean edge weight",
        x = "community")
 
 # Graph of centralization of the different communities
