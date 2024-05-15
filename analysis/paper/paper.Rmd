@@ -269,7 +269,7 @@ decor_graph |>
   filter(name %in% c("braided_cord_roulette",
                      "braided_strip_roulette",
                      "paint",
-                     "straight_cord_mat")) |>
+                     "straight_mat_impression")) |>
 
   #plot the graph
   ggraph(layout = "stress") +
@@ -345,7 +345,7 @@ activate(nodes)
 ```{r backbone-extraction, fig.cap="Extraction of binary backbones at decreasing significance levels: a) 0.05, b) 0.15, c) 0.18"}
 # extract binary backbones at decreasing levels of significance
 decor_05 <- extract_backbone(decor_flat, 0.05)
-decor_15 <- extract_backbone(decor_flat, 0.15)
+decor_15 <- extract_backbone(decor_flat, 0.14)
 decor_20 <- extract_backbone(decor_flat, 0.20) #20 ideale anzahl?
 
 # plot
