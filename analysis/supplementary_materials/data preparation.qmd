@@ -841,7 +841,7 @@ n_ounjg <- data.frame(
 
 ## Sadia
 
-The site was excavated as part of the \"Human Population and Paleoenvironment in Africa\" by Huysecom et al.. The dates of the different stratigraphic ensembles of the site are the results of a bayesian model based on 27 radiocarbon dates. For our 12^th^ century network we used pottery from the stratigraphic ensembles SE1 (1068-1209) and SE2 (1030-1133). In our 7^th^-9^th^ century network pottery from the earliest stratigraphic ensemble, SE5 (792-887), was included.
+The site was excavated as part of the "Human Population and Paleoenvironment in Africa" by Huysecom et al.. The dates of the different stratigraphic ensembles of the site are the results of a bayesian model based on 27 radiocarbon dates. For our 12^th^ century network we used pottery from the stratigraphic ensembles SE1 (1068-1209) and SE2 (1030-1133). In our 7^th^-9^th^ century network pottery from the earliest stratigraphic ensemble, SE5 (792-887), was included.
 
 The ceramic data was taken from figure 9 of Huysecom et al. (2017).
 

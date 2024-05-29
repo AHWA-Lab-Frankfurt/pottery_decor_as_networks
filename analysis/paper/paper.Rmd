@@ -94,47 +94,21 @@ library(readr)
 
 <!-- The actual document text starts here: -->
 
+The full text of the article is available in the published version in "Azania: archaeological research in Africa". This document contains the code for all analyses and figures in the text,as well as some supplementary analzses and figures. It is structured by section to ease overview.
+
+For details on the data and its preparation, see the document in the folder "analysis/supplementary_materials".
+
 # Introduction
-
-The 40 years between 1970 and 2010 were a period of increasing archaeological research in Mali, West Africa. In the region around the middle reaches of the river Niger, this research documented the remains of a dynamic civilization which, from the last millennium BC onwards, developed urbanism, craft specialization, and long-distance trade (McIntosh 1998), and was highly influential not only in changing narratives about the African past but also in global debates on sociocultural dynamics (McIntosh 1999). One of the characteristics of many settlement sites of the first-early second millennium AD in the region is the high volume of ceramic sherds, which sometimes challenged the capacities of research projects (McIntosh 1995, pp. 132--133). Featuring a large variety of decorative motifs, forms, and production techniques, the pottery of the region has been the subject of numerous studies, both from an archaeological and ethnoarchaeological perspective. Three key points have emerged from this research history. Firstly, establishing chronologically sensitive typologies has been very difficult, with contemporary variability often more significant than diachronic change. Secondly, base forming techniques, which vary throughout the region, are likely to correspond to larger cultural and maybe also linguistic spheres. Thirdly, pottery vessels appear to have been objects of trade, at times over long distances.
-
-In this paper, we consider decorative practices on 12^th^ century AD ceramics of this region. We use a network approach to ask how such practices might have spread, and, even when they are not useful as chronological markers, how they might still inform us about sociocultural dynamics of the ancient Middle Niger. This research aim reflects a long-standing concern of archaeologists in the area, but the network approach we adopt here shifts the perspective from ceramic production as representing sociocultural entities to the processes by which techniques spread. This results in connections, rather than boundaries, as the subject of research. Using network models, we ask what ceramics can tell us about the processes that integrated the Middle Niger as a cultural area despite its diversity, and where cultural exchange might have been facilitated or impeded, and why.
 
 ## Middle Niger Ceramics:
 
-In many contemporary societies in the region, pottery is made by occupational specialist groups (Bambara: *nyamakala*). Though there are exceptions, it is the cultural norm in the wider Middle Niger region that pottery is made by women of groups in which the men are specialists in metallurgy. There is some debate as to how far in the past this specialization developed, but it currently seems likely that it has its roots in the first millennium AD (McIntosh 1998, pp. 177--178), and that it had spread throughout the region by the mid second millennium (Tamari 1991, 1995). There is no doubt that potting and metallurgical experts were of great significance to the economy of the Middle Niger during this period of urbanism and emerging statehood, since they made basic products used in most parts of everyday life, from food production to the religious sphere. The cultural innovations linked to pottery making, both in social terms (endogamous craft specialists) and in technology (pottery and metal products), are a key factor in the development of the Middle Niger civilization (McIntosh 1998).
-
-From the 1st millennium BC onwards, ceramics occur in high numbers on archaeological sites on the Middle Niger, and their appearance, especially their surface treatment, is highly variable. The number of different roulette decorations, painted, incised, and applied decors, but also the variety in form, is very high, especially when attention is paid to the techniques and tools of decoration, rather than exclusively to their effects. Consequently, there has been considerable emphasis on ceramics in archaeological and in ethnoarchaeological work. Early studies (Bedaux 1980; e.g. Curdy 1982; and particularly Bedaux and Lange 1983) noted both regional differences in the appearance of pottery as well as striking widespread similarities in individual forms or attributes. Subsequent work has seen both in-depth studies on ceramics of individual sites (e.g. McIntosh 1995; Schmidt et al. 2005; Gallin 2011; van Doosselaere 2014) as well as studies on the spread of particular decorative practices (Livingston Smith 2007) or shaping techniques (e.g. Sterner and David 2003; Mayor 2011a). Three main features of the wider region's ceramic record are important to this study: 1) the relative lack of clear temporal change, 2) high contemporary variability, and 3) pottery as exchange items.
-
 ### Lack of temporal markers:
-
-Susan K. McIntosh's analyses of the ceramics of Jenné-jeno and surrounding sites resulted in a first detailed pottery chronology on the Middle Niger. In two studies (McIntosh and McIntosh 1980; McIntosh 1995), McIntosh was able to show how some pottery shapes, fabrics and decorations showed clear temporal trends. There was, however, also quite strong stability, particularly in many of the decorative techniques (McIntosh and McIntosh 1980, pp. 233--244). Subsequent studies on other sites have also shown change in ceramic production, and particularly in its decorative aspects, to have been very gradual, and stability to have been the norm (e.g. Schmidt et al. 2005). This contrasts with the archaeological record in many other regions of the world, where the outward appearance of pottery has been far more changeable over time and can therefore be used as chronological markers. This has not been possible for most periods and areas of the Middle Niger region, where decorative aspects tend only to vary in their proportion through time. 
 
 ### Ceramics and social boundaries:
 
-The more striking differences between archaeological ceramics in the area are not diachronic, but contemporary. Pottery from different areas varies in its forming techniques, its shapes (though the most pottery is globular or ovoid in its basic shape), and in decorative practices. Occasionally, as at Tongo Maaré Diabal (Gestrich and MacDonald 2018) or Kumbi Saleh (van Doosselaere 2014), different productions can be clearly separated. The mechanisms underlying these differences have been the subject of extensive ethnoarchaeological and archaeological research by the University of Geneva. Led from the outset by the goal of relating ceramic production to ethnic groups (Gallay et al. 1998, pp. 15--22), this extensive research documented how certain parts of the ceramic production -- notably base forming techniques and tools employed in the potting process -- could be employed to create typologies that were patterned by the ethnic identity, economic milieu, and ecological zone of the producers (Gallay et al. 1998, pp. 106--107; Mayor 2011b, p. 14). But certain decorative techniques were also found to have a certain correlation to the ethnicity-based typology created by the Geneva team (Mayor 2011b, pp. 40--78). The main limiting factor here, as Mayor stresses, is that "stylistic borrowings are relatively easy and frequent" (Mayor 2011b, p. 78), but given the fact that some of the decors do correlate with ethnic groups --- or at least with the types assigned to ethnic groups --- Mayor hints at the suggestion that decorative techniques can historically be assigned to one or another group from which they originated (ibid.).
-
-Based on their extensive fieldwork, Mayor's hypothesis is that pottery making is learnt within stable and relatively impermeable family relationships. This is in keeping with some of Gosselain's results from Niger, where he has suggested that this initial approach to the shaping of a pot was the most influenced by teaching and learning (Gosselain 2000, p. 193). Since this usually happens from an early age within the family, it makes sense that kinship relationships, and thus often group and linguistic belonging, would influence the propagation of such techniques. These processes of knowledge exchange, limited to endogamous groups and ethnic milieus, are what explains the commonalities that underlie the typologies created by the Geneva group. Exchange outside of these limits is seen as the exception, rather than the norm. Nevertheless, Mayor gives the following scenarios for the diffusion of pottery traits (Mayor 2011b, p. 83): Firstly, when a technique is simple and expedient, thus easy and profitable to learn. Secondly, when an ethnic group is in the minority in a certain area or when communities find themselves at the geographical margins of their ethnic group. Thirdly, rare cases in which the social order is transgressed by marriage outside of the ethnic group. Mayor thus expects that shaping and decorative techniques would have had a single and ethnically distinct origin and that it is "several centuries of borrowing" (ibid.) that have led to the less demarcated situation that the Geneva team observed in the 1990s and 2000s.
-
 ### Ceramics as trade goods:
 
-Even though most ceramic production appears to have been made for local markets, there is also evidence of pottery being used in trade over longer distances. Historically, the practice of pottery being moved on the Niger by boat and sold widely throughout the region has been documented in an account from the 18^th^ century (Park 1799, p. 219). From the archaeological evidence, it seems as though this was not confined to later periods, but at least occasionally practiced also in the early second millennium and before. Finds of imported ceramics have, for instance, been made at Essouk (Nixon 2017, p. 143,146-147), and at Kumbi Saleh (van Doosselaere 2014, pp. 228--233). We must therefore always consider the possibility that archaeological assemblages do not only reflect local production, and add the indirect contact from long-distance trade to the possible mechanisms of change in ceramic practices.
-
-If the goal of the work by Gallay and Mayor and their teams was to identify the borders between groups in the past, this study asks a different question: how was pottery knowledge transmitted? What were the factors limiting or encouraging the flow of information? We thus begin from a null hypothesis of unlimited sharing, rather than of delimited groups, to see how the results might complement those of the Geneva research teams. Using pottery décor as a relatively easily borrowed attribute, we aim to generate hypotheses on how pottery making knowledge spread along the ancient Middle Niger. Further, we wish to demonstrate the use of network analyses for approaching West African archaeological ceramics and for making such connections visible and explorable. This technique presents a change of perspective on the ceramics of this region, allowing questions of connection to take precedence over those of boundaries.
-
 ## Ceramic decors as networks
-
-In recent years, the use of network analysis in archaeology has been growing significantly (see e.g. Knappett 2021). A large number of these studies focus on ceramics, but geographically most important are North America (Hart 2012; Mills et al. 2013; Crabtree 2015; e.g. Barker and Young 2017; Vavrasek 2020) and the Mediterranean (Torrence and Swadling 2008; Brughmans and Poblome 2016; Iacono 2016; de Groot 2019; Sternini 2019). The archaeological records of these regions are amongst the best and longest studied in the world, with fine-grained pottery typochronologies and extensive excavations. To our knowledge, this is the first application of a network approach to archaeological ceramic material from sub-Saharan Africa, where the conditions are somewhat different (McIntosh 1995, pp. 130--131). That is not to say that archaeological pottery on the Middle Niger is poorly studied. Most researchers in the wider area have detailed publications on their ceramic assemblages, efforts have been made at systematizing nomenclature (Haour et al. 2010) and at synthetic overviews (Mayor 2011b). A large body of ethnographic and ethnoarchaeological literature provides the theoretical basis that informs the network model.
-
-Ethnographic studies of pottery manufacturing in Africa suggest that the way that pottery is made depends largely on systems of learning and teaching the craft (Gosselain 1998), on local market consumer choices (Dietler and Herbich 1994), or on marriage patterns among manufacturing groups (ibid.). In short, the processes underlying the propagation of technical practices through time and across geographical space are dependent on communication and, more specifically, knowledge exchange. Such exchange occurs between humans and we can therefore understand similarities in the *production* as evidence that knowledge was shared. However, different elements of the pottery making process are thought to be reflective of different kinds of social interaction. Gosselain (2000) concludes that, on the whole, forming techniques are more stable, reflective of durable cultural ties, sometimes even ethnic groups. On the other end of the spectrum, decorations are thought to be influenced by far more ephemeral contact, in which seeing someone else's pot might be enough to change a potter's production, as could indirect contact via the wishes of customers.
-
-Decoration on pottery vessels is a topic that has been central to archaeological debates for a very long time. To construct an overly simplified history of ceramic decors in African archaeology, we might distinguish an early period analogous to other parts of the world, in which decors (as a main constituent of typologies) served to distinguish human groups. This position became more elaborate and changed rationale over time, arguably culminating in Hodder's "Symbols in Action" (1982). David et al.'s "Why pots are decorated" (1988) did much to remove confidence in this idea and to situate decorative practices as part of chains of production and expressions of often unconscious propagation of social values. For them, "designs on pottery, far from being 'mere decoration,' art for art's sake, or messages consciously emblemic of ethnicity, are low-technology channels through which society implants its values in the individual --- every day at mealtimes" (David et al. 1988, p. 379). Over the intervening years, the comparatively strong ethnoarchaeological research in Africa has developed an increasingly complex picture of ceramic décor. Gosselain's (2011) "pourquoi le decorer", part review, part programmatic article, gives a good overview : Decorations on pottery occur within cultural constraints and logics, are expressions of individuality, are market-oriented, have practical considerations, are made for visual effect, have profound meanings while being thought of as trivial, are subject to fashion and taste, stand for group membership, mean different things to different people. In short, pottery decoration is not anchored in any stable way to any cultural phenomenon. More importantly for this study, however, Gosselain points out that the propagation, the process of spreading, of decorative practices is a more fruitful topic for study (ibid.: 12). Various decorative practices presuppose various kinds of contact. Some of these, as in the case of a particularly intricate rouletted tool, require the sharing of cultural knowledge and probably reflect shared practices in other cultural domains as well. Others are transmitted more easily, by sight alone. Whatever these mechanisms, there are constraints on transmission and innovation. As Herbich (1987, p. 202) notes, potters innovate and express themselves with reference to other potters they interact with. Therefore, the innovation and spread of decorative practices does not occur freely, but is helped by geographical proximity, social contact, and cultural factors. It is likewise hindered by geographic distance and cultural differences.
-
-This, then, is the basis on which our social network model is conceived. It supposes that co-occurrence of a given practice of decorating pottery is emblematic of a form of sustained social contacts, within the limitations mentioned above. These contacts are not as close as we would expect from a teaching and learning environment, which would be better reflected in forming techniques, but are sustained and meaningful enough for there to have been an exchange of cultural aesthetic values and an exchange of knowledge of how to decorate pottery. These exchanges are therefore what the ties in our network represent.
-
-In choosing sites as the nodes of the network, the data come mainly from contexts in which pottery was consumed, rather than produced. The network agents in the model are therefore communities of consumers. Their ties, based on shared decors on their pottery, are indirect: they must be understood to have been connected via producers (individuals and communities) and possibly also merchant middlemen which remain largely unseen in the archaeological record. Since we have established at least occasional long-distance trade in pottery in our research area (see above), this is clearly a factor limiting the model's explanatory power. Nevertheless, we can use the work carried out by the Geneva MAESAO project to suggest that the majority of pottery found at a site will generally be locally produced (Mayor 2011b, p. 84), which might reasonably allow some conflation between pottery producers and consumers in the network nodes. A low level of imported ceramics can be adjusted for in the network model, but should not be excluded, as these "weak ties" have been shown to be important for introducing innovation in social networks (Granovetter 1973), including technical innovation in ceramic production (Roux et al. 2018).
-
-The analysis of the network will attempt to generate hypotheses on how such knowledge exchanges were structured, the level of interaction between inferred producers of ceramics, and the overall level and structure of cultural contact in the region. This differs somewhat from the rationales for pottery décor networks in studies from other parts of the world. Hart and Engelbrecht (2012, pp. 324--330) justify their building of networks based on pottery décor similarity by arguing for décors as signals in which both group membership and individual skill are expressed. Iacono (2016), on the other hand, takes the co-occurrence of pottery decoration as analogous to other forms of social encounters, and thus as representative of them, conveying the agency of individuals "simply through sensory recognition" (Iacono 2016, p. 126). We would like to stress here that these differences are in no small part due to the history of research and the nature of the archaeological record in different parts of the world, and that the building of network models on archaeological data always requires a well-theorised foundation appropriate to the historical context of the studied material.
 
 # Methods
 
@@ -159,13 +133,9 @@ sites <- read_csv2(here::here("analysis/data/raw_data/sites_all3.csv"))
 n_decors <- read_csv2(here::here("analysis/data/raw_data/n_decor.csv")) |> 
   rename(sites = site) |> 
   select(-1)
-
-
 ```
 
 ## Data
-
-In this paper, we use pottery decor data from contexts occupied in the 12th century AD to attempt a reconstruction of networks through which pottery decorative practices were shared. The network is constructed from standard archaeological frequency data, in which the proportions of decorative practices are represented across the selected site phases (the raw data are available as Annex 1). The decorative practices encode both the tool used and the action performed, for instance a twisted cord (tool) roulette (action). This data is partly taken from existing literature, partly relies on our own fieldwork (TMD and TOG2) or raw data raised by other researchers (TBZ), and was partly documented in collections (Gao-Saney, Tellem). This time slice, which represents a cumulative view of a great many individual interactions, will then be compared to earlier contexts in the same wider area, in order to demonstrate the diachronic possibilities of the approach. The sites we have been able to include in the network model are shown in \@ref(fig:sitemap). We can see here that sites are geographically unequally distributed. This is due to research history as well as past cultural dynamics. Certainly, the IND and the areas bordering it (notably the Lakes region) were strongly populated at the time, maybe more so than other areas. The cluster of sites around the Bandiagara escarpment is due to the extraordinarily detailed and long-term research of the University of Geneva's research teams. Blank spaces do not imply a lack of people, in this case people making and using pottery. Global politics and research priorities over the last 50 years have meant that these are areas we do not currently have excavated and dated ceramics for, though we know that sites exist, often in abundance. This means that in addition to the inherent difficulty of archaeological network models -the actual network is not known, only its effects, from which the network can be partially reconstructed (Sindbaek (2013)-, the effects of missing areas or sites on the network need to be calculated (Peeples et al. 2016).Accordingly, this study should be understood as an exercise in the reconstruction of a possible network that led to the data preserved in the archaeological record: a tiny, unrepresentative sample of a tiny unrepresentative sample, influenced by an unknown amount of mostly unknowable pre- and post-depositional biases. Nevertheless, we will attempt to analyse the reconstructed network to formulate some hypotheses about the nature of innovation and spread in ceramic decors. Future generations of researchers are encouraged to improve upon this initial attempt.
 
 ```{r sitemap, fig.cap="location of sites in the analysis", echo = FALSE}
 source(here::here("analysis/R/map plots.R")) # Load the required R script
@@ -185,9 +155,8 @@ sitemap + inset_element(inset, 0.72, 0.72, 1, 1)
 
 ## Network construction
 
-Our theoretical approach to what the network represents informs the way in which the network model is constructed. So far, the most frequent form of making ties in archaeological ceramic data has been by calculating the statistical similarity between assemblages. (Hart and Engelbrecht 2012) use the Brainerd-Robinson similarity coefficient, as do, for instance, (Mills et al. 2015), while (de Groot 2019) uses the Jaccard and Kulczyinski-2 similarity measures. The similarity value is then used as the basis and weight for forming a tie between the two assemblage nodes. Since we did not only want to base our network on overall similarity but wanted to be able to closer analyze the networks of individual decors, we have constructed a multiplex network. This is a network in which edges can have different types, and thus the network can be envisaged as having layers. A multiplex network is distinct from a multilayer network, in which connections can also exist between layers, and which has recently seen its first application to archaeological ceramics by (Upton 2019). In our multiplex network, each decorative practice is represented as a distinct layer. The layers share the site assemblages as nodes, though not every node is necessarily represented on every layer. The ties are weighted by the product of the percentages of a given décor in two assemblages. This network construction is implemented in R (R Core Team 2022) using the tidygraph package (Pedersen 2022).
+## Data Quality
 
-## quality of data
 ```{r iNext overview, echo = FALSE}
 library(iNEXT)
 
@@ -232,12 +201,9 @@ t()
 iNEXT(decors_abs, q=0, datatype="abundance")
 ```
 
-
 # Analysis
 
 ## Multiplex structure
-
-As is shown in \@ref(fig:total-network), the initial structure of the data leads to a very tightly connected network, known as a "hairball". This is normal for archaeological networks based on co-occurrence or similarity, since even rare occurrences lead to a tie. However, the multiplex nature of the network allows us to make an important initial observations on its structure: the networks in which individual decor types are propagated are only partly overlapping. There are no two decor networks that cover one another entirely. This pattern emerges more clearly in \@ref(fig:total-network-sample), when the number of decorative practices represented on the graph is reduced. This structure suggests that the networks allowing decorative practices to propagate were at least partially different in every case. Remembering the constraints on spread identified by Gosselain (2011, see section 2), we might propose that external factors, such as geography and cultural differences, provided "frontiers" to the spread, albeit different ones in each case. Some decors are very widespread, and thus had fewer inhibitions to their spread, while others occur less frequently.  We can now proceed to further analyse the network in order to identify where such frontiers and catalysts of spread might have been and how they were structured.
 
 ```{r make decor network, echo = FALSE}
 # import functions for network construction
@@ -261,7 +227,9 @@ decor_graph <- tbl_graph(sites, edgelist, directed = FALSE) |>
 ```{r total-network, fig.cap="Plot of 11th century AD network of decorative practices. The plot shows the very strongly connected structure of the network."}
 # Creating a multi-layer graph
 ggraph(decor_graph, layout = "stress") +
-  coloured_edges +
+  geom_edge_fan(colour = "grey") +
+  geom_node_point()+
+  geom_node_text(aes(label = label))+
   theme_graph()
 ```
 
@@ -279,10 +247,6 @@ decor_graph |>
   coloured_edges +
   theme_graph()
 ```
-
-In the first place, we will determine whether there are decors that share similar knowledge exchange networks and others that are dissimilar. Using the multinet package (Magnani et al. 2021), the statistical distance (Jaccard similarity) between the different decors' networks were calculated based on the nodes they contained.
-
-\@ref(fig:layer-comparison) shows that some networks are more similar to one another than others. For instance, the practice of rouletting with a braided cord  (McIntosh and Gueye 2010) appears to have a significant shared network with that of rouletting with a folded strip (Haour and Keita 2010). This means that knowledge of the two tools necessary for these roulettes (for details, see Haour et al. 2010) spread in a similar geographic and cultural sphere, without being impeded. On the other hand, there appears to have been quite strong boundaries in place between the networks sharing knowledge on rouletting with a braided strip and dragging a comb along the surface of the pot or using painted decoration. There thus appear to have been groups of decors that were shared within similar networks, and we can thus ask whether there might have been communities in the network predominantly sharing specific decors.
 
 ```{r import to multinet, echo = FALSE}
 library(multinet)
@@ -337,8 +301,6 @@ heatmap_matrix(lc)
 
 ### Simplified network backbone
 
-While the hyperconnected hairball network has shown us key elements of the structure of pottery décor sharing, it is of less use for more traditional network analyses. These include finding key nodes in the network and key routes through it. In our case, such network statistics might tell us which of the sites, on the basis of their assemblages, were influential in the propagation of pottery decorations, and through which channels the knowledge of different décors might have preferentially passed. In order to extract such measures, the number of connections needs to be reduced. Network sparsification or 'backbone extraction', as this process is also called, is a common challenge in network analysis across its different applications (Serrano et al. 2009; Saha et al. 2013). In archaeological networks, this has frequently been achieved through thresholding, i.e. retaining only the strongest connections and discarding the others (as implemented for example in Hart & Engelbrecht 2012). There are, however, a number of other recent approaches to network sparsification. For our purposes, we have found the best results to come from a process called the "disparity filter" (Serrano et al. 2009). This evaluates the weight of each edge against a null model in which the overall edge weights of a node are evenly distributed among its edges. If an edge is found to diverge from the null model at a set probability, it is retained. The backbone package (Domagalski et al. 2021) implements this in R. In order to use it, we must first 'flatten' the multiplex graph, by adding the weights of the edges between each pair of nodes on all layers. We then extract the backbone of the graph using the disparity filter at different probability thresholds (\@ref(fig:backbone-extraction)).
-
 ```{r flatten}
 decor_flat <- flatten(decor_graph, weighted = TRUE) |> 
 activate(nodes) 
@@ -368,6 +330,7 @@ decor_20 <- decor_20 |>
   filter(!node_is_isolated())
 
 ```
+
 ```{r weighted flat decor}
 flat_edges <- decor_flat |> 
   get.data.frame("edges")
@@ -386,11 +349,7 @@ ggraph(decor_20, layout = "nicely") +
   labs(size = "eigenvector centrality")
 ```
 
-The three communities from the previous section are also visible in the extracted backbone, albeit with some major differences in configuration. The spread-out cluster of long-distance contact now also includes the sites at Akumbu and Kawinza which were placed in the IND cluster. The latter is now reduced to the sites of the Eastern IND, while the Dia sites take a central position within the network, and the "Dogon" cluster remains largely intact. Dammassogou and Kokolo NE 2 are isolated from the network, and remain so until the significance is lowered to 0.2. We will use the backbone at alpha = 0.18 to proceed with our analysis. If this selection of significance values seems rather arbitrary, we point out that analogous situations exist in other attempts at archaeological network simplifications. Hart & Engelbrecht (2012, p. 339), for instance, threshold their similarity network to the point where all nodes form a network but for a single outlier. Higher significance values also do not necessarily mean we get a more reliable network model, especially in a situation where sampling and recovery bias is as extreme as here.
-
 ### Influential nodes
-
-On this backbone, whose ties are no longer weighted, we can perform network calculations. We will begin by asking which nodes are the most influential in the network, i.e. possess the highest potential for spreading information. This is calculated through eigenvalue centrality, which is based on the number of nodes a node is linked to and how well those nodes are linked themselves. Eigenvalue centrality gives us a first idea of key sites in the spread of pottery decor knowledge.
 
 ```{r backbone-eigenvalue, fig.cap="Binary backbone at alpha = 0.15 showing eigenvector centralities"}
 ggraph(decor_20, layout = "nicely") +
@@ -402,11 +361,7 @@ ggraph(decor_20, layout = "nicely") +
   labs(size = "eigenvector centrality")
 ```
 
-The result (\@ref(fig:backbone-eigenvalue)) shows that the highest influence on the network is exerted by the sites in the Eastern IND and Lakes cluster. This reinforces the pattern already seen in clustering and shows the importance of the urban sites of the IND to Middle Niger culture in this period. We should not forget that the network is partial, i.e. many connections to many sites are missing. While the IND and the Bandiagara plateau and the Seno plain are both well researched and the networks therefore comparable, sites like Gao-Saney might have been influential in an undocumented local network.  Nevertheless, it suggests this region specifically as a center through which information and innovation in pottery decoration were disseminated in this period.
-
 ### Brokers
-
-Betweenness centrality shows nodes in brokerage positions within the network. These are interesting to us in finding out where the different network cliques connect, and which sites are at crossroads positions in the pottery knowledge exchange. These are likely to be places with diverse markets, where producers belonging to different networks meet, and where information thus "jumps" between network cliques.
 
 ```{r backbone-betweenness, fig.cap="Binary backbone at alpha = 0.15 showing betweenness centralities"}
 ggraph(decor_20, layout = "nicely") +
@@ -418,11 +373,7 @@ ggraph(decor_20, layout = "nicely") +
   labs(size = "betweenness centrality")
 ```
 
-Particularly interesting among the results (\@ref(fig:backbone-betweenness) is the position of the two sites at Dia, Shoma and Mara (Bedaux et al. 2005), as providing a connection between the wider Niger cluster and the Eastern IND. It is notable that Shoma clusters more with the former, whereas Mara is more closely linked to the latter, via the site of Toguéré Galia (Bedaux et al. 1978). The Eastern IND sites that had such high eigenvector centrality have particularly low betweenness centrality. Also of note is the brokerage position of the Sanga cave sites (Tellem) in relation to the Bandiagara and Seno cluster. As the assemblage here notionally stems from a funerary context, their high betweenness centrality might indicate that ceramics using unusual or imported decorations were preferentially deposited here, while the ceramics from contemporary habitation sites tended to have a more restricted repertoire.
-
 ### Evaluating measurements
-
-In order to know whether these centrality measures are valid, rather than random effects of the backbone sparsification, we implement a variation on Peeples' (2017) suggested method for estimating the robustness of centrality measures in archaeological networks. In order to do so, the edges of the original graph are sampled at 10 % intervals, from 10 to 90 %. The binary backbone of each of these samples is then extracted and the centrality measures calculated. A Spearman's rank correlation test is run between the samples to see how the deletion of edges influences the centrality within the backbone. This is repeated 100 times. \@ref(fig:validity-test) shows that the correlation between the eigenvector and betweenness ranks of nodes in the original graph and the mean of the sampled graphs decreases quite rapidly. This shows us that our network is rather fragile, and the inferences we have made on the basis of the extracted backbone should be treated with the appropriate caution.
 
 ```{r validity-test, warning = FALSE, message = FALSE, fig.cap= "Testing the robustness of the bb-network by comparing its centralities to the original graph"}
 #comparing
@@ -434,8 +385,6 @@ p2 <- test_centralities(decor_graph, "betweenness", 100)
 ```
 
 ## Community detection
-
-We approach this question by clustering, or community analysis, which a number of recent studies have successfully used on archaeological netoworks. Radivojevic and Grujic (2018) have clustered sites on the Balkan based on the source of their copper, Mazzucato (2019) has identified communities of building sites in Çatalhöyük to analyse the process of urbanisation, while Vargas et al. (2020) used community detection to find distinctive clusters of rock art sites in Patagonia. These studies differ significantly as regards the object of research and their questions, but are similar in data structure and methodological approach. All three used the Louvain clustering algorithm (Blondel et al. 2008) to detect groups of sites that share a lot of edges with each other and have fewer edges with nodes outside of their community. The Louvain method is especially useful for archaeological datasets that typically contain few but heavily connected nodes (Blondel et al. 2008; Yang et al. 2016).
 
 ```{r community detection, hide = 'results', echo=FALSE}
 
@@ -456,8 +405,6 @@ modularity <- decor_20 |>
   pull(modularity) |>
   head(1)
 ```
-
-Here, we employ the same clustering algorithm, which results in three communities with a modularity of `r modularity`. [Modularity shows how clearly the communities can be defined]{.underline} on a scale [from -1 to 1]{.underline} (1 [being a network with completely separated sub-networks]{.underline})[.]{.underline} As is shown in \@ref(fig:plot-clusters), community 1 contains seven sites in an area centered on the Inland Niger Delta. Community 2 also contains seven sites, but located in the so-called "Dogon Country", on the eastern edge of the IND, on the Bandiagara plateau and in the Seno plain. Community 3 has the fewest nodes, but geographically the largest extent, containing the southernmost site of the study near Ségou, Togu Missiri, as well as the northernmost at Essouk in the Sahara. The nodes of community 3 show frequent connections to sites of communities 1 and 2, while those communities are not as strongly connected between each other.
 
 ```{r plot-clusters, fig.cap="Louvain communities within the decor network", echo = FALSE}
 # set plot colours for communities
@@ -505,8 +452,6 @@ ggraph(decor_graph, x = lon, y = lat) +
 
 ```
 
-The clustering of the network appears to be influenced quite strongly by geographic features. In the case of community 1, this is the IND and its adjacent areas, which were heavily populated at this time (McIntosh 1995, pp. 373--377). The population density is likely to have been a significant factor in the spread of pottery decors, as Gosselain has suggested. \@ref(fig:cluster1) shows that there is a very well connected group of geographically close sites in the eastern IND (Jenné-jeno (J-J), Hambarketolo (Hamb), and Kaniana are part of the same wider site cluster). This community mainly shared braided cord roulettes, dragged comb incisions.Interestingly, this also includes the site of Kawinza in the Malian Lakes Region (Raimbault and Sanogo 1991). Sites on the western margin of the IND, Dia and Akumbu, are less well connected in this period, conforming to the observations of McIntosh (1995, pp. 369--370), but these remain connected via folded strip roulettes and painted decors.
-
 ```{r cluster1, fig.cap="Internal connections within community 1"}
 decor_graph %>%
   activate(nodes) %>%
@@ -553,8 +498,6 @@ decor_graph %>%
   theme_graph()
 ```
 
-The main geographic factor affecting community 2, and isolating it from community 1, is the mountainous region of the Bandiagara plateau. The cluster has strong links, mostly because of the common use of braided strip roulettes and impressions of a straight-woven cord mat (\@ref(fig:cluster2). The networks exchanging these decors, which are in part linked to base forming techniques, appear to have had a spatial component, with mat impressions linking sites in the Seno plain while braided strip roulettes are more strongly shared on the Bandiagara plateau. These spheres, however, had considerable overlap, most notably at the Sangha cave sites (Tellem) and at Sadia.
-
 ```{r cluster2, fig.cap="Internal connections within community 2"}
 decor_graph %>%
   activate(nodes) %>%
@@ -569,8 +512,6 @@ decor_graph %>%
   theme_graph()
 ```
 
-Community 3 appears to be linked through the wider Niger river system and the long-distance exchange routes that linked into it. This cluster is the most diverse one regarding the types of decoration techniques shared (\@ref(fig:cluster3)), yet the weak nature of the resulting ties shows that this might be due to more exchange of artifacts and less in common shared knowledge across artisans. This is particularly visible at Essouk, which has the weakest connections that, due to its position and cultural history (Nixon 2017), are probably due to imports more than a shared cultural sphere. All of the sites in the community have been linked to long-distance trade (Insoll 1996; Nixon 2017; Gestrich and MacDonald 2018; Gestrich et al. 2021), though this applies just as well to some of the sites in the other communities. The fact that these cluster together is likely due to the fact that their closer local communities are not part of the network model. This, however, allows us to see such ephemeral, long-distance connections based on weaker ties that might be obscured by more intense local exchange.
-
 ```{r cluster3, fig.cap="Internal connections within community 3"}
 decor_graph %>%
   activate(nodes) %>%
@@ -584,6 +525,7 @@ decor_graph %>%
   geom_node_text(aes(label = label), col = "black", repel = TRUE) +
   theme_graph()
 ```
+
 ```{r cluster4, fig.cap="Internal connections within community 3"}
 decor_graph %>%
   activate(nodes) %>%
@@ -597,9 +539,6 @@ decor_graph %>%
   geom_node_text(aes(label = label), col = "black", repel = TRUE) +
   theme_graph()
 ```
-
-
-The measures of network centralization and the mean weight of the edges relative to their number show us that communities 1 and 2 are more equally connected with higher weights, whereas community 3's network is more centralized, thus more uneven, but also much less intense (@ref(fig:cluster-comparison)). This suggests to us a fundamental difference in the nature of the networks. Communities 1 and 2 may have been founded on close cultural ties, frequent exchanges, and maybe even kinship bonds within specialized potter communities. Cultural frontiers, accentuated by geographical boundaries, hindered the spread of decorative techniques between them. Community 3 seems to have been a network based on far less intense contacts, such as sporadic movement of individuals in the context of trade or migration or indirect, down-the-line, exchange of knowledge. \@ref(fig:cluster_centralities) shows the distribution of the weighted degree and eigenvector centralities for each community within the overall network. Clearly, community 1 consists of nodes that both have more and stronger connections and consequently a higher potential for influence on the network. This reflects a number of points in the archaeological record. Firstly, the ceramics in the IND are highly decorated with diverse decors during this period. The clustered urban sites in this area are likely to have been culturally diverse, both drawing in populations from surrounding areas and exerting cultural influence across the wider region. McIntosh sees the Eastern IND as becoming increasingly culturally distinct from the Western and Northern IND during this period (McIntosh 1995, p. 372), and the emergence of new material cultural practices may well be reflected in these measures.
 
 ```{r cluster-comparison, fig.cap="Relative edge weights, edge diversity and centralization by cluster"}
 # adding community/crossing to the edges
@@ -642,7 +581,7 @@ g1 <- ggplot(mean_edge_weight) +
   labs(y = "mean edge weight",
        x = "community")
 
-# Graph of centralization of the different communities
+# Graph of edge diversity of the different communities
 g2 <- ggplot(mean_edge_weight) +
   geom_boxplot(aes(x = community, y = div, fill = community)) +
   scale_fill_grey(start = 0.5, end  = 1) +
@@ -691,8 +630,6 @@ b <- ggplot(centr) +
 a + b
 ```
 
-These three communities, however, were by no means separate from one another. If we consider only those edges that "cross" between communities, we can identify the decors that passed between communities, but also the sites that were important crossing points (\@ref(fig:crossings). These nodes are indicated by their weighted degree centrality, that is, the sum of the weights of all edges pertaining to the node. The sites of cluster 1 are generally better connected, both within the cluster and to sites outside their cluster. This might be a measure of the cultural influence and diversity of the IND's urbanized society in this period. The strongest node in this measure represents the assemblage from TMD (Tongo Maaré Diabal, Horizon 5 (Gestrich and MacDonald 2018)), which provides a crossing between all three communities. These results complement Gestrich's (2013, MacDonald & Gestrich 2018) result from correspondence analysis from which he claims that Tongo Maaré Diabal's ceramic assemblage reflects varying geographic influences. Even without the edges that tie the individual communities together, the network of crossing edges remains densely connected, demonstrating just how well connected the populations of the Middle Niger region must have been in this period, and that the limits of the communities we have detected in the model are far from being clear-cut cultural boundaries.
-
 ```{r crossings, fig.cap="Network of edges which cross between clusters"}
 
 #show crossings with a weight over 3
@@ -716,11 +653,7 @@ decor_graph |>
   theme_community
 ```
 
-
-
 ## Diachronic analysis
-
-The network of interactions that we have been working with up to this point is built on data taken from archaeological contexts whose date range includes the 12^th^ century AD. This means that, in some cases, the period under consideration is actually much longer. Change over time within this period is to be expected, but is hard to distinguish given the nature of the data. Within wider brackets, the issue of change can be approached from a network perspective. While a more systematic diachronic view will be the subject of future publications, we will here consider an early 9^th^ century AD sample in order to show how the temporal development of the network can be approached.
 
 ```{r import-new-data}
 library(readr)
@@ -758,182 +691,33 @@ early_flat_bb <- early_flat_bb |>
          lon = early_flat_nodes$lon
          )
 
+# put cumulative edge weights back into the backbone
+flat_edges <- early_flat |> 
+  get.data.frame("edges")
+
+early_flat_bb <- early_flat_bb |> 
+  activate(edges) |> 
+  select(-weight) |> 
+  left_join(flat_edges)
+
 #plot
 ggraph(early_flat_bb, layout = "stress") +
-  geom_node_point() +
-  geom_edge_fan(color = "grey", alpha = 0.8) +
+  geom_node_point(aes(size = centrality_betweenness())) +
+  geom_edge_fan(aes(width = weight), color = "grey", alpha = 0.8) +
   scale_edge_width(range = c(0.2, 3)) +
   geom_node_text(aes(label = label), repel = TRUE) +
   theme_graph()
 ```
 
-The analytical steps run on the 12^th^ century network were carried out identically on the earlier assemblages. The main differences are best visualized on the extracted backbone (\@ref(fig:early-backbone). Here, only two network cliques remain. The first takes sites within the IND and on its margins, including TMD and Akumbu. The other group consists of sites on the Bandiagara plateau and in the Seno plain. The latter group is more strongly internally connected than it is in the 12^th^ century network, while the IND group is less closely connected. Essouk is isolated in the backbone until alpha is increased to 0.37, indicating that connections to Essouk are not very reliable.
-
-A more in-depth treatment of the temporal development of the pottery networks in this area will be the subject of future publications. For now, we might draw the following preliminary conclusions: The comparison of the two networks appears to show several processes. One, observable on the Bandiagara-Seno cluster, is a network that is becoming less tightly connected, in other words it opens up to more outside influences between the two periods. This, in a sense, is reflective of Gallay et al.'s vision of increasingly mixed traditions, discussed above. The second process is observable in the IND cluster, which is less strongly connected in the 9^th^ century network and becomes more coherent and also internally diversified by the 12^th^ century. This is more reflective of a dynamic of an area in the process of cultural genesis, rather than fragmentation. Thirdly, the long-distance connections emerging from the 12^th^ century networks are very weak, so as not to be statistically detectable, in the 9^th^ century. While there are issues of unequal samples between the two periods, we can take this to suggest that the impact of long-distance exchange along the Middle Niger on pottery decoration was not yet very strong in the earlier period.
-
 # Discussion
-
-Potter communities and the propagation of knowledge within them, have been the subject of several very detailed ethnoarchaeological and archaeological studies in this region and within Africa more widely. Their boundaries might be seen in other elements of the pottery making sequence, notably in the forming technique, but decorative practices are recognized not to be straightforwardly related to social identities (Gosselain 2011, p. 11). Our network model is intended to represent communication of knowledge about pottery that transcends smaller communities of practice. As such, it permits us to explore what mechanisms of exchange may have been at the basis of the patterns in archaeological ceramic decors on sites along the Middle Niger.
-
-The results of our analyses suggest that the propagation of pottery decor motifs occurred within networks of differing geographic extent. Some of these networks were local, geographically, and possibly also culturally, bounded. This can, for instance, be seen in the group of sites on the Bandiagara massif and in the Seno plain, or in the eastern part of the IND. Cross-cutting such local exchange, however, were long-distance contacts along the Niger River, which led to similarities between very distant sites. This underlines a key aspect of past cultural dynamics in the wider region: there was, and continues to be, both a high level of cultural diversity, of human groups and languages, and overarching regional connectivity. These two processes, the local and the global, interacted to shape the Middle Niger cultural landscape. Every site assemblage can therefore be seen to be reflective of how strongly innovation and tradition influenced local potting communities.
-
-Network analysis allows us to explore the roles of nodes within the network, and thus to show note where this interaction between network groups takes place. While the archaeological record is necessarily only a sample and many nodes are missing, we can nevertheless gain a preliminary insight into the channels along which information on pottery decoration was shared and identify those sites within the record which occupy key positions in this exchange. In the case of the 12^th^ century Middle Niger, our network model suggests that the clustered urban sites of the eastern IND exerted a large influence on the sharing of pottery decoration techniques, even though other sites, such as Dia, were more important to their spread.
-
-The diachronic comparison of two networks from different periods begins to show us processes of innovation, and how these change networks. This must be seen as a work in progress, and a fuller picture will be the subject of future publications. Nevertheless, we can detect how the sites within the IND became a major centre for diversification and diffusion of decorative techniques, while the close-knit and formerly more isolated "Bandiagara cluster" opened up to outside influences. Overall, the later period is marked by more ties, and therefore an intensifying network. This is likely due to an increased frequency of contact between heterogenous potter communities, perhaps as a result of a combination of increases in population size, the establishment of new markets, and an increased flow of goods, some of which will have been contained in pottery. Mayor (2011b, p. 208) has also suggested political factors behind the spread of some decors. The difference between the networks is less likely to stem from an overall higher [long-range]{.underline} mobility of individual potters, since the overlapping structure of the individual technique networks suggests gradual change.
-
-Chronological and spatial approaches to pottery decor in the study region have not often yielded satisfying results, with changes only in percentages of decors which rarely provided the basis for clear phase changes or cultural boundaries. Our approach here emphasises that this picture of gradual differences points to a strongly connected society, in which pottery producers were routinely exposed to their neighbours' productions, and in which decorative techniques were mostly able to propagate without impediment. Nevertheless, within this picture, local traditions can be discerned as cliques within the networks, whose degree of isolation varies, but which are never without outside contact.
-
-We should note here that the network has artificial boundaries which are likely to impact on how well the model reflects actual social contacts in the period in question. Our sample is geographically centered on the IND, where we have one of the network cliques and the most abundant data. Especially towards the geographical edges of the sample, the model is probably much less reliable. Thus, we know that the Bandiagara -- Seno cluster is only a small part of what would likely be a much larger and internally differentiated cluster below the Niger Bend. If this were fully included in the model, it is certain that it would provide new and different linkages to the northeastern sites of our model, Gao and Essouk. The latter two sites also have extensive cultural links further north and east, which cannot be captured in this model. The same is true of sites in the south and west (Togu Missiri, Akumbu, Kawinza), whose main local networks are probably simply not reflected in this sample. All of this has led to network clusters of different kinds, as discussed above: the geographically large Niger river cluster is very likely reflective of very different forms of contact than the smaller, more tightly knit IND cluster is. We hypothesise that such smaller clusters could probably be found anywhere in the area if there were enough suitable data, and that the historical spread of pottery decors would have been influenced by both closer local and looser regional networks. In Gosselain's (2011) sense, the flow of information in the larger regional network would most likely have been impeded by geographic distance, but also by the force of the closer local networks.
 
 # Conclusion
 
-Modelling pottery decorative techniques along the Middle Niger as a knowledge exchange network presents a change of perspective on the subject. Previous work, including the author's own, has focused on distribution areas and relative prevalence at different sites. We have taken the same information to indicate the degree to which pottery producers supplying the various sites were part of contact networks in which knowledge of decors could spread. While this approach is certainly as reductive as any other, we draw the novel conclusion that the relatively static record of pottery decor in this area is due to a diverse and very well connected population of pottery producers. They exchanged their techniques most frequently on a local level, where geographically bounded closer networks shared intensively. Such exchange might have taken many forms, such as marriage-related mobility, kinship-based learning networks, much more ephemeral exchanges in marketplaces, or even indirect contact by seeing another potter's product. The latter form is the most likely basis for the way in which these local networks corresponded to a larger one: all along the Middle Niger, from our southernmost sample in the Ségou area to Gao and the Saharan entrepot of Essouk, pottery and the knowledge of certain decorative techniques appears to have travelled.
-
-The study of archaeological material as networks shifts the focus "from spatial relations to social relations"(Knappett 2011). Herein lies the main difference of the approach taken in this paper to previous synthetic studies of archaeological ceramics on the Middle Niger. Mayor's (2011b) study, in particular, has admirably shown how the ceramics of the wider region can reflect a number of cultural groups and historical influences. These preliminary results of our network study, on the other hand, begin to show how the area's pottery reflects webs of exchange, both at smaller local levels and at a larger regional level. It makes visible and understandable the way in which the Middle Niger was both an integrated cultural sphere, albeit one consisting of significant differences. These two approaches do not invalidate each other but should be seen as complementary. The results feed into long-standing discussions on the Middle Niger, and West Africa in general, as a highly connected and interdependent cultural space in the first and early second millennium AD (for recent discussions on this topic, see Gestrich et al. 2021; Dueppen and Gallagher 2023).
-
 # Acknowledgements
 
-The work presented here was undertaken as part of the project "Borrowed words and shared objects" within the German Research Foundation's (DFG) Priority Programme "Entangled Africa". The authors wish to thank the Institut des Sciences Humaines du Mali, the Musée National du Mali, and the Rijksmuseum voor Volkenkunde in Leiden for access to their pottery collections, and Sam Nixon and Douglas Post Park for providing primary data. The R compendium for this article was created using the rrtools package.
+The work presented here was undertaken as part of the project "Borrowed words and shared objects" within the German Research Foundation's (DFG) Priority Programme "Entangled Africa". Nikolas Gestrich was responsible for the research design and implementation. He is the main author of the analysis code and the manuscript. Juan-Marco Puerta Schardt aided in collating the data and co-authored the analysis code, particularly the section on community detection. He also contributed to the draft versions of the manuscript. The authors wish to thank the Institut des Sciences Humaines du Mali, the Musée National du Mali, and the Rijksmuseum voor Volkenkunde in Leiden for access to their pottery collections, and Susan McIntosh and Douglas Post Park for providing primary data. The R compendium for this article was created using the rrtools package.
 
 <!-- The following line inserts a page break  -->
-
-\newpage
-
-# References
-
-<!-- The following line ensures the references appear here for the MS Word or HTML output files, rather than right at the end of the document (this will not work for PDF files):  -->
-
-Barker CS, Young LC (2017) Networks of Ceramic Exchange: Comparing Homol’ovi Pueblo III Pithouse and Pueblo Communities. KIVA
-
-Bedaux R (1980) The geographic distribution of footed bowls in the upper and middle Niger region. In: Swartz, B., Dumett, R. (eds), West African Culture Dynamics: Archaeological and Historical Perspectives. pp 247–258
-
-Bedaux R, Lange A (1983) Tellem, reconnaissance archéologique d’une culture de l’Ouest africain au Moyen-Age: la poterie. Journal des Africanistes 53:5–59
-
-Bedaux R, Polet J, Sanogo K (2005) Recherches archéologiques à Dia dans le delta intérieur du Niger (Mali): Bilan des saisons de fouilles 1998-2003. CNWS Publications, Leiden
-
-Bedaux RMA, Constandse-Westermann TS, Haquebord L, et al (1978) Recherches archeologiques dans le Delta Interieur du Niger (Mali). Palaeohistoria Bussum 20:91–220
-
-Blondel VD, Guillaume J-L, Lambiotte R, Lefebvre E (2008) Fast unfolding of communities in large networks. J Stat Mech 2008:P10008. https://doi.org/10.1088/1742-5468/2008/10/P10008
-
-Brughmans T, Poblome J (2016) Pots in space: understanding Roman pottery distribution from confronting exploratory and geographical network analyses. In: Barker E, Bouzarovski S, Pelling C, Isaksen L (eds) New worlds from old texts: revisiting ancient space and place. Oxford University Press, Oxford, pp 255–280
-
-Crabtree SA (2015) Inferring Ancestral Pueblo Social Networks from Simulation in the Central Mesa Verde. J Archaeol Method Theory 22:144–181. https://doi.org/10.1007/s10816-014-9233-8
-
-Curdy P (1982) Tiébala (Mali): un complexe céramique du 6e siècle après J.-C. Archives suisses d’anthropologie générale 46:183–198
-
-David N, Sterner J, Gavua K (1988) Why pots are decorated. Current Anthropology 29:365–389
-
-de Groot BG (2019) A Diachronic Study of Networks of Ceramic Assemblage Similarity in Neolithic Western Anatolia, the Aegean and the Balkans (c.6600–5500 bc). Archaeometry 61:600–613. https://doi.org/10.1111/arcm.12450
-
-Dietler M, Herbich I (1994) Ceramics and thnic identity : ethnoarchaeological observations on the distibution of pottery styles and the relationship between the social contexts of production and consumption. In: Terre cuite et société : céramique, document technique, économique, culturel. Rencontres internationales d’archéologie et d’histoire (14, 21- 23 oct. 1993, Antibes). Eds APDCA (Assoc. pour la promotion et la diffusion des connaissances archaéologiques). Juan-les-Pins, pp 459–472
-
-Domagalski R, Neal ZP, Sagan B (2021) Backbone: An R package for extracting the backbone of bipartite projections. PLoS ONE 16:e0244363. https://doi.org/10.1371/journal.pone.0244363
-
-Dueppen SA, Gallagher D (2023) Networked Farmers, Ancestral Rituals, Regional Marketplaces, and Salt: New Insights into the Complexity of First Millennium BC/AD Farming Societies in West Africa. Afr Archaeol Rev. https://doi.org/10.1007/s10437-022-09509-2
-
-Gallay A, Huysecom E, Mayor A (1998) Peuples et céramiques du Delta intérieur du Niger (Mali): un bilan de cinq années de missions (1988-1993). Mainz
-
-Gallin A (2011) Les styles céramiques de Kobadi. Analyse comparative et implications chronoculturelles au Néolithique du Sahel malien. Frankfurt
-
-Gestrich N, Champion L, Keita D, Coulibaly N (2021) Evidence of an 11th century CE cola nitida trade into the Middle Niger region. African Archaeological Review 38:403–418
-
-Gestrich N, MacDonald KC (2018) On the Margins of Ghana and Kawkaw: Four Seasons of Excavation at Tongo Maaré Diabal (AD 500-1150), Mali. Journal of African Archaeology 16:1–30
-
-Gosselain O (2000) Materializing identities : an African perspective. Journal of Archaeological Method and Theory 7:187–217
-
-Gosselain OP (1998) Social and Technical Identity in a Clay Crystal Ball. In: Stark MT (ed) The Archaeology of Social Boundaries
-
-Gosselain OP (2011) Pourquoi le décorer? Quelques observations sur le décor céramique  en Afrique. Azania: Archaeological Research in Africa 46:3–19
-
-Granovetter MS (1973) The Strength of Weak Ties. American Journal of Sociology 78:1360–80
-
-Haour A, Keita D (2010) Folded Strip Roulette/ Roulette de fibre plate pliée. In: Haour A, Manning K, Arazi N, et al. (eds) African Pottery Roulettes Past and Present. Techniques, Identification  and Distribution. Oxbow, Oxford, pp 169–176
-
-Haour A, Manning K, Arazi N, et al (eds) (2010) African pottery roulettes past and present: techniques, identification and distribution. Oxbow Books, Oxford
-
-Hart JP (2012) The effects of geographical distances on pottery assemblage similarities: a case study from Northern Iroquoia. Journal of Archaeological Science 39:128–134. https://doi.org/10.1016/j.jas.2011.09.010
-
-Hart JP, Engelbrecht W (2012) Northern Iroquoian Ethnic Evolution: A Social Network Analysis. J Archaeol Method Theory 19:322–349. https://doi.org/10.1007/s10816-011-9116-1
-
-Herbich I (1987) Learning patterns, potter interaction and ceramic style among the  Luo of Kenya. African Archaeological Review 5:193
-
-Hodder I (1982) Symbols in Action: Ethnoarchaeological Studies of Material Culture. Cambridge University Press, Cambridge
-
-Iacono F (2016) From Networks to Society: Pottery Style and Hegemony in Bronze Age Southern Italy. Cambridge Archaeological Journal 26:121–140. https://doi.org/10.1017/S0959774315000190
-
-Insoll T (1996) Islam, Archaeology and History. Gao Region (Mali) ca. AD 900-1250. Tempus Reparatum, Cambridge Monographs in African Archaeology 39. BAR S647. Oxford
-
-Knappett C (2011) An archaeology of interaction: network perspectives on material culture and society. Oxford University Press, Oxford
-
-Knappett C (2021) Networks in Archaeology. The Oxford Handbook of Social Networks 443–466. https://doi.org/10.1093/oxfordhb/9780190251765.013.26
-
-Livingston Smith A (2007) Histoire du décor à la roulette en Afrique subsaharienne. Journal of African Archaeology 5:189–216
-
-Magnani M, Rossi L, Vega D (2021) Analysis of Multiplex Social Networks with R. Journal of Statistical Software 98:1–30
-
-Mayor A (2011a) Impressions de vanneries et technique du martelage sur forme concave:  Anthropologie et histoire d’une technique dans la boucle du Niger. Azania 46:1:88–109
-
-Mayor A (2011b) Traditions céramiques dans la boucle du Niger. Africa Magna, Cologne
-
-Mazzucato C (2019) Socio-Material Archaeological Networks at Çatalhöyük a Community Detection Approach. Frontiers in Digital Humanities 6:. https://doi.org/10.3389/fdigh.2019.00008
-
-McIntosh RJ (1998) The peoples of the Middle Niger. The island of gold. Blackwell Publishers, Malden, Mass.; London
-
-McIntosh SK (1995) Excavations at Jenné-Jeno, Hambarketolo, and Kaniana, Inland Niger delta, Mali, the 1981 season. University of California press, Berkeley (Calif.) Los Angeles (Calif.) London
-
-McIntosh SK (ed) (1999) Beyond Chiefdoms. Pathways to Complexity in Africa. Cambridge
-
-McIntosh SK, Gueye NS (2010) Braided cord roulette (simple and composite). In: Haour A, Manning K, Arazi N, et al. (eds) African Pottery Roulettes Past and Present. Techniques, Identification  and Distribution. Oxbow, Oxford
-
-McIntosh SK, McIntosh RJ (1980) Prehistoric Investigations in the Region of Jenne, Mali. BAR, Oxford
-
-Mills BJ, Peeples MA, Haas, Jr. WR, et al (2015) Multiscalar Perspectives on Social Networks in the Late Prehispanic Southwest. American Antiquity 80:3–24. https://doi.org/10.7183/0002-7316.79.4.3
-
-Mills BJ, Roberts JM, Clark JJ, et al (2013) The dynamics of social networks in the Late Prehispanic U.S. Southwest. In: Knappett C (ed) Network analysis in archaeology. New approaches to regional interaction. Oxford University Press, Oxford, pp 181–202
-
-Nixon S (2017) Essouk-Tadmekka: An Early Islamic Trans-Saharan Market Town. Brill
-
-Park M (1799) Travels in the Interior of Africa. W. Bulmer & Co., London
-
-Pedersen T (2022) tidygraph: A Tidy API for Graph Manipulation. https://tidygraph.data-imaginist.com, https://github.com/thomasp85/tidygraph
-
-Peeples MA (2017) Network Science and Statistical Techniques for Dealing with Uncertainties in Archaeological Datasets. http://www.mattpeeples.net/netstats.html. Accessed 18 Oct 2022
-
-Peeples MA, Mills BJ, Haas WRJr, et al (2016) Analytical Challenges for the Application of Social Network Analysis in Archaeology. In: Brughmans T, Collar A, Coward F (eds) The Connected Past: challenges to network studies in archaeology and history. Oxford University Press, Oxford, pp 59–84
-
-R Core Team (2022) R: A Language and Environment for Statistical Computing. R Foundation for Statistical Computing, Vienna, Austria
-
-Radivojević M, Grujić J (2018) Community structure of copper supply networks in the prehistoric Balkans: An independent evaluation of the archaeological record from the 7th to the 4th millennium BC. Journal of Complex Networks 6:106–124. https://doi.org/10.1093/comnet/cnx013
-
-Raimbault M, Sanogo K (eds) (1991) Recherches Archéologiques au Mali: Prospections et inventaire,  fouilles et études analytiques en Zone lacustre. Karthala, Paris
-
-Roux V, Bril B, Karasik A (2018) Weak Ties and Expertise: Crossing Technological Boundaries. J Archaeol Method Theory 25:1024–1050. https://doi.org/10.1007/s10816-018-9397-8
-
-Saha T, Rangwala H, Domeniconi C (2013) Sparsification and Sampling of Networks for Collective Classification. In: Greenberg AM, Kennedy WG, Bos ND (eds) Social Computing, Behavioral-Cultural Modeling and Prediction. Springer, Berlin, Heidelberg, pp 293–302
-
-Schmidt A, Arazi N, MacDonald KC, et al (2005) La poterie. In: Bedaux RMA, Polet J, Sanogo K, Schmidt A (eds) Recherches archéologiques a Dia dans le Delta intérieur du Niger  (Mali): bilan des saisons de fouilles 1998-2003. CNWS, Leiden, pp 191–256
-
-Serrano MÁ, Boguñá M, Vespignani A (2009) Extracting the multiscale backbone of complex weighted networks. Proceedings of the National Academy of Sciences 106:6483–6488. https://doi.org/10.1073/pnas.0808904106
-
-Sindbæk SM (2013) Broken links and black boxes: material affiliations and contextual network synthesis in the Viking world. Network Analysis in Archaeology: New Approaches to Regional Interaction 71–94
-
-Sterner J, David N (2003) Action on matter: the unique African tamper and concave anvil pot-forming  technique. Journal of African Archaeology 1:3–38
-
-Sternini M (2019) The production centres and river network of Italian terra sigillata between the Arno and Tiber valleys: a geographical point of view. Journal of Roman Archaeology 32:485–494. https://doi.org/10.1017/S1047759419000254
-
-Tamari T (1991) The development of case systems in West Africa. Journal of African History 32:221–250
-
-Tamari T (1995) Linguistic Evidence for the History of West African "Castes. In: Conrad DC, Frank BE (eds) Status and Identity in West Africa. Indiana University Press, Bloomington, pp 61–85
-
-Upton AJ (2019) Multilayer Network Relationships and Culture Contact in Mississippian West-Central Illinois, A.D. 1200 - 1450. Ph.D., Michigan State University
-
-van Doosselaere B (2014) Le Roi et le Potier: Étude technologique de l’assemblage céramique de Koumbi Saleh, Mauritanie (5e/6e - 17e siècles AD). Africa Magna, Frankfurt am Main
-
-Vargas FE, Lanata JL, Abramson G, et al (2020) Digging the topology of rock art in northwestern Patagonia. Journal of Complex Networks 8:cnz033. https://doi.org/10.1093/comnet/cnz033
-
-Vavrasek JL (2020) Interactions Between Jefferson County Iroquoian Women and Men as Explored Through Social Network Analysis of Pottery and Pipe Decorative Motif Traits. Ph.D., State University of New York at Albany
-
-Yang Z, Algesheimer R, Tessone CJ (2016) A Comparative Analysis of Community Detection Algorithms on Artificial Networks. Sci Rep 6:30750. https://doi.org/10.1038/srep30750
 
 \newpage
 
