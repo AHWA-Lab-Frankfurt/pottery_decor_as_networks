@@ -261,7 +261,9 @@ decor_graph <- tbl_graph(sites, edgelist, directed = FALSE) |>
 ```{r total-network, fig.cap="Plot of 11th century AD network of decorative practices. The plot shows the very strongly connected structure of the network."}
 # Creating a multi-layer graph
 ggraph(decor_graph, layout = "stress") +
-  coloured_edges +
+  geom_edge_fan(colour = "grey") +
+  geom_node_point()+
+  geom_node_text(aes(label = label))+
   theme_graph()
 ```
 
@@ -642,7 +644,7 @@ g1 <- ggplot(mean_edge_weight) +
   labs(y = "mean edge weight",
        x = "community")
 
-# Graph of centralization of the different communities
+# Graph of edge diversity of the different communities
 g2 <- ggplot(mean_edge_weight) +
   geom_boxplot(aes(x = community, y = div, fill = community)) +
   scale_fill_grey(start = 0.5, end  = 1) +
@@ -758,10 +760,19 @@ early_flat_bb <- early_flat_bb |>
          lon = early_flat_nodes$lon
          )
 
+# put cumulative edge weights back into the backbone
+flat_edges <- early_flat |> 
+  get.data.frame("edges")
+
+early_flat_bb <- early_flat_bb |> 
+  activate(edges) |> 
+  select(-weight) |> 
+  left_join(flat_edges)
+
 #plot
 ggraph(early_flat_bb, layout = "stress") +
-  geom_node_point() +
-  geom_edge_fan(color = "grey", alpha = 0.8) +
+  geom_node_point(aes(size = centrality_betweenness())) +
+  geom_edge_fan(aes(width = weight), color = "grey", alpha = 0.8) +
   scale_edge_width(range = c(0.2, 3)) +
   geom_node_text(aes(label = label), repel = TRUE) +
   theme_graph()
