@@ -157,13 +157,6 @@ sitemap + inset_element(inset, 0.72, 0.72, 1, 1)
 
 ## Data Quality
 
-<<<<<<< HEAD
-## quality of data
-
-The pottery samples vary strongly in size. This might effect the number of decorations present and might lead to (especially rare) decoration techniques beeing absent in some sites due to the small amount of sherds excavated.
-We use the iNext-package (Hsieh et al. 2016) to estimate the effect the sample size has on the diversity of the sample. This way we can decide how the different abundance of sherds might impact our network.
-=======
->>>>>>> e2dc34cb43304066eb7de459929385318ee33e03
 ```{r iNext overview, echo = FALSE}
 library(iNEXT)
 
@@ -180,12 +173,8 @@ t()
 # getting a table of the results of the analysis
 i <- iNEXT(decors_abs, q=0, datatype="abundance")
 
-d <- i$iNextEst$size_based |> 
-slice(c(seq(1, n(), by = 10),seq(20, n(), by = 40))) |> 
-  arrange(Assemblage, m) 
-
-d
-
+i
+  
 # Fractured and extrapolated diversity of Doupwil
   i <- decors_abs[,c(4)]|> 
  iNEXT(q=c(0), datatype="abundance")
@@ -209,19 +198,7 @@ t()
 
 
 # getting a table of the results of the analysis
-e <- iNEXT(decors_abs, q=0, datatype="abundance") 
-
-e <- e$iNextEst$size_based |> 
-slice(c(seq(1, n(), by = 10),seq(20, n(), by = 40))) |> 
-  arrange(Assemblage, m) 
-
-e
-#creating datatable of both periods
-#rbind(d,e) |> 
- # mutate(across(where(is.numeric), ~ round(.x, 4))) |> 
-  #write.csv2(here::here("analysis/data/derived_data/inext.csv"))
-
-
+iNEXT(decors_abs, q=0, datatype="abundance")
 ```
 
 # Analysis
@@ -546,6 +523,7 @@ decor_graph %>%
   scale_edge_width(range = c(0.2, 2)) +
   geom_node_point(aes(size = centrality_degree(weights = weight)), colour = "darkgreen") +
   geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  guides(color = "legend", edge_width = "none", size = "none")+
   theme_graph()
 ```
 
@@ -555,11 +533,12 @@ decor_graph %>%
   mutate(deg = centrality_eigen(weights = weight)) %>%
   filter(louvain == 4) %>%
   ggraph(layout = "graphopt") +
+  scale_edge_width(range = c(0.2, 2)) +
   geom_edge_fan(aes(color = name, edge_width = weight, edge_alpha = weight)) +
   scale_edge_color_manual(values = decorcolor[E(decor_graph)$name]) +
-  scale_edge_width(range = c(0.2, 2)) +
   geom_node_point(aes(size = centrality_degree(weights = weight)), colour = "yellow") +
   geom_node_text(aes(label = label), col = "black", repel = TRUE) +
+  guides(color = "legend", edge_width = "none", size = "none")+
   theme_graph()
 ```
 
