@@ -188,6 +188,9 @@ sitemap + inset_element(inset, 0.72, 0.72, 1, 1)
 Our theoretical approach to what the network represents informs the way in which the network model is constructed. So far, the most frequent form of making ties in archaeological ceramic data has been by calculating the statistical similarity between assemblages. (Hart and Engelbrecht 2012) use the Brainerd-Robinson similarity coefficient, as do, for instance, (Mills et al. 2015), while (de Groot 2019) uses the Jaccard and Kulczyinski-2 similarity measures. The similarity value is then used as the basis and weight for forming a tie between the two assemblage nodes. Since we did not only want to base our network on overall similarity but wanted to be able to closer analyze the networks of individual decors, we have constructed a multiplex network. This is a network in which edges can have different types, and thus the network can be envisaged as having layers. A multiplex network is distinct from a multilayer network, in which connections can also exist between layers, and which has recently seen its first application to archaeological ceramics by (Upton 2019). In our multiplex network, each decorative practice is represented as a distinct layer. The layers share the site assemblages as nodes, though not every node is necessarily represented on every layer. The ties are weighted by the product of the percentages of a given décor in two assemblages. This network construction is implemented in R (R Core Team 2022) using the tidygraph package (Pedersen 2022).
 
 ## quality of data
+
+The pottery samples vary strongly in size. This might effect the number of decorations present and might lead to (especially rare) decoration techniques beeing absent in some sites due to the small amount of sherds excavated.
+We use the iNext-package (Hsieh et al. 2016) to estimate the effect the sample size has on the diversity of the sample. This way we can decide how the different abundance of sherds might impact our network.
 ```{r iNext overview, echo = FALSE}
 library(iNEXT)
 
@@ -204,8 +207,12 @@ t()
 # getting a table of the results of the analysis
 i <- iNEXT(decors_abs, q=0, datatype="abundance")
 
-i
-  
+d <- i$iNextEst$size_based |> 
+slice(c(seq(1, n(), by = 10),seq(20, n(), by = 40))) |> 
+  arrange(Assemblage, m) 
+
+d
+
 # Fractured and extrapolated diversity of Doupwil
   i <- decors_abs[,c(4)]|> 
  iNEXT(q=c(0), datatype="abundance")
@@ -229,7 +236,19 @@ t()
 
 
 # getting a table of the results of the analysis
-iNEXT(decors_abs, q=0, datatype="abundance")
+e <- iNEXT(decors_abs, q=0, datatype="abundance") 
+
+e <- e$iNextEst$size_based |> 
+slice(c(seq(1, n(), by = 10),seq(20, n(), by = 40))) |> 
+  arrange(Assemblage, m) 
+
+e
+#creating datatable of both periods
+#rbind(d,e) |> 
+ # mutate(across(where(is.numeric), ~ round(.x, 4))) |> 
+  #write.csv2(here::here("analysis/data/derived_data/inext.csv"))
+
+
 ```
 
 

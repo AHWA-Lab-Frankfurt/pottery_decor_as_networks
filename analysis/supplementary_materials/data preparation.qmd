@@ -689,6 +689,16 @@ n_Dmssg <- data.frame(
 
 ## Gao
 
+There have been several excavations at different sites at Gao; however, many of the older ones did not document ceramics in any detail (Cissé et al. 2013). Of the more recent excavations by Insoll (in 1993 & 1996) and the Malian Direction Nationale de Patrimoine Culturel (2001, 2002 & 2006), only the latter have documented ceramics in a way that can be used in our analysis. While we tried to re-record Insoll’s pottery which is stored at the Institut de Sciences Humaines in Bamako in 2020, selection errors meant that we did not have a suitably datable sample for this analysis. Our use of the ceramics reported by Cisse are complicated by the fact that there is an inconsistency between dates produced from different laboratories at the site, with those of the University of Waikato being consistently around 100 years older than the two related dates analysed by Beta Analytic (Cisse 2011:139). A further complication is added by Cisse's decision to present the ceramic data in three aggregated assemblages (Final, Upper, Lower) for each unit, making chronological control of the samples even more difficult. Furthermore, only pottery from ACGS can be used for our model as the roulette decorations have been sufficiently documented in this unit.
+
+In Unit ACGS, the final levels (1-10) were made up of extensive trash deposits. Their upper component is dated to 995-1217 cal. CE (Beta 261360, 950 ± 60 BP). We include the "Final" assemblage in our twelfth century network as reflective of occupation at Gao, but there are points of caution: No architectural remains are known from this period at Gao Saney, the single date has a wide calibrated range and a date in neighbouring GS1, 40 cm lower, has a University of Waikato date with a calibrated range at the end of the first millennium CE. As only the top and the bottom of the ACGS sequence were dated, we cannot estimate how old the lower layers included in the sample are.
+
+All of the units excavated by Cisse were probably inhabited during the ninth century, but to isolate the contexts is rather difficult. A simple sequence model in Oxcal 4.4 refines the date from GS3 Level 5 to 803-979 cal CE, and that from Level 12 to 772 - 939 cal CE, suggesting that the bulk of the deposits dates to the ninth and the first half of the 10th centuries. In the presentation of the ceramic data, however, the "Upper" section comprises of Levels 2-12 and its date range probably extends into the 11th century. In GS1, the "Upper" assemblage is narrower, uniting Levels 5-9. These are dated by a single date in Level 7b, to a modelled age of 696-884 CE (648-876 cal CE), suggesting an admixture of 8th and possibly even 7th-century materials. In order to limit the chronological range of the sample, only the Upper assemblage from GS1 has been used.
+
+Although GS1 itself cannot be utilized, its proximity to ACGS enables a comparative analysis of the stratigraphy between the two units. Consequently, despite the absence of direct dating for the "Upper" Horizon of ACGS, we consider it the most suitable horizon for our ninth century network.
+
+Both datasets contain cord roulette decorations that were not specified; 15.5% of the decorations documented for lower layers and 17.5% of the decorations documented for the final layers.
+
 ```{r}
 Gao <- read_csv2(here::here("analysis/data/raw_data/Gao.csv")) |> rename("dragged_comb" = "Comb_tot",
     "channel" = "Channel_comb",
@@ -841,7 +851,7 @@ n_ounjg <- data.frame(
 
 ## Sadia
 
-The site was excavated as part of the \"Human Population and Paleoenvironment in Africa\" by Huysecom et al.. The dates of the different stratigraphic ensembles of the site are the results of a bayesian model based on 27 radiocarbon dates. For our 12^th^ century network we used pottery from the stratigraphic ensembles SE1 (1068-1209) and SE2 (1030-1133). In our 7^th^-9^th^ century network pottery from the earliest stratigraphic ensemble, SE5 (792-887), was included.
+The site was excavated as part of the "Human Population and Paleoenvironment in Africa" by Huysecom et al.. The dates of the different stratigraphic ensembles of the site are the results of a bayesian model based on 27 radiocarbon dates. For our 12^th^ century network we used pottery from the stratigraphic ensembles SE1 (1068-1209) and SE2 (1030-1133). In our 7^th^-9^th^ century network pottery from the earliest stratigraphic ensemble, SE5 (792-887), was included.
 
 The ceramic data was taken from figure 9 of Huysecom et al. (2017).
 
