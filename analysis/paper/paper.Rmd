@@ -94,7 +94,7 @@ library(readr)
 
 <!-- The actual document text starts here: -->
 
-The full text of the article is available in the published version in "Azania: archaeological research in Africa". This document contains the code for all analyses and figures in the text,as well as some supplementary analzses and figures. It is structured by section to ease overview.
+The full text of the article is available in the published version in "Azania: archaeological research in Africa". This document contains the code for all analyses and figures in the text,as well as some supplementary analyses and figures. It is structured by section to ease overview.
 
 For details on the data and its preparation, see the document in the folder "analysis/supplementary_materials".
 
