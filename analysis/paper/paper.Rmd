@@ -178,13 +178,13 @@ i
 # Fractured and extrapolated diversity of Doupwil
   i <- decors_abs[,c(4)]|> 
  iNEXT(q=c(0), datatype="abundance")
- ggiNEXT(i, type=1, facet.var="Assemblage")+
+ p1 <- ggiNEXT(i, type=1, facet.var="Assemblage")+
   labs(title = "Doupwil")
 
 # Fractured and extrapolated diversity of Jenne-jeno
  i <- decors_abs[,c(8)]|> 
  iNEXT(q=c(0), datatype="abundance")
-  ggiNEXT(i, type=1, facet.var="Assemblage")+
+ p2 <-  ggiNEXT(i, type=1, facet.var="Assemblage")+
   labs(title = "Jenne-jeno")
 
 #getting absolute numbers of decorations for the 9th century sites
@@ -341,8 +341,8 @@ decor_20 <- decor_20 |>
   left_join(flat_edges)
 
 ggraph(decor_20, layout = "nicely") +
-  geom_node_point(aes(size = centrality_eigen())) +
   geom_edge_fan(color = "grey", alpha = 0.8, aes(edge_width = weight)) +
+   geom_node_point(aes(size = centrality_eigen(weights = weight))) +
   scale_edge_width(range = c(0.2, 3)) +
   geom_node_text(aes(label = label), repel = TRUE) +
   theme_graph() +
@@ -365,8 +365,8 @@ ggraph(decor_20, layout = "nicely") +
 
 ```{r backbone-betweenness, fig.cap="Binary backbone at alpha = 0.15 showing betweenness centralities"}
 ggraph(decor_20, layout = "nicely") +
-  geom_node_point(aes(size = centrality_betweenness())) +
    geom_edge_fan(color = "grey", alpha = 0.8, aes(edge_width = weight)) +
+    geom_node_point(aes(size = centrality_betweenness(weights = weight))) +
   scale_edge_width(range = c(0.2, 3)) +
   geom_node_text(aes(label = label), repel = TRUE) +
   theme_graph() +
@@ -704,11 +704,12 @@ early_flat_bb <- early_flat_bb |>
 
 #plot
 ggraph(early_flat_bb, layout = "stress") +
-  geom_node_point(aes(size = centrality_betweenness())) +
   geom_edge_fan(aes(width = weight), color = "grey", alpha = 0.8) +
+    geom_node_point(aes(size = centrality_betweenness())) +
   scale_edge_width(range = c(0.2, 3)) +
   geom_node_text(aes(label = label), repel = TRUE) +
-  theme_graph()
+  theme_graph()+
+  labs(size = "betweenness centrality")
 ```
 
 # Discussion
