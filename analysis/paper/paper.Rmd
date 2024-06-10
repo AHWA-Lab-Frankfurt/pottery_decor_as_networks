@@ -21,10 +21,12 @@ output:
       #- --lua-filter=../templates/scholarly-metadata.lua
       #- --lua-filter=../templates/author-info-blocks.lua
       #- --lua-filter=../templates/pagebreak.lua
+      dpi: 300
 abstract: |
   This paper reports on an attempt to analyse decorative techniques on archaeological pottery from the Middle Niger as knowledge exchange networks. The 12th-century CE state of this network is modelled and analysed, and then compared to its 9th-century counterpart. The analysis shows how knowledge about pottery decoration was propagated within networks of different sizes and intensities, from local, well-connected networks to more loosely tied long-distance connections. The article shows how the perspective of network analysis differs from, and can fruitfully complement, previous treatments of ceramic décor distribution in the region. It adds a novel perspective to what the distribution of archaeological ceramics in this region reflects, and contributes to the generation of hypotheses that can be further tested by fieldwork. 
 keywords: |
   Mali; network analysis; pottery; archaeological ceramics
+
 ---
 
 <!-- This is the format for text comments that will be ignored during renderings. Do not put R code in these comments because it will not be ignored. -->
@@ -157,13 +159,7 @@ sitemap + inset_element(inset, 0.72, 0.72, 1, 1)
 
 ## Data Quality
 
-<<<<<<< HEAD
 ## quality of data
-
-The pottery samples vary strongly in size. This might effect the number of decorations present and might lead to (especially rare) decoration techniques beeing absent in some sites due to the small amount of sherds excavated.
-We use the iNext-package (Hsieh et al. 2016) to estimate the effect the sample size has on the diversity of the sample. This way we can decide how the different abundance of sherds might impact our network.
-=======
->>>>>>> e2dc34cb43304066eb7de459929385318ee33e03
 ```{r iNext overview, echo = FALSE}
 library(iNEXT)
 
