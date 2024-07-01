@@ -200,6 +200,7 @@ decors_abs <- decorsearly |>
   select(-n) |> 
 t()
 
+p1 + p2
 
 # getting a table of the results of the analysis
 iNEXT(decors_abs, q=0, datatype="abundance")
