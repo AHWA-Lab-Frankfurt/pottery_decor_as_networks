@@ -7,23 +7,17 @@
 
 This repository contains the data and code for our paper:
 
-> Nikolas Gestrich & Juan-Marco Puerta Schardt, (2023). *Pottery decor
+> Nikolas Gestrich & Juan-Marco Puerta Schardt, (2024). *Pottery decor
 > as networks on the Middle Niger*. Azania: Archaeological Research in Africa.
-> <https://doi.org/xxx/xxx>
-
-Our pre-print is online here:
-
-> Authors, (YYYY). *Pottery decor as networks on the Middle Niger*. Name
-> of journal/book, Accessed 03 Aug 2023. Online at
-> <https://doi.org/xxx/xxx>
+> <https://doi.org/10.1080/0067270X.2024.2380219>
 
 ### How to cite
 
 Please cite this compendium as:
 
-> Authors, (2023). *Compendium of R code and data for Pottery decor as
-> networks on the Middle Niger*. Accessed 03 Aug 2023. Online at
-> <https://doi.org/xxx/xxx>
+> Authors, (2024). *Compendium of R code and data for Pottery decor as
+> networks on the Middle Niger*. Accessed 03 Aug 2024. Online at
+> <http://doi.org/10.5281/zenodo.11441100>
 
 ## Contents
 
