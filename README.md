@@ -15,7 +15,7 @@ This repository contains the data and code for our paper:
 
 Please cite this compendium as:
 
-> Authors, (2024). *Compendium of R code and data for Pottery decor as
+> Nikolas Gestrich & Juan-Marco Puerta Schardt, (2024). *Compendium of R code and data for Pottery decor as
 > networks on the Middle Niger*. Accessed 03 Aug 2024. Online at
 > <http://doi.org/10.5281/zenodo.11441100>
 
